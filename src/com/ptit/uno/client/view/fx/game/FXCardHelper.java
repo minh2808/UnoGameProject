@@ -1,4 +1,4 @@
-package com.ptit.uno.client.view.fx;
+package com.ptit.uno.client.view.fx.game;
 
 import com.ptit.uno.model.Card;
 import com.ptit.uno.model.CardColor;

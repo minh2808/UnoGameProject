@@ -1,4 +1,4 @@
-package com.ptit.uno.client.view.fx;
+package com.ptit.uno.client.view.fx.game;
 
 import com.ptit.uno.model.Card;
 import com.ptit.uno.model.CardColor;
@@ -30,11 +30,11 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 /**
- * Controller điều khiển giao diện bàn chơi UNO (JavaFX).
- * Kết nối hai chiều với ClientControl qua GameActionListener và các hàm update
- * từ Server.
+ * GameBoardUIBridge: Cầu nối UI Code-Behind điều khiển giao diện bàn chơi UNO (JavaFX FXML).
+ * Đóng vai trò là Presentation Helper thuần túy của tầng View,
+ * kết nối hai chiều với UnoGameFXView và ClientControl qua GameActionListener.
  */
-public class GameBoardController implements Initializable {
+public class GameBoardUIBridge implements Initializable {
 
     // 0. LEFT: Game Log
     @FXML
@@ -232,15 +232,6 @@ public class GameBoardController implements Initializable {
         });
     }
 
-    private String getTurnPlayerName(List<GameState.PlayerSummary> list, int seat) {
-        for (GameState.PlayerSummary p : list) {
-            if (p.getSeatNumber() == seat) {
-                return p.getUsername();
-            }
-        }
-        return "Người chơi";
-    }
-
     public void setOpponentInfo(String name, int cardCount, String status) {
         Platform.runLater(() -> {
             lblOpponentName.setText(name);
@@ -250,8 +241,6 @@ public class GameBoardController implements Initializable {
             opponentHandBox.getChildren().clear();
             opponentHandBox.setAlignment(Pos.CENTER);
 
-            // Tự động điều chỉnh khoảng cách overlap để khi bốc thêm bài thì giãn đều sang
-            // 2 bên
             double spacing = -28.0;
             if (cardCount > 9) {
                 spacing = Math.max(-38.0, -28.0 - (cardCount - 9) * 0.7);
@@ -454,9 +443,6 @@ public class GameBoardController implements Initializable {
         });
     }
 
-    /**
-     * Thêm thông báo vào khung Game Log bên trái chuẩn phong cách hình mẫu
-     */
     public void addGameLog(String prefix, String message, Color prefixColor, Color messageColor) {
         Platform.runLater(() -> {
             Text prefixText = new Text(prefix);

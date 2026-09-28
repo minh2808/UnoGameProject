@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.Line?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.ptit.uno.client.view.fx.auth.LoginUIBridge"
+            prefWidth="960.0" prefHeight="580.0"
+            styleClass="auth-root"
+            stylesheets="@../css/uno_theme.css">
+
+    <!-- 1. TITLEBAR PHONG CÁCH GAME -->
+    <top>
+        <HBox styleClass="titlebar-box" alignment="CENTER_LEFT" spacing="10.0">
+            <ImageView fitWidth="22.0" fitHeight="22.0" pickOnBounds="true" preserveRatio="true">
+                <Image url="@../uno_logo.png"/>
+            </ImageView>
+            <Label text="UNO MULTIPLAYER ONLINE · ĐĂNG NHẬP" styleClass="titlebar-title"/>
+            <Label text="PTIT LTM" styleClass="badge-tag"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <HBox styleClass="titlebar-controls">
+                <Label text="—" styleClass="window-control-btn"/>
+                <Label text="☐" styleClass="window-control-btn"/>
+                <Label text="✕" styleClass="window-control-btn, window-control-close"/>
+            </HBox>
+        </HBox>
+    </top>
+
+    <!-- 2. NỘI DUNG CHÍNH (TIÊU ĐỀ LỚN + HERO & FORM 2 CỘT) -->
+    <center>
+        <VBox alignment="CENTER" spacing="20.0">
+            <padding>
+                <Insets top="18.0" bottom="24.0" left="30.0" right="30.0"/>
+            </padding>
+
+            <!-- Tiêu đề lớn giữa màn hình -->
+            <VBox alignment="CENTER" spacing="6.0">
+                <HBox alignment="CENTER" spacing="8.0">
+                    <Label text="GAME BÀI" styleClass="big-title"/>
+                    <Label text="UNO" styleClass="big-title, highlight-yellow"/>
+                    <Label text="ONLINE" styleClass="big-title"/>
+                </HBox>
+                <!-- Đường kẻ neon phát sáng -->
+                <Region styleClass="neon-rule" prefWidth="540.0" maxWidth="540.0"/>
+            </VBox>
+
+            <!-- Khung 2 cột: Cột trái Hero minh họa - Cột phải Form đăng nhập -->
+            <HBox alignment="CENTER" spacing="42.0">
+                
+                <!-- CỘT TRÁI: HERO BANNER -->
+                <VBox alignment="CENTER" spacing="14.0" prefWidth="400.0">
+                    <StackPane prefHeight="220.0">
+                        <!-- Quầng sáng tỏa tròn phía sau -->
+                        <Circle radius="110.0" styleClass="hero-glow-circle"/>
+                        
+                        <!-- Quạt bài minh họa nghệ thuật -->
+                        <HBox alignment="CENTER" spacing="-32.0">
+                            <ImageView fitWidth="100.0" fitHeight="145.0" pickOnBounds="true" preserveRatio="true"
+                                       rotate="-16.0" style="-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 10, 0, -3, 3);">
+                                <Image url="@../card_back.png"/>
+                            </ImageView>
+                            <ImageView fitWidth="125.0" fitHeight="170.0" pickOnBounds="true" preserveRatio="true"
+                                       style="-fx-effect: dropshadow(three-pass-box, rgba(255,200,61,0.6), 18, 0.3, 0, 0);">
+                                <Image url="@../uno_logo.png"/>
+                            </ImageView>
+                            <ImageView fitWidth="100.0" fitHeight="145.0" pickOnBounds="true" preserveRatio="true"
+                                       rotate="16.0" style="-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 10, 0, 3, 3);">
+                                <Image url="@../card_back.png"/>
+                            </ImageView>
+                        </HBox>
+                    </StackPane>
+
+                    <Label text="Game đấu thẻ bài trực tuyến 1-1 thời gian thực" styleClass="hero-subtitle"/>
+                    <HBox alignment="CENTER" spacing="10.0">
+                        <Label text="⚡ TCP Socket" styleClass="badge-tag"/>
+                        <Label text="🛡 Mô hình MVC Cải tiến" styleClass="badge-tag"/>
+                        <Label text="🏆 Hệ thống Elo" styleClass="badge-tag"/>
+                    </HBox>
+                </VBox>
+
+                <!-- CỘT PHẢI: FORM ĐĂNG NHẬP (CARD PANEL) -->
+                <VBox styleClass="auth-card" spacing="10.0" prefWidth="380.0">
+                    <HBox alignment="CENTER_LEFT" spacing="8.0">
+                        <Label text="THÔNG TIN ĐĂNG NHẬP" styleClass="field-label, highlight-yellow" style="-fx-font-size: 15px;"/>
+                    </HBox>
+
+                    <!-- Server Host & Port chia 2 cột nhỏ -->
+                    <HBox spacing="10.0">
+                        <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                            <Label text="Server Host:" styleClass="field-label"/>
+                            <TextField fx:id="txtHost" text="localhost" promptText="Host..." styleClass="auth-input, input-term"/>
+                        </VBox>
+                        <VBox spacing="4.0" prefWidth="120.0">
+                            <Label text="Port:" styleClass="field-label"/>
+                            <TextField fx:id="txtPort" text="8888" promptText="Port..." styleClass="auth-input, input-term"/>
+                        </VBox>
+                    </HBox>
+
+                    <!-- Username -->
+                    <VBox spacing="4.0">
+                        <Label text="Tên đăng nhập:" styleClass="field-label"/>
+                        <TextField fx:id="txtUsername" promptText="Nhập tên đăng nhập..." styleClass="auth-input"/>
+                    </VBox>
+
+                    <!-- Password -->
+                    <VBox spacing="4.0">
+                        <Label text="Mật khẩu:" styleClass="field-label"/>
+                        <PasswordField fx:id="txtPassword" promptText="Nhập mật khẩu..." styleClass="auth-input"/>
+                    </VBox>
+
+                    <!-- Dòng hiển thị thông báo lỗi nếu có -->
+                    <Label fx:id="lblError" text="" styleClass="error-text" minHeight="18.0"/>
+
+                    <!-- Nhóm nút bấm Đăng nhập & Sang Đăng ký -->
+                    <HBox spacing="12.0" alignment="CENTER" style="-fx-padding: 4px 0 0 0;">
+                        <Button fx:id="btnLogin" text="Đăng nhập" styleClass="btn-primary"
+                                prefWidth="175.0" defaultButton="true"/>
+                        <Button fx:id="btnToRegister" text="Chưa có nick?" styleClass="btn-ghost"
+                                prefWidth="165.0"/>
+                    </HBox>
+                </VBox>
+            </HBox>
+        </VBox>
+    </center>
+
+</BorderPane>

@@ -1,0 +1,227 @@
+/* ==========================================================
+   UNO MULTIPLAYER - CYBER DARK THEME
+   Bám sát phong cách thiết kế của UNO-Nhom6-mockup.html
+   Bảng màu:
+     Nền chính: #040b1f
+     Panel/Card: #081739 & #0a1a44
+     Viền neon xanh: #2f7bff (Soft: #1d4aa8)
+     Màu chữ: #eaf1ff (Muted: #8ea6d8)
+     Vàng điểm nhấn: #ffc83d
+     Xanh lục CTA: #16c47f
+     Đỏ cảnh báo: #e5383b
+   ========================================================== */
+
+.root {
+    -fx-font-family: 'Segoe UI', Arial, sans-serif;
+    -fx-base: #040b1f;
+    -fx-background-color: #040b1f;
+}
+
+/* Nền toàn màn hình */
+.auth-root {
+    -fx-background-color: radial-gradient(center 50% 45%, radius 90%, #0d276b 0%, #081739 45%, #040b1f 100%);
+    -fx-border-color: #2f7bff;
+    -fx-border-width: 2px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-effect: dropshadow(three-pass-box, rgba(47, 123, 255, 0.35), 24, 0.2, 0, 0);
+}
+
+/* Thanh tiêu đề cửa sổ (Titlebar giả lập phong cách game) */
+.titlebar-box {
+    -fx-background-color: linear-gradient(to bottom, #0c1f55, #081739);
+    -fx-border-color: #2f7bff;
+    -fx-border-width: 0 0 1px 0;
+    -fx-padding: 8px 14px;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.titlebar-title {
+    -fx-text-fill: #eaf1ff;
+    -fx-font-size: 13.5px;
+    -fx-font-weight: bold;
+}
+
+.titlebar-controls {
+    -fx-alignment: CENTER_RIGHT;
+    -fx-spacing: 14px;
+}
+
+.window-control-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #8ea6d8;
+    -fx-font-size: 13px;
+    -fx-padding: 2px 6px;
+    -fx-cursor: hand;
+}
+
+.window-control-btn:hover {
+    -fx-text-fill: #ffffff;
+    -fx-background-color: rgba(47, 123, 255, 0.25);
+    -fx-background-radius: 4px;
+}
+
+.window-control-close:hover {
+    -fx-text-fill: #ffffff;
+    -fx-background-color: #e5383b;
+    -fx-background-radius: 4px;
+}
+
+/* Hộp chứa nội dung form (Card Panel) */
+.auth-card {
+    -fx-background-color: rgba(7, 19, 54, 0.88);
+    -fx-background-radius: 10px;
+    -fx-border-color: #2f7bff;
+    -fx-border-radius: 10px;
+    -fx-border-width: 1.5px;
+    -fx-padding: 22px 24px;
+    -fx-effect: dropshadow(three-pass-box, rgba(47, 123, 255, 0.25), 16, 0.15, 0, 0);
+}
+
+/* Tiêu đề lớn phong cách Game */
+.big-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #eaf1ff;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.6), 4, 0.5, 0, 2);
+}
+
+.highlight-yellow {
+    -fx-text-fill: #ffc83d;
+    -fx-font-weight: 800;
+}
+
+/* Đường gạch ngang phát sáng neon */
+.neon-rule {
+    -fx-background-color: #2f7bff;
+    -fx-background-radius: 2px;
+    -fx-pref-height: 3px;
+    -fx-effect: dropshadow(three-pass-box, #2f7bff, 10, 0.4, 0, 0);
+}
+
+.neon-rule-yellow {
+    -fx-background-color: #ffc83d;
+    -fx-background-radius: 2px;
+    -fx-pref-height: 3px;
+    -fx-effect: dropshadow(three-pass-box, #ffc83d, 10, 0.4, 0, 0);
+}
+
+/* Trường nhãn */
+.field-label {
+    -fx-text-fill: #eaf1ff;
+    -fx-font-size: 13.5px;
+    -fx-font-weight: bold;
+}
+
+/* Ô nhập liệu */
+.auth-input, .text-field, .password-field {
+    -fx-background-color: #050f2c;
+    -fx-text-fill: #eaf1ff;
+    -fx-prompt-text-fill: #5b739e;
+    -fx-border-color: #1d4aa8;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-border-width: 1.5px;
+    -fx-padding: 8px 12px;
+    -fx-font-size: 14px;
+}
+
+.auth-input:focused, .text-field:focused, .password-field:focused {
+    -fx-border-color: #2f7bff;
+    -fx-background-color: #07153d;
+    -fx-effect: dropshadow(three-pass-box, rgba(47, 123, 255, 0.6), 8, 0.2, 0, 0);
+}
+
+/* Trường terminal (Host, Port có màu xanh neon) */
+.input-term {
+    -fx-text-fill: #4ff0a0;
+    -fx-font-family: 'Consolas', 'Courier New', monospace;
+    -fx-font-size: 13.5px;
+}
+
+/* Ô nhập lỗi (màu đỏ) */
+.input-error {
+    -fx-border-color: #e5383b;
+    -fx-effect: dropshadow(three-pass-box, rgba(229, 56, 59, 0.6), 8, 0.2, 0, 0);
+}
+
+/* Nhãn thông báo lỗi */
+.error-text {
+    -fx-text-fill: #ff5b62;
+    -fx-font-size: 12.5px;
+    -fx-font-weight: normal;
+}
+
+/* Nút bấm Đăng nhập / Đăng ký (Xanh lục CTA) */
+.btn-primary {
+    -fx-background-color: linear-gradient(to bottom, #1ddb8f, #16c47f);
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-background-radius: 7px;
+    -fx-border-color: #35e39b;
+    -fx-border-radius: 7px;
+    -fx-border-width: 1.5px;
+    -fx-padding: 9px 18px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(22, 196, 127, 0.35), 8, 0.2, 0, 2);
+}
+
+.btn-primary:hover {
+    -fx-background-color: linear-gradient(to bottom, #25f09e, #1abf7d);
+    -fx-effect: dropshadow(three-pass-box, rgba(22, 196, 127, 0.65), 14, 0.3, 0, 2);
+}
+
+.btn-primary:pressed {
+    -fx-background-color: #129e66;
+    -fx-translate-y: 1px;
+}
+
+/* Nút bấm phụ / Ghost (Chưa có tài khoản?, Quay lại) */
+.btn-ghost {
+    -fx-background-color: #0a1a46;
+    -fx-text-fill: #8ea6d8;
+    -fx-font-weight: bold;
+    -fx-font-size: 13.5px;
+    -fx-background-radius: 7px;
+    -fx-border-color: #1d4aa8;
+    -fx-border-radius: 7px;
+    -fx-border-width: 1.5px;
+    -fx-padding: 9px 16px;
+    -fx-cursor: hand;
+}
+
+.btn-ghost:hover {
+    -fx-text-fill: #eaf1ff;
+    -fx-border-color: #2f7bff;
+    -fx-background-color: #10255c;
+    -fx-effect: dropshadow(three-pass-box, rgba(47, 123, 255, 0.4), 10, 0.2, 0, 0);
+}
+
+.btn-ghost:pressed {
+    -fx-background-color: #08163d;
+    -fx-translate-y: 1px;
+}
+
+/* Pill badge (nhãn tag nhỏ) */
+.badge-tag {
+    -fx-background-color: #132a66;
+    -fx-background-radius: 999px;
+    -fx-border-color: #1d4aa8;
+    -fx-border-radius: 999px;
+    -fx-border-width: 1px;
+    -fx-text-fill: #ffc83d;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 3px 10px;
+}
+
+/* Hero Section (Cột trái màn hình đăng nhập) */
+.hero-glow-circle {
+    -fx-fill: radial-gradient(center 50% 50%, radius 50%, rgba(47, 123, 255, 0.3) 0%, transparent 100%);
+}
+
+.hero-subtitle {
+    -fx-text-fill: #8ea6d8;
+    -fx-font-size: 13px;
+}

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.ptit.uno.client.view.fx.auth.RegisterUIBridge"
+            prefWidth="960.0" prefHeight="580.0"
+            styleClass="auth-root"
+            stylesheets="@../css/uno_theme.css">
+
+    <!-- 1. TITLEBAR -->
+    <top>
+        <HBox styleClass="titlebar-box" alignment="CENTER_LEFT" spacing="10.0">
+            <ImageView fitWidth="22.0" fitHeight="22.0" pickOnBounds="true" preserveRatio="true">
+                <Image url="@../uno_logo.png"/>
+            </ImageView>
+            <Label text="UNO MULTIPLAYER ONLINE · ĐĂNG KÝ TÀI KHOẢN" styleClass="titlebar-title"/>
+            <Label text="PTIT LTM" styleClass="badge-tag"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <HBox styleClass="titlebar-controls">
+                <Label text="—" styleClass="window-control-btn"/>
+                <Label text="☐" styleClass="window-control-btn"/>
+                <Label text="✕" styleClass="window-control-btn, window-control-close"/>
+            </HBox>
+        </HBox>
+    </top>
+
+    <!-- 2. NỘI DUNG FORM ĐĂNG KÝ CĂN GIỮA -->
+    <center>
+        <VBox alignment="CENTER" spacing="24.0">
+            <padding>
+                <Insets top="20.0" bottom="30.0" left="40.0" right="40.0"/>
+            </padding>
+
+            <!-- Tiêu đề lớn -->
+            <VBox alignment="CENTER" spacing="6.0">
+                <HBox alignment="CENTER" spacing="8.0">
+                    <Label text="ĐĂNG KÝ" styleClass="big-title"/>
+                    <Label text="TÀI KHOẢN MỚI" styleClass="big-title, highlight-yellow"/>
+                </HBox>
+                <Region styleClass="neon-rule-yellow" prefWidth="580.0" maxWidth="580.0"/>
+            </VBox>
+
+            <!-- Card Form Đăng ký căn giữa trang trọng -->
+            <VBox styleClass="auth-card" spacing="14.0" prefWidth="560.0" maxWidth="560.0">
+                
+                <!-- Tên đăng nhập -->
+                <VBox spacing="5.0">
+                    <Label text="Tên đăng nhập:" styleClass="field-label"/>
+                    <TextField fx:id="txtUsername" promptText="Chọn tên đăng nhập (ví dụ: player7)..." styleClass="auth-input"/>
+                </VBox>
+
+                <!-- Mật khẩu -->
+                <VBox spacing="5.0">
+                    <Label text="Mật khẩu:" styleClass="field-label"/>
+                    <PasswordField fx:id="txtPassword" promptText="Nhập mật khẩu bí mật..." styleClass="auth-input"/>
+                </VBox>
+
+                <!-- Xác nhận mật khẩu -->
+                <VBox spacing="5.0">
+                    <Label text="Xác nhận mật khẩu:" styleClass="field-label"/>
+                    <PasswordField fx:id="txtConfirmPassword" promptText="Nhập lại mật khẩu..." styleClass="auth-input"/>
+                    <!-- Cảnh báo realtime nếu không khớp -->
+                    <Label fx:id="lblError" text="" styleClass="error-text" minHeight="18.0"/>
+                </VBox>
+
+                <!-- Nút bấm Đăng ký & Quay lại -->
+                <HBox spacing="16.0" alignment="CENTER" style="-fx-padding: 8px 0 0 0;">
+                    <Button fx:id="btnRegister" text="Đăng ký tài khoản" styleClass="btn-primary"
+                            prefWidth="250.0" defaultButton="true"/>
+                    <Button fx:id="btnBackToLogin" text="Quay lại đăng nhập" styleClass="btn-ghost"
+                            prefWidth="230.0"/>
+                </HBox>
+
+            </VBox>
+
+            <!-- Ghi chú bảo mật nhỏ bên dưới -->
+            <Label text="Mật khẩu được mã hóa an toàn khi truyền qua giao thức TCP Socket." styleClass="hero-subtitle"/>
+
+        </VBox>
+    </center>
+
+</BorderPane>

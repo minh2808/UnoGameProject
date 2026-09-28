@@ -1,4 +1,4 @@
-package com.ptit.uno.client.view.fx;
+package com.ptit.uno.client.view.fx.game;
 
 import com.ptit.uno.model.Card;
 import com.ptit.uno.model.ChatMessage;
@@ -15,21 +15,18 @@ import java.net.URL;
 import java.util.List;
 
 /**
- * UnoGameFXView: Cầu nối View chuẩn MVC giữa ClientControl và giao diện JavaFX FXML.
+ * UnoGameFXView: Cầu nối View chuẩn MVC giữa ClientControl và giao diện JavaFX FXML bàn chơi.
  * Đóng gói toàn bộ thao tác luồng Platform.runLater, cho phép Controller gọi các hàm
  * setVisible, renderHand, updateGameState, appendChatMessage tương tự một JFrame truyền thống.
  */
 public class UnoGameFXView {
     private Stage stage;
-    private GameBoardController controller;
+    private GameBoardUIBridge controller;
 
     public UnoGameFXView() {
-        // Đảm bảo JavaFX Toolkit đã được khởi tạo
         try {
             Platform.startup(() -> {});
-        } catch (IllegalStateException ignored) {
-            // Toolkit đã được khởi tạo trước đó
-        }
+        } catch (IllegalStateException ignored) {}
 
         Platform.runLater(this::initFX);
     }
@@ -63,12 +60,8 @@ public class UnoGameFXView {
             stage.setMinHeight(620);
             stage.centerOnScreen();
 
-            // Khi người dùng bấm nút [X] của cửa sổ
             stage.setOnCloseRequest(e -> {
-                e.consume(); // Không cho tắt đột ngột, gọi qua sự kiện thoát bàn
-                if (controller != null) {
-                    // Controller sẽ tự mở hộp thoại xác nhận thoát
-                }
+                e.consume();
             });
 
         } catch (Exception e) {
@@ -77,7 +70,7 @@ public class UnoGameFXView {
         }
     }
 
-    public void setActionListener(GameBoardController.GameActionListener listener) {
+    public void setActionListener(GameBoardUIBridge.GameActionListener listener) {
         Platform.runLater(() -> {
             if (controller != null) {
                 controller.setActionListener(listener);
@@ -143,7 +136,7 @@ public class UnoGameFXView {
         });
     }
 
-    public GameBoardController getController() {
+    public GameBoardUIBridge getController() {
         return controller;
     }
 }

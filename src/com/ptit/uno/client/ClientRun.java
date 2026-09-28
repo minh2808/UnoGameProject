@@ -2,6 +2,7 @@ package com.ptit.uno.client;
 
 import com.ptit.uno.client.control.ClientControl;
 import com.ptit.uno.client.view.LoginFrm;
+import com.ptit.uno.client.view.fx.auth.LoginFXView;
 
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -25,7 +26,8 @@ public class ClientRun {
         } catch (Exception ignored) {}
 
         SwingUtilities.invokeLater(() -> {
-            LoginFrm loginFrm = new LoginFrm();
+            // Sử dụng LoginFXView (Giao diện Dark Cyber cao cấp chuẩn mockup UNO Nhóm 6)
+            LoginFrm loginFrm = new LoginFXView();
             new ClientControl(loginFrm);
             loginFrm.setVisible(true);
         });

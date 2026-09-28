@@ -1,8 +1,10 @@
 package com.ptit.uno.client.control;
 
 import com.ptit.uno.client.view.*;
-import com.ptit.uno.client.view.fx.GameBoardController;
-import com.ptit.uno.client.view.fx.UnoGameFXView;
+import com.ptit.uno.client.view.fx.auth.LoginFXView;
+import com.ptit.uno.client.view.fx.auth.RegisterFXView;
+import com.ptit.uno.client.view.fx.game.GameBoardUIBridge;
+import com.ptit.uno.client.view.fx.game.UnoGameFXView;
 import com.ptit.uno.model.*;
 import com.ptit.uno.protocol.Message;
 import com.ptit.uno.protocol.MessageType;
@@ -44,7 +46,7 @@ public class ClientControl {
 
     public ClientControl(LoginFrm loginFrm) {
         this.loginFrm = loginFrm;
-        this.registerFrm = new RegisterFrm();
+        this.registerFrm = (loginFrm instanceof LoginFXView) ? new RegisterFXView() : new RegisterFrm();
         this.lobbyFrm = new LobbyFrm();
         this.roomWaitingFrm = new RoomWaitingFrm();
         this.gameView = new UnoGameFXView();
@@ -97,7 +99,7 @@ public class ClientControl {
         roomWaitingFrm.addSendChatListener(new SendChatListener());
 
         // --- 5. Sự kiện trên GameBoard JavaFX ---
-        gameView.setActionListener(new GameBoardController.GameActionListener() {
+        gameView.setActionListener(new GameBoardUIBridge.GameActionListener() {
             @Override
             public void onPlayCard(Card card, CardColor chosenColor) {
                 Object[] payload = new Object[]{card, chosenColor};
