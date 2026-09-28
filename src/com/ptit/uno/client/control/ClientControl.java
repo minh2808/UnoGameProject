@@ -1,6 +1,8 @@
 package com.ptit.uno.client.control;
 
 import com.ptit.uno.client.view.*;
+import com.ptit.uno.client.view.fx.GameBoardController;
+import com.ptit.uno.client.view.fx.UnoGameFXView;
 import com.ptit.uno.model.*;
 import com.ptit.uno.protocol.Message;
 import com.ptit.uno.protocol.MessageType;
@@ -36,7 +38,7 @@ public class ClientControl {
     private final RegisterFrm registerFrm;
     private final LobbyFrm lobbyFrm;
     private final RoomWaitingFrm roomWaitingFrm;
-    private final GameFrm gameFrm;
+    private final UnoGameFXView gameView;
     private final LeaderboardFrm leaderboardFrm;
     private final MatchHistoryFrm matchHistoryFrm;
 
@@ -45,7 +47,7 @@ public class ClientControl {
         this.registerFrm = new RegisterFrm();
         this.lobbyFrm = new LobbyFrm();
         this.roomWaitingFrm = new RoomWaitingFrm();
-        this.gameFrm = new GameFrm();
+        this.gameView = new UnoGameFXView();
         this.leaderboardFrm = new LeaderboardFrm();
         this.matchHistoryFrm = new MatchHistoryFrm();
 
@@ -94,17 +96,41 @@ public class ClientControl {
         roomWaitingFrm.addLeaveRoomListener(new LeaveRoomListener());
         roomWaitingFrm.addSendChatListener(new SendChatListener());
 
-        // --- 5. Sự kiện trên GameFrm ---
-        gameFrm.addPlayCardListener(new PlayCardListener());
-        gameFrm.addDrawCardListener(e -> sendData(new Message(MessageType.DRAW_CARD_REQUEST)));
-        gameFrm.addCallUnoListener(e -> sendData(new Message(MessageType.CALL_UNO_REQUEST)));
-        gameFrm.addLeaveGameListener(e -> {
-            int confirm = JOptionPane.showConfirmDialog(gameFrm,
-                    "Bạn có chắc muốn thoát ván đấu? Bot sẽ đánh thay bạn!", "Xác nhận thoát", JOptionPane.YES_NO_OPTION);
-            if (confirm == JOptionPane.YES_OPTION) {
-                sendData(new Message(MessageType.LEAVE_ROOM_REQUEST));
-                gameFrm.setVisible(false);
-                lobbyFrm.setVisible(true);
+        // --- 5. Sự kiện trên GameBoard JavaFX ---
+        gameView.setActionListener(new GameBoardController.GameActionListener() {
+            @Override
+            public void onPlayCard(Card card, CardColor chosenColor) {
+                Object[] payload = new Object[]{card, chosenColor};
+                sendData(new Message(MessageType.PLAY_CARD_REQUEST, payload));
+            }
+
+            @Override
+            public void onDrawCard() {
+                sendData(new Message(MessageType.DRAW_CARD_REQUEST));
+            }
+
+            @Override
+            public void onCallUno() {
+                sendData(new Message(MessageType.CALL_UNO_REQUEST));
+            }
+
+            @Override
+            public void onSendMessage(String message) {
+                if (message != null && !message.trim().isEmpty() && currentRoom != null && currentUser != null) {
+                    ChatMessage chat = new ChatMessage(currentRoom.getId(), currentUser.getUsername(), message.trim());
+                    sendData(new Message(MessageType.CHAT_MESSAGE, chat));
+                }
+            }
+
+            @Override
+            public void onLeaveGame() {
+                int confirm = JOptionPane.showConfirmDialog(null,
+                        "Bạn có chắc muốn thoát ván đấu? Bot sẽ đánh thay bạn!", "Xác nhận thoát", JOptionPane.YES_NO_OPTION);
+                if (confirm == JOptionPane.YES_OPTION) {
+                    sendData(new Message(MessageType.LEAVE_ROOM_REQUEST));
+                    gameView.setVisible(false);
+                    lobbyFrm.setVisible(true);
+                }
             }
         });
     }
@@ -208,17 +234,7 @@ public class ClientControl {
         }
     }
 
-    class PlayCardListener implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            Card card = gameFrm.getSelectedCardToPlay();
-            CardColor color = gameFrm.getSelectedWildColor();
-            if (card != null) {
-                Object[] payload = new Object[]{card, color};
-                sendData(new Message(MessageType.PLAY_CARD_REQUEST, payload));
-            }
-        }
-    }
+
 
     // =========================================================================
     // XỬ LÝ GÓI TIN TỪ SERVER GỬI VỀ (ĐƯỢC GỌI TỪ CLIENT RECEIVER THREAD)
@@ -281,28 +297,32 @@ public class ClientControl {
 
                     case GAME_STATE_BROADCAST:
                         GameState state = (GameState) msg.getPayload();
-                        if (!gameFrm.isVisible()) {
+                        if (!gameView.isVisible()) {
                             roomWaitingFrm.setVisible(false);
-                            gameFrm.setVisible(true);
+                            if (currentUser != null) {
+                                gameView.setPlayerUsername(currentUser.getUsername());
+                            }
+                            gameView.setVisible(true);
                             // Tìm bài trên tay ban đầu của mình
                             if (currentRoom != null) {
                                 Player me = currentRoom.getPlayer(currentUser.getId());
                                 if (me != null && me.getHand() != null) {
-                                    gameFrm.renderHand(me.getHand());
+                                    gameView.renderHand(me.getHand());
                                 }
                             }
                         }
-                        gameFrm.updateGameState(state, currentUser.getId());
+                        gameView.updateGameState(state, currentUser.getId());
                         break;
 
                     case PLAYER_HAND_UPDATE:
                         List<Card> newHand = (List<Card>) msg.getPayload();
-                        gameFrm.renderHand(newHand);
+                        gameView.renderHand(newHand);
                         break;
 
                     case CHAT_MESSAGE:
                         ChatMessage chat = (ChatMessage) msg.getPayload();
                         roomWaitingFrm.appendChatMessage(chat);
+                        gameView.appendChatMessage(chat);
                         break;
 
                     case LEADERBOARD_RESPONSE:
@@ -371,7 +391,7 @@ public class ClientControl {
     public void handleDisconnect(String reason) {
         SwingUtilities.invokeLater(() -> {
             JOptionPane.showMessageDialog(null, reason, "Mất kết nối", JOptionPane.ERROR_MESSAGE);
-            gameFrm.setVisible(false);
+            gameView.setVisible(false);
             roomWaitingFrm.setVisible(false);
             lobbyFrm.setVisible(false);
             loginFrm.setVisible(true);
