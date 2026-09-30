@@ -225,3 +225,216 @@
     -fx-text-fill: #8ea6d8;
     -fx-font-size: 13px;
 }
+
+/* Nút Vàng (Tạo phòng mới) */
+.btn-yellow {
+    -fx-background-color: linear-gradient(to bottom, #ffd86b, #ffc83d);
+    -fx-text-fill: #2a1c00;
+    -fx-font-weight: bold;
+    -fx-font-size: 13.5px;
+    -fx-background-radius: 7px;
+    -fx-border-color: #ffe08a;
+    -fx-border-radius: 7px;
+    -fx-border-width: 1.5px;
+    -fx-padding: 9px 16px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(255, 200, 61, 0.35), 8, 0.2, 0, 2);
+}
+
+.btn-yellow:hover {
+    -fx-background-color: linear-gradient(to bottom, #ffe48a, #ffcf54);
+    -fx-effect: dropshadow(three-pass-box, rgba(255, 200, 61, 0.65), 12, 0.3, 0, 2);
+}
+
+.btn-yellow:pressed {
+    -fx-background-color: #e0ab26;
+    -fx-translate-y: 1px;
+}
+
+/* Nút Đỏ (Đăng xuất, Rời phòng) */
+.btn-danger {
+    -fx-background-color: linear-gradient(to bottom, #f04e51, #e5383b);
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-background-radius: 7px;
+    -fx-border-color: #ff6b6e;
+    -fx-border-radius: 7px;
+    -fx-border-width: 1.5px;
+    -fx-padding: 8px 14px;
+    -fx-cursor: hand;
+}
+
+.btn-danger:hover {
+    -fx-background-color: linear-gradient(to bottom, #ff6366, #eb4649);
+    -fx-effect: dropshadow(three-pass-box, rgba(229, 56, 59, 0.6), 10, 0.2, 0, 0);
+}
+
+.btn-danger:pressed {
+    -fx-background-color: #bd282b;
+    -fx-translate-y: 1px;
+}
+
+/* ==========================================================
+   BẢNG JAVAFX TABLEVIEW DARK CYBER (SẢNH CHÍNH)
+   ========================================================== */
+.table-view {
+    -fx-background-color: #050f2c;
+    -fx-background-radius: 8px;
+    -fx-border-color: #1d4aa8;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1.5px;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: linear-gradient(to bottom, #12337f, #0c2055);
+    -fx-border-color: #1d4aa8;
+    -fx-border-width: 0 0 1.5px 0;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-padding: 8px 6px;
+    -fx-alignment: CENTER;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #ffc83d;
+    -fx-font-weight: bold;
+    -fx-font-size: 12.5px;
+}
+
+.table-row-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: rgba(47, 123, 255, 0.12);
+    -fx-border-width: 0 0 1px 0;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: rgba(255, 255, 255, 0.02);
+}
+
+.table-row-cell:hover {
+    -fx-background-color: rgba(47, 123, 255, 0.18);
+    -fx-cursor: hand;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: rgba(22, 196, 127, 0.22);
+    -fx-border-color: #16c47f;
+    -fx-border-width: 1px 0 1px 0;
+}
+
+.table-row-cell .table-cell {
+    -fx-text-fill: #eaf1ff;
+    -fx-alignment: CENTER;
+    -fx-padding: 7px 6px;
+    -fx-font-size: 13px;
+}
+
+/* Các nhãn trạng thái trong bảng */
+.st-wait {
+    -fx-text-fill: #4ff0a0;
+    -fx-font-weight: bold;
+}
+
+.st-play {
+    -fx-text-fill: #ff9f1c;
+    -fx-font-weight: bold;
+}
+
+.st-free {
+    -fx-text-fill: #4ff0a0;
+}
+
+.st-busy {
+    -fx-text-fill: #ff5b62;
+}
+
+/* ==========================================================
+   ĐẤU TRƯỜNG PHÒNG CHỜ 1-1 (VS ARENA)
+   ========================================================== */
+.arena-card {
+    -fx-background-color: rgba(7, 19, 54, 0.82);
+    -fx-background-radius: 10px;
+    -fx-border-color: #2f7bff;
+    -fx-border-radius: 10px;
+    -fx-border-width: 1.5px;
+    -fx-effect: dropshadow(three-pass-box, rgba(47, 123, 255, 0.25), 14, 0.15, 0, 0);
+}
+
+/* Chữ VS nghệ thuật giữa sàn đấu */
+.vs-label {
+    -fx-font-size: 64px;
+    -fx-font-weight: 800;
+    -fx-font-style: italic;
+    -fx-text-fill: linear-gradient(to bottom, #ffe57a, #ff9f1c);
+    -fx-effect: dropshadow(three-pass-box, rgba(255, 159, 28, 0.8), 20, 0.4, 0, 0);
+}
+
+/* Khung hiển thị người chơi trên ghế */
+.seat-frame {
+    -fx-pref-width: 150px;
+    -fx-pref-height: 170px;
+    -fx-background-color: linear-gradient(to bottom, #0f2b6e, #081a47);
+    -fx-border-color: #2f7bff;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-border-width: 2px;
+    -fx-alignment: CENTER;
+    -fx-effect: dropshadow(three-pass-box, rgba(47, 123, 255, 0.35), 14, 0.2, 0, 0);
+}
+
+.seat-frame-empty {
+    -fx-background-color: rgba(8, 23, 57, 0.4);
+    -fx-border-color: #1d4aa8;
+    -fx-border-style: dashed;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-border-width: 2px;
+    -fx-alignment: CENTER;
+}
+
+.seat-ring-host {
+    -fx-fill: radial-gradient(center 50% 50%, radius 50%, rgba(229, 56, 59, 0.65) 0%, transparent 100%);
+}
+
+.seat-ring-guest {
+    -fx-fill: radial-gradient(center 50% 50%, radius 50%, rgba(47, 123, 255, 0.75) 0%, transparent 100%);
+}
+
+.badge-host {
+    -fx-background-color: #2a1c00;
+    -fx-border-color: #ffc83d;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-border-width: 1.5px;
+    -fx-text-fill: #ffc83d;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-padding: 1px 8px;
+}
+
+.seat-player-name {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.seat-empty-text {
+    -fx-text-fill: #8ea6d8;
+    -fx-font-size: 13.5px;
+}
+
+/* Khung log chat phòng chờ */
+.chat-log-area {
+    -fx-background-color: #050f2c;
+    -fx-background-radius: 6px;
+    -fx-border-color: #1d4aa8;
+    -fx-border-radius: 6px;
+    -fx-border-width: 1.5px;
+    -fx-font-family: 'Consolas', 'Courier New', monospace;
+    -fx-font-size: 12.5px;
+    -fx-text-fill: #4ff0a0;
+}
+

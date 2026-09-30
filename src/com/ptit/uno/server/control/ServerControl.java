@@ -1,9 +1,6 @@
 package com.ptit.uno.server.control;
 
-import com.ptit.uno.model.Card;
-import com.ptit.uno.model.GameState;
-import com.ptit.uno.model.Room;
-import com.ptit.uno.model.User;
+import com.ptit.uno.model.*;
 import com.ptit.uno.protocol.Message;
 import com.ptit.uno.protocol.MessageType;
 import com.ptit.uno.server.dao.DAO;
@@ -117,7 +114,26 @@ public class ServerControl {
 
     public void broadcastToRoom(int roomId, GameState state) {
         Message msg = new Message(MessageType.GAME_STATE_BROADCAST, state);
-        broadcastToRoom(roomId, msg);
+        
+        GameManager gm = roomManager.getGameManager(roomId);
+        Room room = roomManager.getRoom(roomId);
+        Message specMsg = null;
+        if (gm != null && room != null && room.getPlayers().size() >= 2) {
+            List<Card> hostHand = room.getPlayers().get(0).getHand();
+            List<Card> guestHand = room.getPlayers().get(1).getHand();
+            SpectatorState specState = new SpectatorState(state, hostHand, guestHand);
+            specMsg = new Message(MessageType.SPECTATOR_STATE_BROADCAST, specState);
+        }
+
+        for (ClientHandler ch : activeClients) {
+            if (ch.getCurrentRoomId() == roomId) {
+                if (ch.isSpectator() && specMsg != null) {
+                    ch.sendMessage(specMsg);
+                } else if (!ch.isSpectator()) {
+                    ch.sendMessage(msg);
+                }
+            }
+        }
     }
 
     public void sendHandUpdate(int userId, List<Card> hand) {
@@ -146,5 +162,18 @@ public class ServerControl {
 
     public RoomManager getRoomManager() {
         return roomManager;
+    }
+
+    public void updateRoomUsersStatus(int roomId, String status) {
+        for (ClientHandler ch : activeClients) {
+            if (ch.getCurrentRoomId() == roomId && ch.getCurrentUser() != null) {
+                if (!ch.isSpectator()) {
+                    ch.getCurrentUser().setStatus(status);
+                } else {
+                    ch.getCurrentUser().setStatus("Đang xem");
+                }
+            }
+        }
+        broadcastOnlineUsers();
     }
 }

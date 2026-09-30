@@ -5,6 +5,8 @@ import com.ptit.uno.client.view.fx.auth.LoginFXView;
 import com.ptit.uno.client.view.fx.auth.RegisterFXView;
 import com.ptit.uno.client.view.fx.game.GameBoardUIBridge;
 import com.ptit.uno.client.view.fx.game.UnoGameFXView;
+import com.ptit.uno.client.view.fx.lobby.LobbyFXView;
+import com.ptit.uno.client.view.fx.room.RoomWaitingFXView;
 import com.ptit.uno.model.*;
 import com.ptit.uno.protocol.Message;
 import com.ptit.uno.protocol.MessageType;
@@ -41,17 +43,19 @@ public class ClientControl {
     private final LobbyFrm lobbyFrm;
     private final RoomWaitingFrm roomWaitingFrm;
     private final UnoGameFXView gameView;
+    private final com.ptit.uno.client.view.fx.game.SpectatorFXView spectatorView;
     private final LeaderboardFrm leaderboardFrm;
     private final MatchHistoryFrm matchHistoryFrm;
 
     public ClientControl(LoginFrm loginFrm) {
         this.loginFrm = loginFrm;
         this.registerFrm = (loginFrm instanceof LoginFXView) ? new RegisterFXView() : new RegisterFrm();
-        this.lobbyFrm = new LobbyFrm();
-        this.roomWaitingFrm = new RoomWaitingFrm();
+        this.lobbyFrm = (loginFrm instanceof LoginFXView) ? new LobbyFXView() : new LobbyFrm();
+        this.roomWaitingFrm = (loginFrm instanceof LoginFXView) ? new RoomWaitingFXView() : new RoomWaitingFrm();
         this.gameView = new UnoGameFXView();
-        this.leaderboardFrm = new LeaderboardFrm();
-        this.matchHistoryFrm = new MatchHistoryFrm();
+        this.spectatorView = new com.ptit.uno.client.view.fx.game.SpectatorFXView();
+        this.leaderboardFrm = (loginFrm instanceof LoginFXView) ? new com.ptit.uno.client.view.fx.lobby.LeaderboardFXView() : new LeaderboardFrm();
+        this.matchHistoryFrm = (loginFrm instanceof LoginFXView) ? new com.ptit.uno.client.view.fx.lobby.MatchHistoryFXView() : new MatchHistoryFrm();
 
         // Đăng ký toàn bộ các Listener từ Control vào View (Chuẩn Slide b02-2)
         initListeners();
@@ -85,6 +89,9 @@ public class ClientControl {
         });
         lobbyFrm.addHistoryListener(e -> {
             sendData(new Message(MessageType.GET_MATCH_HISTORY_REQUEST));
+            if (matchHistoryFrm instanceof com.ptit.uno.client.view.fx.lobby.MatchHistoryFXView) {
+                ((com.ptit.uno.client.view.fx.lobby.MatchHistoryFXView) matchHistoryFrm).setCurrentUsername(currentUser != null ? currentUser.getUsername() : "");
+            }
             matchHistoryFrm.setVisible(true);
         });
         lobbyFrm.addLogoutListener(e -> {
@@ -92,6 +99,9 @@ public class ClientControl {
             lobbyFrm.setVisible(false);
             loginFrm.setVisible(true);
         });
+        if (lobbyFrm instanceof LobbyFXView) {
+            ((LobbyFXView) lobbyFrm).addSpectateRoomListener(new SpectateRoomListener());
+        }
 
         // --- 4. Sự kiện trên RoomWaitingFrm ---
         roomWaitingFrm.addStartGameListener(new StartGameListener());
@@ -134,7 +144,17 @@ public class ClientControl {
                     lobbyFrm.setVisible(true);
                 }
             }
+
+            @Override
+            public void onGameFinished() {
+                gameView.setVisible(false);
+                roomWaitingFrm.setVisible(true);
+            }
         });
+
+        // --- 6. Sự kiện trên SpectatorView ---
+        spectatorView.addLeaveRoomListener(new LeaveRoomListener());
+        spectatorView.addSendChatListener(new SendChatListener());
     }
 
     // =========================================================================
@@ -144,51 +164,64 @@ public class ClientControl {
     class LoginListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            try {
-                if (socket == null || socket.isClosed()) {
-                    boolean connected = openConnection(loginFrm.getHost(), loginFrm.getPort());
-                    if (!connected) {
-                        loginFrm.showMessage("Không thể kết nối đến máy chủ: " + loginFrm.getHost() + ":" + loginFrm.getPort());
-                        return;
-                    }
-                }
-                User user = loginFrm.getUser();
-                if (user.getUsername().isEmpty() || user.getPassword().isEmpty()) {
-                    loginFrm.showMessage("Vui lòng nhập đầy đủ tài khoản và mật khẩu!");
-                    return;
-                }
-                sendData(new Message(MessageType.LOGIN_REQUEST, user));
-            } catch (Exception ex) {
-                loginFrm.showMessage("Lỗi: " + ex.getMessage());
+            User user = loginFrm.getUser();
+            String host = loginFrm.getHost();
+            int port = loginFrm.getPort();
+
+            if (user.getUsername().isEmpty() || user.getPassword().isEmpty()) {
+                loginFrm.showMessage("Vui lòng nhập đầy đủ tài khoản và mật khẩu!");
+                return;
             }
+
+            new Thread(() -> {
+                try {
+                    if (socket == null || socket.isClosed()) {
+                        boolean connected = openConnection(host, port);
+                        if (!connected) {
+                            loginFrm.showMessage("Không thể kết nối đến máy chủ: " + host + ":" + port);
+                            return;
+                        }
+                    }
+                    sendData(new Message(MessageType.LOGIN_REQUEST, user));
+                } catch (Exception ex) {
+                    loginFrm.showMessage("Lỗi: " + ex.getMessage());
+                }
+            }).start();
         }
     }
 
     class RegisterListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            try {
-                if (socket == null || socket.isClosed()) {
-                    boolean connected = openConnection(loginFrm.getHost(), loginFrm.getPort());
-                    if (!connected) {
-                        registerFrm.showMessage("Không thể kết nối đến máy chủ!");
-                        return;
-                    }
-                }
-                User user = registerFrm.getUser();
-                if (user != null) {
-                    sendData(new Message(MessageType.REGISTER_REQUEST, user));
-                }
-            } catch (Exception ex) {
-                registerFrm.showMessage("Lỗi: " + ex.getMessage());
+            User user = registerFrm.getUser();
+            String host = loginFrm.getHost();
+            int port = loginFrm.getPort();
+            
+            if (user == null) {
+                return;
             }
+
+            new Thread(() -> {
+                try {
+                    if (socket == null || socket.isClosed()) {
+                        boolean connected = openConnection(host, port);
+                        if (!connected) {
+                            registerFrm.showMessage("Không thể kết nối đến máy chủ!");
+                            return;
+                        }
+                    }
+                    sendData(new Message(MessageType.REGISTER_REQUEST, user));
+                } catch (Exception ex) {
+                    registerFrm.showMessage("Lỗi: " + ex.getMessage());
+                }
+            }).start();
         }
     }
 
     class CreateRoomListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            String roomName = JOptionPane.showInputDialog(lobbyFrm, "Nhập tên phòng mới:", "Tạo phòng UNO", JOptionPane.PLAIN_MESSAGE);
+            String roomName = lobbyFrm.promptCreateRoomName();
             if (roomName != null && !roomName.trim().isEmpty()) {
                 Room r = new Room(0, roomName.trim(), currentUser.getId(), currentUser.getUsername(), 4);
                 sendData(new Message(MessageType.CREATE_ROOM_REQUEST, r));
@@ -220,6 +253,7 @@ public class ClientControl {
         public void actionPerformed(ActionEvent e) {
             sendData(new Message(MessageType.LEAVE_ROOM_REQUEST));
             roomWaitingFrm.setVisible(false);
+            if (spectatorView != null) spectatorView.setVisible(false);
             lobbyFrm.setVisible(true);
             sendData(new Message(MessageType.GET_ROOMS_REQUEST));
         }
@@ -229,14 +263,27 @@ public class ClientControl {
         @Override
         public void actionPerformed(ActionEvent e) {
             String content = roomWaitingFrm.getChatMessage();
+            if (content.isEmpty() && spectatorView != null && spectatorView.isVisible()) {
+                content = spectatorView.getChatMessage();
+            }
             if (!content.isEmpty() && currentRoom != null) {
                 ChatMessage chat = new ChatMessage(currentRoom.getId(), currentUser.getUsername(), content);
                 sendData(new Message(MessageType.CHAT_MESSAGE, chat));
             }
         }
     }
-
-
+    
+    class SpectateRoomListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            Integer roomId = lobbyFrm.getSelectedRoomId();
+            if (roomId == null) {
+                lobbyFrm.showMessage("Vui lòng chọn 1 phòng trong danh sách!");
+                return;
+            }
+            sendData(new Message(MessageType.SPECTATE_ROOM_REQUEST, roomId));
+        }
+    }
 
     // =========================================================================
     // XỬ LÝ GÓI TIN TỪ SERVER GỬI VỀ (ĐƯỢC GỌI TỪ CLIENT RECEIVER THREAD)
@@ -305,13 +352,6 @@ public class ClientControl {
                                 gameView.setPlayerUsername(currentUser.getUsername());
                             }
                             gameView.setVisible(true);
-                            // Tìm bài trên tay ban đầu của mình
-                            if (currentRoom != null) {
-                                Player me = currentRoom.getPlayer(currentUser.getId());
-                                if (me != null && me.getHand() != null) {
-                                    gameView.renderHand(me.getHand());
-                                }
-                            }
                         }
                         gameView.updateGameState(state, currentUser.getId());
                         break;
@@ -325,6 +365,31 @@ public class ClientControl {
                         ChatMessage chat = (ChatMessage) msg.getPayload();
                         roomWaitingFrm.appendChatMessage(chat);
                         gameView.appendChatMessage(chat);
+                        if (spectatorView != null) {
+                            spectatorView.addChatMessage(chat.getSender(), chat.getContent(), chat.getSender().equals(currentUser.getUsername()));
+                        }
+                        break;
+
+                    case SPECTATE_ROOM_RESPONSE:
+                        if (msg.isSuccess()) {
+                            this.currentRoom = (Room) msg.getPayload();
+                            lobbyFrm.setVisible(false);
+                            if (currentRoom.getPlayers() != null && currentRoom.getPlayers().size() >= 2) {
+                                spectatorView.setPlayersInfo(
+                                    currentRoom.getPlayers().get(0).getUsername(),
+                                    currentRoom.getPlayers().get(1).getUsername()
+                                );
+                            }
+                            spectatorView.setVisible(true);
+                        } else {
+                            lobbyFrm.showMessage(msg.getMessage());
+                        }
+                        break;
+
+                    case SPECTATOR_STATE_BROADCAST:
+                        SpectatorState specState = (SpectatorState) msg.getPayload();
+                        spectatorView.updateGameState(specState.getGameState(), specState.getHostHand(), specState.getGuestHand());
+                        spectatorView.updateCountdown(specState.getGameState().getRemainingSeconds());
                         break;
 
                     case LEADERBOARD_RESPONSE:

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.ptit.uno.client.view.fx.lobby.MatchHistoryUIBridge"
+            prefWidth="850.0" prefHeight="560.0"
+            styleClass="auth-root"
+            stylesheets="@../css/uno_theme.css">
+
+    <!-- TITLEBAR -->
+    <top>
+        <HBox styleClass="titlebar-box" alignment="CENTER_LEFT" spacing="10.0">
+            <ImageView fitWidth="22.0" fitHeight="22.0" pickOnBounds="true" preserveRatio="true">
+                <Image url="@../uno_logo.png"/>
+            </ImageView>
+            <Label text="LỊCH SỬ CÁC VÁN ĐẤU" styleClass="titlebar-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <HBox styleClass="titlebar-controls">
+                <Label text="✕" fx:id="lblCloseIcon" styleClass="window-control-btn, window-control-close"/>
+            </HBox>
+        </HBox>
+    </top>
+
+    <!-- NỘI DUNG CHÍNH -->
+    <center>
+        <VBox spacing="14.0" alignment="CENTER">
+            <padding>
+                <Insets top="18.0" bottom="18.0" left="22.0" right="22.0"/>
+            </padding>
+
+            <Label text="📜 LỊCH SỬ THI ĐẤU GẦN ĐÂY" styleClass="big-title, highlight-yellow" style="-fx-font-size: 24px; -fx-padding: 0 0 10 0;"/>
+
+            <StackPane VBox.vgrow="ALWAYS">
+                <TableView fx:id="tblHistory" styleClass="auth-card">
+                    <columns>
+                        <TableColumn fx:id="colId" text="Mã ván" prefWidth="60.0" style="-fx-alignment: CENTER;"/>
+                        <TableColumn fx:id="colRoom" text="Tên phòng" prefWidth="150.0"/>
+                        <TableColumn fx:id="colOpponent" text="Đối thủ" prefWidth="130.0"/>
+                        <TableColumn fx:id="colResult" text="Kết quả" prefWidth="90.0" style="-fx-alignment: CENTER;"/>
+                        <TableColumn fx:id="colScoreChange" text="Biến động điểm" prefWidth="120.0" style="-fx-alignment: CENTER;"/>
+                        <TableColumn fx:id="colTime" text="Thời gian" prefWidth="160.0" style="-fx-alignment: CENTER;"/>
+                    </columns>
+                    <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                    </columnResizePolicy>
+                </TableView>
+                
+                <Label fx:id="lblEmptyMessage" text="Bạn chưa có ván đấu nào. Hãy vào phòng và chơi thử!" 
+                       style="-fx-text-fill: #8ea6d8; -fx-font-size: 15px;" visible="false"/>
+            </StackPane>
+
+        </VBox>
+    </center>
+
+    <bottom>
+        <HBox alignment="CENTER_RIGHT" spacing="12.0">
+            <padding>
+                <Insets top="0" bottom="22.0" left="22.0" right="22.0"/>
+            </padding>
+            <Label fx:id="lblSummary" text="Tổng: 0 trận | Thắng 0 | Thua 0" style="-fx-text-fill: #8ea6d8; -fx-font-size: 14px;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnClose" text="Đóng" styleClass="btn-primary" prefWidth="150.0"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

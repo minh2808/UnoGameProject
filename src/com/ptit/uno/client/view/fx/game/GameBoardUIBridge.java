@@ -105,6 +105,9 @@ public class GameBoardUIBridge implements Initializable {
 
     private Timeline countdownTimeline;
     private int remainingSeconds = 15;
+    private Card currentTopCard;
+    private CardColor currentActiveColor;
+    private boolean isMyTurn = false;
 
     // Callback kết nối với ClientControl
     private GameActionListener actionListener;
@@ -119,6 +122,7 @@ public class GameBoardUIBridge implements Initializable {
         void onSendMessage(String message);
 
         void onLeaveGame();
+        void onGameFinished();
     }
 
     public void setActionListener(GameActionListener listener) {
@@ -167,6 +171,8 @@ public class GameBoardUIBridge implements Initializable {
             // 1. Cập nhật lá bài trên bàn
             Card top = state.getTopCard();
             if (top != null) {
+                currentTopCard = top;
+                currentActiveColor = state.getActiveColor();
                 setTopCard(top, state.getActiveColor());
             }
 
@@ -182,20 +188,30 @@ public class GameBoardUIBridge implements Initializable {
             // Ghi log lượt đi khi có thay đổi
             if (state.getCurrentTurnSeat() != lastTurnSeat) {
                 lastTurnSeat = state.getCurrentTurnSeat();
-                boolean isMyTurn = false;
+                boolean myTurnStatus = false;
                 String turnName = "Đối thủ";
                 if (state.getPlayerSummaries() != null) {
                     for (GameState.PlayerSummary p : state.getPlayerSummaries()) {
+                        if (p.getUserId() == currentUserId) {
+                            if (p.getSeatNumber() == lastTurnSeat) myTurnStatus = true;
+                        }
                         if (p.getSeatNumber() == lastTurnSeat) {
                             turnName = p.getUsername();
-                            if (p.getUserId() == currentUserId)
-                                isMyTurn = true;
-                            break;
                         }
                     }
                 }
+                this.isMyTurn = myTurnStatus;
                 addGameLog("HỆ THỐNG: ", isMyTurn ? "Đến lượt BẠN" : "Đến lượt " + turnName, Color.web("#f1c40f"),
                         Color.web("#a0c4ab"));
+            } else {
+                // Đảm bảo isMyTurn được cập nhật kể cả khi lastTurnSeat không đổi (trường hợp mới vào phòng)
+                if (state.getPlayerSummaries() != null) {
+                    for (GameState.PlayerSummary p : state.getPlayerSummaries()) {
+                        if (p.getUserId() == currentUserId && p.getSeatNumber() == state.getCurrentTurnSeat()) {
+                            this.isMyTurn = true;
+                        }
+                    }
+                }
             }
 
             // 3. Đếm ngược
@@ -227,7 +243,12 @@ public class GameBoardUIBridge implements Initializable {
                 winAlert.setTitle("Kết quả trận đấu");
                 winAlert.setHeaderText("TRẬN ĐẤU ĐÃ KẾT THÚC!");
                 winAlert.setContentText("Người chiến thắng: " + state.getWinnerUsername());
-                winAlert.show();
+                winAlert.showAndWait();
+                
+                // Trở về phòng chờ sau khi tắt Alert
+                if (actionListener != null) {
+                    actionListener.onGameFinished();
+                }
             }
         });
     }
@@ -263,9 +284,15 @@ public class GameBoardUIBridge implements Initializable {
             countdownTimeline.stop();
         }
         remainingSeconds = seconds;
+        if (lblCountdown != null) {
+            lblCountdown.setText(remainingSeconds + "s");
+        }
 
         countdownTimeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
             remainingSeconds--;
+            if (lblCountdown != null) {
+                lblCountdown.setText(Math.max(0, remainingSeconds) + "s");
+            }
             if (remainingSeconds <= 0) {
                 countdownTimeline.stop();
             }
@@ -365,12 +392,29 @@ public class GameBoardUIBridge implements Initializable {
         if (selectedCard == null)
             return;
 
+        if (!isMyTurn) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Thông báo");
+            alert.setHeaderText(null);
+            alert.setContentText("Chưa đến lượt của bạn!");
+            alert.showAndWait();
+            return;
+        }
+
+        if (currentTopCard != null && !selectedCard.canPlayOn(currentTopCard, currentActiveColor)) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Nước đi không hợp lệ");
+            alert.setHeaderText(null);
+            alert.setContentText("Lá bài này không thể đánh! Phải cùng màu, cùng số/chức năng, hoặc bài Đen (Wild).");
+            alert.showAndWait();
+            return;
+        }
+
         if (selectedCard.isWild()) {
             showChooseColorDialog(selectedCard);
         } else {
             Card cardToPlay = selectedCard;
             clearSelection();
-            addGameLog("BẠN: ", "đánh lá '" + cardToPlay + "'", Color.web("#f1c40f"), Color.web("#ffffff"));
             if (actionListener != null) {
                 actionListener.onPlayCard(cardToPlay, cardToPlay.getColor());
             }
@@ -379,7 +423,14 @@ public class GameBoardUIBridge implements Initializable {
 
     @FXML
     private void handleDrawCard(MouseEvent event) {
-        addGameLog("BẠN: ", "rút 1 lá bài", Color.web("#f1c40f"), Color.web("#d5e3d8"));
+        if (!isMyTurn) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Thông báo");
+            alert.setHeaderText(null);
+            alert.setContentText("Chưa đến lượt của bạn!");
+            alert.showAndWait();
+            return;
+        }
         if (actionListener != null) {
             actionListener.onDrawCard();
         }
@@ -387,7 +438,6 @@ public class GameBoardUIBridge implements Initializable {
 
     @FXML
     private void handleCallUno(ActionEvent event) {
-        addGameLog("BẠN: ", "HÔ UNO!", Color.web("#e74c3c"), Color.web("#f1c40f"));
         if (actionListener != null) {
             actionListener.onCallUno();
         }

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.ptit.uno.client.view.fx.room.RoomWaitingUIBridge"
+            prefWidth="1100.0" prefHeight="680.0"
+            styleClass="auth-root"
+            stylesheets="@../css/uno_theme.css">
+
+    <!-- 1. TITLEBAR & THÔNG TIN PHÒNG -->
+    <top>
+        <VBox spacing="0">
+            <HBox styleClass="titlebar-box" alignment="CENTER_LEFT" spacing="10.0">
+                <ImageView fitWidth="22.0" fitHeight="22.0" pickOnBounds="true" preserveRatio="true">
+                    <Image url="@../uno_logo.png"/>
+                </ImageView>
+                <Label text="UNO MULTIPLAYER ONLINE · PHÒNG CHỜ (ĐẤU TRƯỜNG 1-1)" styleClass="titlebar-title"/>
+                <Label text="PTIT LTM" styleClass="badge-tag"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <HBox styleClass="titlebar-controls">
+                    <Label text="—" styleClass="window-control-btn"/>
+                    <Label text="☐" styleClass="window-control-btn"/>
+                    <Label text="✕" styleClass="window-control-btn, window-control-close"/>
+                </HBox>
+            </HBox>
+
+            <!-- Tiêu đề phòng -->
+            <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="auth-card"
+                  style="-fx-padding: 8px 18px; -fx-background-radius: 0; -fx-border-width: 0 0 1.5px 0;">
+                <Label fx:id="lblRoomInfo" text="Phòng #... (Chủ phòng: ...)"
+                       style="-fx-text-fill: #4ff0a0; -fx-font-size: 17px; -fx-font-weight: bold;"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- 2. SÀN ĐẤU VS 1-1 & KHUNG CHAT -->
+    <center>
+        <HBox spacing="14.0">
+            <padding>
+                <Insets top="12.0" bottom="12.0" left="14.0" right="14.0"/>
+            </padding>
+
+            <!-- SÀN ĐẤU ĐỐI KHÁNG 1-1 (VS ARENA) -->
+            <VBox styleClass="arena-card" spacing="10.0" HBox.hgrow="ALWAYS" alignment="CENTER"
+                  style="-fx-padding: 16px;">
+                <Label fx:id="lblSeatHeader" text="ĐẤU TRƯỜNG ĐỐI KHÁNG 1-1" styleClass="field-label, highlight-yellow"
+                       style="-fx-font-size: 15px;"/>
+
+                <HBox alignment="CENTER" spacing="50.0" VBox.vgrow="ALWAYS">
+                    
+                    <!-- GHẾ 1: CHỦ PHÒNG (HOST) -->
+                    <VBox alignment="CENTER" spacing="8.0" prefWidth="190.0">
+                        <Label fx:id="lblHostElo" text="👑 Elo: 1250" styleClass="elo-badge"/>
+                        <StackPane>
+                            <!-- Vòng hào quang đỏ quanh chân ghế -->
+                            <Circle radius="75.0" styleClass="seat-ring-host"/>
+                            <VBox styleClass="seat-frame" alignment="CENTER" spacing="6.0">
+                                <Label text="🦊" style="-fx-font-size: 54px;"/>
+                                <Label text="Chủ phòng" styleClass="badge-host"/>
+                            </VBox>
+                        </StackPane>
+                        <Label fx:id="lblHostName" text="HostName" styleClass="seat-player-name"/>
+                    </VBox>
+
+                    <!-- CHỮ VS KHỔNG LỒ RỰC LỬA -->
+                    <VBox alignment="CENTER" spacing="0">
+                        <Label text="VS" styleClass="vs-label"/>
+                    </VBox>
+
+                    <!-- GHẾ 2: KHÁCH (GUEST) -->
+                    <VBox alignment="CENTER" spacing="8.0" prefWidth="190.0">
+                        <Label fx:id="lblGuestElo" text="👤 Elo: 1100" styleClass="elo-badge"/>
+                        <StackPane>
+                            <!-- Vòng hào quang xanh -->
+                            <Circle fx:id="guestRing" radius="75.0" styleClass="seat-ring-guest"/>
+                            <VBox fx:id="guestFrame" styleClass="seat-frame" alignment="CENTER" spacing="6.0">
+                                <Label fx:id="lblGuestAvatar" text="🐯" style="-fx-font-size: 54px;"/>
+                                <Label text="Đối thủ" styleClass="badge-tag"/>
+                            </VBox>
+                        </StackPane>
+                        <Label fx:id="lblGuestName" text="GuestName" styleClass="seat-player-name"/>
+                    </VBox>
+
+                </HBox>
+            </VBox>
+
+            <!-- KHUNG TRÒ CHUYỆN PHÒNG CHỜ -->
+            <VBox styleClass="auth-card" spacing="8.0" prefWidth="350.0" style="-fx-padding: 10px;">
+                <Label text="TRÒ CHUYỆN TRONG PHÒNG" styleClass="field-label, highlight-yellow"
+                       style="-fx-font-size: 14.5px;"/>
+                <TextArea fx:id="txtChatLog" editable="false" wrapText="true"
+                          styleClass="chat-log-area" VBox.vgrow="ALWAYS"/>
+                <HBox spacing="8.0">
+                    <TextField fx:id="txtChatInput" promptText="Nhập tin nhắn..."
+                               styleClass="auth-input" HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="btnSendChat" text="Gửi" styleClass="btn-ghost" prefWidth="70.0"/>
+                </HBox>
+            </VBox>
+
+        </HBox>
+    </center>
+
+    <!-- 3. THANH ĐIỀU KHIỂN DƯỚI CÙNG -->
+    <bottom>
+        <HBox alignment="CENTER_RIGHT" spacing="16.0" styleClass="auth-card"
+              style="-fx-padding: 10px 18px; -fx-background-radius: 0; -fx-border-width: 1.5px 0 0 0;">
+            <Label fx:id="lblWaitNote" text="Chỉ chủ phòng bấm được nút Bắt đầu."
+                   style="-fx-text-fill: #8ea6d8; -fx-font-size: 13.5px;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnStartGame" text="BẮT ĐẦU VÁN ĐẤU (2 người)"
+                    styleClass="btn-primary" prefWidth="380.0" style="-fx-font-size: 15px; -fx-padding: 11px 24px;"/>
+            <Button fx:id="btnLeaveRoom" text="Rời phòng"
+                    styleClass="btn-danger" style="-fx-font-size: 14px; -fx-padding: 10px 18px;"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

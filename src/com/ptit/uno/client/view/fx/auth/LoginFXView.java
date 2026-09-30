@@ -117,7 +117,6 @@ public class LoginFXView extends LoginFrm {
             if (controller != null) {
                 controller.setError(msg);
             }
-            JOptionPane.showMessageDialog(null, msg, "Thông báo", JOptionPane.INFORMATION_MESSAGE);
         });
     }
 

@@ -219,11 +219,11 @@ public class GameManager {
     }
 
     /**
-     * Hô UNO khi còn đúng 1 lá.
+     * Hô UNO khi còn 2 lá chuẩn bị đánh, hoặc còn 1 lá.
      */
     public synchronized void handleCallUno(int userId) {
         Player player = room.getPlayer(userId);
-        if (player != null && player.getCardCount() == 1) {
+        if (player != null && player.getCardCount() <= 2) {
             player.setUno(true);
             gameState.setLastActionLog(player.getUsername() + " đã hô: 'UNO!!!'");
             broadcastGameState();
@@ -381,6 +381,7 @@ public class GameManager {
         matchDAO.saveMatchResult(room.getName(), winner.getUserId(), totalTurnsCount, room.getPlayers(), scoreChanges);
 
         room.setStatus(Room.STATUS_WAITING);
+        serverControl.updateRoomUsersStatus(room.getId(), "Đang trong phòng");
         broadcastGameState();
     }
 

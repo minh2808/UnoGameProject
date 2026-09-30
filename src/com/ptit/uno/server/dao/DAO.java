@@ -12,7 +12,7 @@ public class DAO {
 
     private static final String DB_URL = "jdbc:mysql://localhost:3306/unodb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8";
     private static final String DB_USER = "root";
-    private static final String DB_PASSWORD = "root"; // Mặc định MySQL local
+    private static final String DB_PASSWORD = "28082005"; // Mặc định MySQL local
 
     public DAO() {
         getConnection();

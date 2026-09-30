@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.ptit.uno.client.view.fx.lobby.LeaderboardUIBridge"
+            prefWidth="780.0" prefHeight="560.0"
+            styleClass="auth-root"
+            stylesheets="@../css/uno_theme.css">
+
+    <!-- TITLEBAR -->
+    <top>
+        <HBox styleClass="titlebar-box" alignment="CENTER_LEFT" spacing="10.0">
+            <ImageView fitWidth="22.0" fitHeight="22.0" pickOnBounds="true" preserveRatio="true">
+                <Image url="@../uno_logo.png"/>
+            </ImageView>
+            <Label text="BẢNG XẾP HẠNG CAO THỦ UNO" styleClass="titlebar-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <HBox styleClass="titlebar-controls">
+                <Label text="✕" fx:id="lblCloseIcon" styleClass="window-control-btn, window-control-close"/>
+            </HBox>
+        </HBox>
+    </top>
+
+    <!-- NỘI DUNG CHÍNH -->
+    <center>
+        <VBox spacing="14.0" alignment="CENTER">
+            <padding>
+                <Insets top="18.0" bottom="18.0" left="22.0" right="22.0"/>
+            </padding>
+
+            <Label text="🏆 TOP CAO THỦ UNO ONLINE" styleClass="big-title, highlight-yellow" style="-fx-font-size: 24px; -fx-padding: 0 0 10 0;"/>
+
+            <TableView fx:id="tblLeaderboard" VBox.vgrow="ALWAYS" styleClass="auth-card">
+                <columns>
+                    <TableColumn fx:id="colRank" text="Hạng" prefWidth="60.0" style="-fx-alignment: CENTER;"/>
+                    <TableColumn fx:id="colName" text="Tên người chơi" prefWidth="250.0"/>
+                    <TableColumn fx:id="colElo" text="Điểm Elo" prefWidth="120.0" style="-fx-alignment: CENTER; -fx-text-fill: #ffc83d; -fx-font-weight: bold;"/>
+                    <TableColumn fx:id="colWins" text="Trận thắng" prefWidth="120.0" style="-fx-alignment: CENTER; -fx-text-fill: #4ff0a0;"/>
+                    <TableColumn fx:id="colTotal" text="Tổng trận" prefWidth="120.0" style="-fx-alignment: CENTER;"/>
+                </columns>
+                <columnResizePolicy>
+                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                </columnResizePolicy>
+            </TableView>
+
+        </VBox>
+    </center>
+
+    <bottom>
+        <HBox alignment="CENTER_RIGHT" spacing="12.0">
+            <padding>
+                <Insets top="0" bottom="22.0" left="22.0" right="22.0"/>
+            </padding>
+            <Button fx:id="btnClose" text="Đóng" styleClass="btn-primary" prefWidth="150.0"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

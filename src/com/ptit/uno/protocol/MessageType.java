@@ -24,6 +24,10 @@ public enum MessageType implements Serializable {
     JOIN_ROOM_RESPONSE,
     LEAVE_ROOM_REQUEST,
     ROOM_UPDATE_BROADCAST,
+    
+    SPECTATE_ROOM_REQUEST,
+    SPECTATE_ROOM_RESPONSE,
+    SPECTATOR_STATE_BROADCAST,
 
     // --- Trong phòng chờ (Room Waiting) ---
     PLAYER_READY_REQUEST,

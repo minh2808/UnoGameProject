@@ -160,6 +160,10 @@ public class LobbyFrm extends JFrame {
         JOptionPane.showMessageDialog(this, msg);
     }
 
+    public String promptCreateRoomName() {
+        return JOptionPane.showInputDialog(this, "Nhập tên phòng mới:", "Tạo phòng UNO", JOptionPane.PLAIN_MESSAGE);
+    }
+
     // --- BỘ ĐĂNG KÝ LISTENER ĐỂ CONTROLLER CẮM VÀO ---
     public void addCreateRoomListener(ActionListener log) {
         btnCreateRoom.addActionListener(log);

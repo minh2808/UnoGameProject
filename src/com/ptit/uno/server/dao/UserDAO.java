@@ -33,7 +33,7 @@ public class UserDAO extends DAO {
             return mockUser;
         }
 
-        String sql = "SELECT id, username, password, score, win_matches, total_matches, created_at FROM tbl_user WHERE username = ? AND password = ?";
+        String sql = "SELECT id, username, password, score, win_count, total_matches FROM `user` WHERE username = ? AND password = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, username);
             ps.setString(2, password);
@@ -44,9 +44,9 @@ public class UserDAO extends DAO {
                     user.setUsername(rs.getString("username"));
                     user.setPassword(rs.getString("password"));
                     user.setScore(rs.getInt("score"));
-                    user.setWinMatches(rs.getInt("win_matches"));
+                    user.setWinMatches(rs.getInt("win_count"));
                     user.setTotalMatches(rs.getInt("total_matches"));
-                    user.setCreatedAt(rs.getTimestamp("created_at"));
+                    // Removed created_at since it's not in db_schema.sql
                     return user;
                 }
             }
@@ -65,8 +65,8 @@ public class UserDAO extends DAO {
             return true;
         }
 
-        String checkSql = "SELECT id FROM tbl_user WHERE username = ?";
-        String insertSql = "INSERT INTO tbl_user(username, password, score, win_matches, total_matches) VALUES(?, ?, 1000, 0, 0)";
+        String checkSql = "SELECT id FROM `user` WHERE username = ?";
+        String insertSql = "INSERT INTO `user`(username, password, score, win_count, total_matches) VALUES(?, ?, 1000, 0, 0)";
         try {
             try (PreparedStatement psCheck = connection.prepareStatement(checkSql)) {
                 psCheck.setString(1, user.getUsername());
@@ -109,7 +109,7 @@ public class UserDAO extends DAO {
             return list;
         }
 
-        String sql = "SELECT id, username, score, win_matches, total_matches FROM tbl_user ORDER BY score DESC, win_matches DESC LIMIT 20";
+        String sql = "SELECT id, username, score, win_count, total_matches FROM `user` ORDER BY score DESC, win_count DESC LIMIT 20";
         try (Statement st = connection.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
@@ -117,7 +117,7 @@ public class UserDAO extends DAO {
                 u.setId(rs.getInt("id"));
                 u.setUsername(rs.getString("username"));
                 u.setScore(rs.getInt("score"));
-                u.setWinMatches(rs.getInt("win_matches"));
+                u.setWinMatches(rs.getInt("win_count"));
                 u.setTotalMatches(rs.getInt("total_matches"));
                 list.add(u);
             }
@@ -134,7 +134,7 @@ public class UserDAO extends DAO {
         Connection connection = getConnection();
         if (connection == null) return;
 
-        String sql = "UPDATE tbl_user SET score = GREATEST(0, score + ?), total_matches = total_matches + 1, win_matches = win_matches + ? WHERE id = ?";
+        String sql = "UPDATE `user` SET score = GREATEST(0, score + ?), total_matches = total_matches + 1, win_count = win_count + ? WHERE id = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, scoreChange);
             ps.setInt(2, isWinner ? 1 : 0);

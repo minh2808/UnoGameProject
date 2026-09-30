@@ -23,7 +23,7 @@ public class MatchDAO extends DAO {
     }
 
     /**
-     * Lưu kết quả ván đấu vào tbl_match và tbl_match_participant.
+     * Lưu kết quả ván đấu vào `match` và `match_player`.
      */
     public int saveMatchResult(String roomName, int winnerUserId, int totalTurns,
                                List<Player> participants, Map<Integer, Integer> scoreChanges) {
@@ -33,8 +33,8 @@ public class MatchDAO extends DAO {
             return 1;
         }
 
-        String sqlMatch = "INSERT INTO tbl_match(room_name, winner_id, total_turns, start_time, end_time) VALUES(?, ?, ?, NOW(), NOW())";
-        String sqlPart = "INSERT INTO tbl_match_participant(match_id, user_id, seat_number, score_change, is_bot_played) VALUES(?, ?, ?, ?, ?)";
+        String sqlMatch = "INSERT INTO `match`(room_name, winner_id, total_turns, start_time, end_time) VALUES(?, ?, ?, NOW(), NOW())";
+        String sqlPart = "INSERT INTO `match_player`(match_id, user_id, score_change, cards_left, cards_detail, is_winner) VALUES(?, ?, ?, ?, ?, ?)";
 
         try {
             int matchId = -1;
@@ -60,11 +60,12 @@ public class MatchDAO extends DAO {
                     for (Player p : participants) {
                         psPart.setInt(1, matchId);
                         psPart.setInt(2, p.getUserId());
-                        psPart.setInt(3, p.getSeatNumber());
                         int delta = scoreChanges != null && scoreChanges.containsKey(p.getUserId())
                                 ? scoreChanges.get(p.getUserId()) : 0;
-                        psPart.setInt(4, delta);
-                        psPart.setBoolean(5, p.isBot());
+                        psPart.setInt(3, delta);
+                        psPart.setInt(4, p.getCardCount());
+                        psPart.setString(5, p.getHand() != null ? p.getHand().toString() : "");
+                        psPart.setInt(6, p.getUserId() == winnerUserId ? 1 : 0);
                         psPart.addBatch();
                     }
                     psPart.executeBatch();
@@ -96,9 +97,9 @@ public class MatchDAO extends DAO {
 
         String sql = "SELECT m.id AS match_id, m.room_name, u.username AS winner_name, " +
                 "mp.score_change, m.end_time " +
-                "FROM tbl_match m " +
-                "JOIN tbl_match_participant mp ON m.id = mp.match_id " +
-                "LEFT JOIN tbl_user u ON m.winner_id = u.id " +
+                "FROM `match` m " +
+                "JOIN `match_player` mp ON m.id = mp.match_id " +
+                "LEFT JOIN `user` u ON m.winner_id = u.id " +
                 "WHERE mp.user_id = ? " +
                 "ORDER BY m.id DESC LIMIT 20";
 

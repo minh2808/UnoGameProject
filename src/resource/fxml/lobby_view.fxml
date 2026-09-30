@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.ptit.uno.client.view.fx.lobby.LobbyUIBridge"
+            prefWidth="1100.0" prefHeight="680.0"
+            styleClass="auth-root"
+            stylesheets="@../css/uno_theme.css">
+
+    <!-- 1. TITLEBAR PHONG CÁCH GAME -->
+    <top>
+        <VBox spacing="0">
+            <HBox styleClass="titlebar-box" alignment="CENTER_LEFT" spacing="10.0">
+                <ImageView fitWidth="22.0" fitHeight="22.0" pickOnBounds="true" preserveRatio="true">
+                    <Image url="@../uno_logo.png"/>
+                </ImageView>
+                <Label text="UNO MULTIPLAYER ONLINE · SẢNH CHÍNH (LOBBY)" styleClass="titlebar-title"/>
+                <Label text="PTIT LTM" styleClass="badge-tag"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <HBox styleClass="titlebar-controls">
+                    <Label text="—" styleClass="window-control-btn"/>
+                    <Label text="☐" styleClass="window-control-btn"/>
+                    <Label text="✕" styleClass="window-control-btn, window-control-close"/>
+                </HBox>
+            </HBox>
+
+            <!-- 2. TOP BAR THÔNG TIN NGƯỜI DÙNG & TIỆN ÍCH -->
+            <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="auth-card"
+                  style="-fx-padding: 8px 16px; -fx-background-radius: 0; -fx-border-width: 0 0 1.5px 0;">
+                <Label fx:id="lblUserInfo" text="Xin chào: Đang tải... | Điểm Elo: 1000 | Thắng: 0/0"
+                       style="-fx-text-fill: #4ff0a0; -fx-font-size: 15px; -fx-font-weight: bold;"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button fx:id="btnLeaderboard" text="🏆 Bảng xếp hạng" styleClass="btn-ghost"/>
+                <Button fx:id="btnHistory" text="📜 Lịch sử đấu" styleClass="btn-ghost"/>
+                <Button fx:id="btnLogout" text="Đăng xuất" styleClass="btn-danger"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- 3. NỘI DUNG CHÍNH: CHIA 2 CỘT (PHÒNG CHƠI & ONLINE) -->
+    <center>
+        <HBox spacing="14.0">
+            <padding>
+                <Insets top="12.0" bottom="12.0" left="14.0" right="14.0"/>
+            </padding>
+
+            <!-- CỘT TRÁI: DANH SÁCH PHÒNG CHƠI -->
+            <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                <VBox styleClass="auth-card" spacing="8.0" VBox.vgrow="ALWAYS" style="-fx-padding: 10px;">
+                    <Label text="DANH SÁCH PHÒNG CHƠI" styleClass="field-label, highlight-yellow"
+                           style="-fx-font-size: 14.5px;"/>
+                    <TableView fx:id="tblRooms" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="colRoomId" text="ID" prefWidth="60.0"/>
+                            <TableColumn fx:id="colRoomName" text="Tên phòng" prefWidth="240.0"/>
+                            <TableColumn fx:id="colRoomHost" text="Chủ phòng" prefWidth="160.0"/>
+                            <TableColumn fx:id="colRoomPlayers" text="Số người" prefWidth="90.0"/>
+                            <TableColumn fx:id="colRoomStatus" text="Trạng thái" prefWidth="130.0"/>
+                        </columns>
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
+                    </TableView>
+                </VBox>
+
+                <!-- 4 NÚT HÀNH ĐỘNG DƯỚI BẢNG PHÒNG -->
+                <HBox spacing="10.0" alignment="CENTER_LEFT">
+                    <Button fx:id="btnCreateRoom" text="➕ Tạo phòng mới" styleClass="btn-yellow" prefWidth="165.0"/>
+                    <Button fx:id="btnJoinRoom" text="🚪 Vào phòng đã chọn" styleClass="btn-primary" prefWidth="175.0"/>
+                    <Button fx:id="btnSpectate" text="👁 Xem trận đấu" styleClass="btn-ghost" prefWidth="140.0"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="btnRefresh" text="🔄 Làm mới" styleClass="btn-ghost" prefWidth="120.0"/>
+                </HBox>
+            </VBox>
+
+            <!-- CỘT PHẢI: NGƯỜI CHƠI TRỰC TUYẾN -->
+            <VBox styleClass="auth-card" spacing="8.0" prefWidth="320.0" style="-fx-padding: 10px;">
+                <Label text="NGƯỜI CHƠI TRỰC TUYẾN" styleClass="field-label, highlight-yellow"
+                       style="-fx-font-size: 14.5px;"/>
+                <TableView fx:id="tblOnline" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colOnlineId" text="#" prefWidth="45.0"/>
+                        <TableColumn fx:id="colOnlineName" text="Tên" prefWidth="120.0"/>
+                        <TableColumn fx:id="colOnlineElo" text="Elo" prefWidth="65.0"/>
+                        <TableColumn fx:id="colOnlineStatus" text="Trạng thái" prefWidth="80.0"/>
+                    </columns>
+                    <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                    </columnResizePolicy>
+                </TableView>
+            </VBox>
+
+        </HBox>
+    </center>
+
+</BorderPane>
