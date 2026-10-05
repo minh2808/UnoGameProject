@@ -13,13 +13,20 @@ import javafx.scene.control.TextField;
  */
 public class LoginUIBridge {
 
-    @FXML private TextField txtHost;
-    @FXML private TextField txtPort;
-    @FXML private TextField txtUsername;
-    @FXML private PasswordField txtPassword;
-    @FXML private Label lblError;
-    @FXML private Button btnLogin;
-    @FXML private Button btnToRegister;
+    @FXML
+    private TextField txtHost;
+    @FXML
+    private TextField txtPort;
+    @FXML
+    private TextField txtUsername;
+    @FXML
+    private PasswordField txtPassword;
+    @FXML
+    private Label lblError;
+    @FXML
+    private Button btnLogin;
+    @FXML
+    private Button btnToRegister;
 
     private Runnable onLoginAction;
     private Runnable onToRegisterAction;

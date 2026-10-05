@@ -1,19 +1,22 @@
 /* ==========================================================
    GAME BOARD CSS - UNO MULTIPLAYER (PTIT LTM)
-   Thiết kế chuẩn bàn cờ nỉ Casino phong cách hiện đại
+   Thiết kế chuẩn bàn chơi UNO với Animation và Thẩm mỹ cao
    ========================================================== */
 
 .root {
     -fx-font-family: 'Segoe UI', Arial, sans-serif;
 }
 
-/* Nền bàn chơi nỉ xanh đậm với viền bàn bo cong */
+/* Nền bàn chơi với texture nỉ Uno hoặc radial gradient chất lượng cao */
 .table-background {
-    -fx-background-color: radial-gradient(center 50% 50%, radius 70%, #1c6b37 0%, #0d381c 100%);
-    -fx-background-radius: 20px;
+    -fx-background-image: url('../sprites/bg_game.jpg');
+    -fx-background-size: cover;
+    -fx-background-position: center center;
+    -fx-background-repeat: no-repeat;
     -fx-border-color: #2b1d0c;
-    -fx-border-width: 10px;
-    -fx-border-radius: 20px;
+    -fx-border-width: 8px;
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
 }
 
 /* Tiêu đề trò chơi */
@@ -21,17 +24,19 @@
     -fx-text-fill: #f5eedc;
     -fx-font-size: 16px;
     -fx-font-weight: bold;
-    -fx-letter-spacing: 1px;
+    -fx-letter-spacing: 1.5px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 6, 0, 0, 2);
 }
 
 /* Panel thông tin người chơi/đối thủ */
 .player-badge {
-    -fx-background-color: rgba(20, 35, 25, 0.65);
-    -fx-background-radius: 12px;
-    -fx-border-color: rgba(255, 255, 255, 0.15);
-    -fx-border-radius: 12px;
+    -fx-background-color: rgba(15, 30, 20, 0.75);
+    -fx-background-radius: 14px;
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-radius: 14px;
     -fx-border-width: 1px;
-    -fx-padding: 6px 12px;
+    -fx-padding: 6px 14px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 8, 0, 0, 3);
 }
 
 .player-name {
@@ -58,17 +63,18 @@
 
 /* Viên thuốc thông báo Lượt chơi & Đồng hồ đếm ngược trung tâm */
 .turn-timer-pill {
-    -fx-background-color: rgba(10, 30, 18, 0.88);
+    -fx-background-color: rgba(10, 28, 16, 0.92);
     -fx-background-radius: 20px;
-    -fx-border-color: rgba(241, 196, 15, 0.45);
+    -fx-border-color: rgba(241, 196, 15, 0.6);
     -fx-border-radius: 20px;
-    -fx-border-width: 1.2px;
-    -fx-padding: 4px 18px;
+    -fx-border-width: 1.5px;
+    -fx-padding: 5px 20px;
+    -fx-effect: dropshadow(gaussian, rgba(241, 196, 15, 0.25), 10, 0, 0, 0);
 }
 
 .turn-timer-text {
     -fx-text-fill: #f1c40f;
-    -fx-font-size: 13px;
+    -fx-font-size: 14px;
     -fx-font-weight: bold;
 }
 
@@ -78,54 +84,70 @@
     -fx-font-weight: bold;
 }
 
-/* Khu vực cọc bài giữa bàn */
+/* Khu vực 2 cọc bài giữa bàn */
 .center-pile {
     -fx-cursor: hand;
-    -fx-background-radius: 8px;
+    -fx-background-radius: 10px;
+    -fx-padding: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.65), 14, 0, 0, 6);
 }
 
 .center-pile:hover {
-    -fx-opacity: 0.92;
+    -fx-scale-x: 1.04;
+    -fx-scale-y: 1.04;
 }
 
-.active-color-text {
-    -fx-font-size: 13px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #e74c3c;
-}
-
-.action-log-text {
-    -fx-font-size: 12px;
+.pile-label {
     -fx-text-fill: #d5e3d8;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-letter-spacing: 1px;
+    -fx-opacity: 0.85;
 }
 
 /* Nút Đánh Bài */
 .btn-play-card {
-    -fx-background-color: linear-gradient(to bottom, #2b593a, #163620);
-    -fx-background-radius: 10px;
+    -fx-background-color: linear-gradient(to bottom, #27ae60, #1b6a3b);
+    -fx-background-radius: 22px;
     -fx-border-color: #f1c40f;
-    -fx-border-radius: 10px;
-    -fx-border-width: 1.5px;
+    -fx-border-radius: 22px;
+    -fx-border-width: 1.8px;
     -fx-text-fill: #ffffff;
-    -fx-font-size: 16px;
+    -fx-font-size: 15px;
     -fx-font-weight: bold;
-    -fx-padding: 8px 24px;
+    -fx-padding: 7px 28px;
     -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 8, 0, 0, 3);
 }
 
 .btn-play-card:hover {
-    -fx-background-color: linear-gradient(to bottom, #39734d, #1c4529);
+    -fx-background-color: linear-gradient(to bottom, #2ecc71, #218c4e);
     -fx-border-color: #ffe066;
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
 }
 
 .btn-play-card:disabled {
-    -fx-opacity: 0.4;
+    -fx-opacity: 0.35;
     -fx-cursor: default;
+    -fx-scale-x: 1.0;
+    -fx-scale-y: 1.0;
 }
 
-/* Nút Hô UNO! */
-.btn-uno {
-    -fx-background-color: rgba(18, 38, 25, 0.85);
+/* Vỏ bọc 2 cọc bài ở giữa */
+.piles-wrapper {
+    -fx-background-color: rgba(0, 168, 255, 0.1);
+    -fx-border-color: #00a8ff;
+    -fx-border-width: 3px;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 4px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 168, 255, 0.6), 15, 0, 0, 0);
+}
+
+/* Nút Đánh Bài bên trái */
+.btn-play-card-side {
+    -fx-background-color: linear-gradient(to bottom, #27ae60, #1b6a3b);
     -fx-background-radius: 12px;
     -fx-border-color: #f1c40f;
     -fx-border-radius: 12px;
@@ -133,160 +155,127 @@
     -fx-text-fill: #ffffff;
     -fx-font-size: 15px;
     -fx-font-weight: bold;
-    -fx-padding: 6px 20px;
+    -fx-padding: 30px 10px;
     -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 8, 0, 0, 3);
 }
 
-.btn-uno:hover {
-    -fx-background-color: rgba(30, 60, 40, 0.95);
-    -fx-border-color: #ffd700;
+.btn-play-card-side:hover {
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-background-color: linear-gradient(to bottom, #2ecc71, #218c4e);
 }
 
-/* Nhãn Bài mình */
-.badge-hand {
-    -fx-background-color: rgba(0, 0, 0, 0.45);
-    -fx-background-radius: 8px;
-    -fx-padding: 3px 12px;
-    -fx-text-fill: #b3c2b8;
-    -fx-font-size: 11px;
+.btn-play-card-side:disabled {
+    -fx-opacity: 0.35;
+    -fx-scale-x: 1.0;
+    -fx-scale-y: 1.0;
+}
+
+/* Nút Hô UNO! dùng ảnh gốc */
+.btn-uno-image {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 8, 0, 0, 3);
+}
+
+.btn-uno-image:hover {
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+.btn-uno-image:pressed {
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
 }
 
 /* Lá bài trong tay người chơi */
 .hand-card-view {
     -fx-cursor: hand;
     -fx-background-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.45), 6, 0, 0, 3);
 }
 
 .hand-card-view:hover {
-    -fx-translate-y: -6px;
+    -fx-translate-y: -16px;
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.4), 10, 0, 0, 4);
 }
 
-/* Lá bài được chọn: nâng cao và có viền vàng rõ ràng */
+/* Lá bài được chọn: nâng cao và có viền sáng rõ ràng */
 .hand-card-selected {
-    -fx-translate-y: -14px;
+    -fx-translate-y: -22px;
+    -fx-scale-x: 1.08;
+    -fx-scale-y: 1.08;
     -fx-border-color: #f1c40f;
     -fx-border-width: 3px;
     -fx-border-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(241, 196, 15, 0.8), 16, 0, 0, 6);
 }
 
 /* Các nút góc phải (Trợ giúp, Thoát bàn) */
 .btn-utility {
-    -fx-background-color: rgba(0, 0, 0, 0.4);
-    -fx-background-radius: 6px;
-    -fx-border-color: rgba(255, 255, 255, 0.2);
-    -fx-border-radius: 6px;
+    -fx-background-color: rgba(0, 0, 0, 0.45);
+    -fx-background-radius: 8px;
+    -fx-border-color: rgba(255, 255, 255, 0.25);
+    -fx-border-radius: 8px;
     -fx-border-width: 1px;
     -fx-text-fill: #d5e3d8;
-    -fx-font-size: 12px;
+    -fx-font-size: 11px;
     -fx-padding: 4px 10px;
     -fx-cursor: hand;
 }
 
 .btn-utility:hover {
-    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-background-color: rgba(255, 255, 255, 0.15);
     -fx-text-fill: #ffffff;
 }
 
-/* Box Chat */
-.chat-container {
-    -fx-background-color: rgba(0, 0, 0, 0.5);
-    -fx-background-radius: 10px;
-    -fx-border-color: rgba(255, 255, 255, 0.12);
-    -fx-border-radius: 10px;
+/* Box Chat & Game Log */
+.chat-container, .gamelog-container {
+    -fx-background-color: rgba(8, 20, 12, 0.75);
+    -fx-background-radius: 12px;
+    -fx-border-color: rgba(255, 255, 255, 0.15);
+    -fx-border-radius: 12px;
     -fx-border-width: 1px;
     -fx-padding: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 8, 0, 0, 2);
 }
 
-/* Box Game Log bên tay trái */
-.gamelog-container {
-    -fx-background-color: rgba(10, 30, 18, 0.78);
-    -fx-background-radius: 10px;
-    -fx-border-color: rgba(255, 255, 255, 0.12);
-    -fx-border-radius: 10px;
-    -fx-border-width: 1px;
-    -fx-padding: 8px;
-}
-
-.gamelog-header-title {
-    -fx-text-fill: #a0c4ab;
-    -fx-font-size: 12px;
+.chat-header-title, .gamelog-header-title {
+    -fx-text-fill: #b3c2b8;
+    -fx-font-size: 11px;
     -fx-font-weight: bold;
-    -fx-letter-spacing: 0.5px;
+    -fx-letter-spacing: 0.8px;
 }
 
-.gamelog-message-list {
+.chat-message-list, .gamelog-message-list {
     -fx-background-color: transparent;
-    -fx-background-insets: 0;
-    -fx-padding: 0;
+    -fx-padding: 4px;
 }
 
-.gamelog-message-list .list-cell {
+.chat-message-list .list-cell, .gamelog-message-list .list-cell {
     -fx-background-color: transparent;
-    -fx-padding: 3px 0;
-}
-
-.chat-header-title {
-    -fx-text-fill: #d5e3d8;
-    -fx-font-size: 12px;
-}
-
-.chat-message-list {
-    -fx-background-color: transparent;
-    -fx-background-insets: 0;
-    -fx-padding: 0;
-}
-
-.chat-message-list .list-cell {
-    -fx-background-color: transparent;
-    -fx-padding: 2px 0;
-}
-
-.chat-text-player {
-    -fx-fill: #f1c40f;
-    -fx-font-weight: bold;
-    -fx-font-size: 12px;
-}
-
-.chat-text-content {
-    -fx-fill: #e0e0e0;
-    -fx-font-size: 12px;
+    -fx-padding: 2px 4px;
 }
 
 .chat-input {
-    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-background-color: rgba(0, 0, 0, 0.5);
     -fx-background-radius: 6px;
-    -fx-text-fill: #ffffff;
-    -fx-prompt-text-fill: #808080;
-    -fx-border-color: rgba(255, 255, 255, 0.15);
+    -fx-border-color: rgba(255, 255, 255, 0.2);
     -fx-border-radius: 6px;
-    -fx-font-size: 12px;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 11px;
     -fx-padding: 4px 8px;
 }
 
-.chat-input:focused {
-    -fx-border-color: #2ecc71;
-}
-
 .chat-btn-send {
-    -fx-background-color: transparent;
-    -fx-text-fill: #a0b8a6;
-    -fx-font-size: 14px;
-    -fx-cursor: hand;
-    -fx-padding: 2px 6px;
-}
-
-.chat-btn-send:hover {
+    -fx-background-color: #27ae60;
+    -fx-background-radius: 6px;
     -fx-text-fill: #ffffff;
-}
-
-/* Ẩn scrollbar thô cho bài và chat */
-.scroll-pane {
-    -fx-background-color: transparent;
-    -fx-background: transparent;
-}
-.scroll-pane > .viewport {
-    -fx-background-color: transparent;
-}
-.scroll-bar:horizontal, .scroll-bar:vertical {
-    -fx-opacity: 0.3;
+    -fx-font-size: 11px;
+    -fx-cursor: hand;
+    -fx-padding: 4px 8px;
 }

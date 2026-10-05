@@ -5,6 +5,7 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.ptit.uno.client.view.fx.lobby.LobbyUIBridge"
@@ -30,14 +31,54 @@
             </HBox>
 
             <!-- 2. TOP BAR THÔNG TIN NGƯỜI DÙNG & TIỆN ÍCH -->
-            <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="auth-card"
-                  style="-fx-padding: 8px 16px; -fx-background-radius: 0; -fx-border-width: 0 0 1.5px 0;">
-                <Label fx:id="lblUserInfo" text="Xin chào: Đang tải... | Điểm Elo: 1000 | Thắng: 0/0"
-                       style="-fx-text-fill: #4ff0a0; -fx-font-size: 15px; -fx-font-weight: bold;"/>
+            <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="auth-card"
+                  style="-fx-padding: 10px 20px; -fx-background-color: #12151c; -fx-background-radius: 0; -fx-border-color: #2a303c; -fx-border-width: 0 0 1px 0;">
+                
+                <!-- WIDGET NGƯỜI DÙNG -->
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                    <!-- Avatar (Viền glow xanh) -->
+                    <StackPane style="-fx-background-color: #4c8bf520; -fx-border-color: #4c8bf5; -fx-border-width: 1.5; -fx-border-radius: 50%; -fx-background-radius: 50%; -fx-min-width: 44; -fx-min-height: 44; -fx-max-width: 44; -fx-max-height: 44;">
+                        <FontIcon iconLiteral="fas-user-astronaut" iconSize="22" iconColor="#4c8bf5"/>
+                    </StackPane>
+                    
+                    <!-- Thông tin -->
+                    <VBox spacing="4" alignment="CENTER_LEFT">
+                        <Label fx:id="lblUsername" text="Đang tải..." style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 15px;"/>
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <!-- ELO Badge -->
+                            <HBox spacing="4" alignment="CENTER" style="-fx-background-color: #ff9f1c20; -fx-padding: 2 6; -fx-background-radius: 4;">
+                                <FontIcon iconLiteral="fas-star" iconSize="10" iconColor="#ff9f1c"/>
+                                <Label fx:id="lblElo" text="--- Elo" style="-fx-text-fill: #ff9f1c; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+                            </HBox>
+                            
+                            <!-- WIN RATE Badge -->
+                            <HBox spacing="4" alignment="CENTER" style="-fx-background-color: #4ff0a020; -fx-padding: 2 6; -fx-background-radius: 4;">
+                                <FontIcon iconLiteral="fas-trophy" iconSize="10" iconColor="#4ff0a0"/>
+                                <Label fx:id="lblWinRate" text="Thắng -/-" style="-fx-text-fill: #4ff0a0; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+                            </HBox>
+                        </HBox>
+                    </VBox>
+                </HBox>
+                
                 <Region HBox.hgrow="ALWAYS"/>
-                <Button fx:id="btnLeaderboard" text="🏆 Bảng xếp hạng" styleClass="btn-ghost"/>
-                <Button fx:id="btnHistory" text="📜 Lịch sử đấu" styleClass="btn-ghost"/>
-                <Button fx:id="btnLogout" text="Đăng xuất" styleClass="btn-danger"/>
+                
+                <HBox spacing="10" alignment="CENTER_RIGHT">
+                    <Button fx:id="btnLeaderboard" text="Bảng xếp hạng" styleClass="btn-ghost" style="-fx-text-fill: #b3bccf;">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-crown" iconColor="#ff9f1c" iconSize="14"/>
+                        </graphic>
+                    </Button>
+                    <Button fx:id="btnHistory" text="Lịch sử đấu" styleClass="btn-ghost" style="-fx-text-fill: #b3bccf;">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-history" iconColor="#4c8bf5" iconSize="14"/>
+                        </graphic>
+                    </Button>
+                    <Button fx:id="btnLogout" text="Đăng xuất" styleClass="btn-danger">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-sign-out-alt" iconColor="white" iconSize="14"/>
+                        </graphic>
+                    </Button>
+                </HBox>
             </HBox>
         </VBox>
     </top>
@@ -51,30 +92,47 @@
 
             <!-- CỘT TRÁI: DANH SÁCH PHÒNG CHƠI -->
             <VBox spacing="10.0" HBox.hgrow="ALWAYS">
-                <VBox styleClass="auth-card" spacing="8.0" VBox.vgrow="ALWAYS" style="-fx-padding: 10px;">
-                    <Label text="DANH SÁCH PHÒNG CHƠI" styleClass="field-label, highlight-yellow"
-                           style="-fx-font-size: 14.5px;"/>
-                    <TableView fx:id="tblRooms" VBox.vgrow="ALWAYS">
-                        <columns>
-                            <TableColumn fx:id="colRoomId" text="ID" prefWidth="60.0"/>
-                            <TableColumn fx:id="colRoomName" text="Tên phòng" prefWidth="240.0"/>
-                            <TableColumn fx:id="colRoomHost" text="Chủ phòng" prefWidth="160.0"/>
-                            <TableColumn fx:id="colRoomPlayers" text="Số người" prefWidth="90.0"/>
-                            <TableColumn fx:id="colRoomStatus" text="Trạng thái" prefWidth="130.0"/>
-                        </columns>
-                        <columnResizePolicy>
-                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                        </columnResizePolicy>
-                    </TableView>
+                <VBox styleClass="auth-card" spacing="12.0" VBox.vgrow="ALWAYS" style="-fx-padding: 14px; -fx-background-color: #12151c;">
+                    <!-- HEADER -->
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <Label text="Danh sách phòng" style="-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: white;" />
+                        <Label fx:id="lblRoomCount" text="0 phòng" style="-fx-background-color: #2a303c; -fx-text-fill: #8c95a6; -fx-padding: 2 6; -fx-background-radius: 4; -fx-font-size: 11px;" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        
+                        <!-- Search Box -->
+                        <HBox alignment="CENTER_LEFT" spacing="6" style="-fx-background-color: #0b0d13; -fx-background-radius: 4px; -fx-padding: 4 8; -fx-border-color: #2a303c; -fx-border-radius: 4px;">
+                            <FontIcon iconLiteral="fas-search" iconSize="12" iconColor="#8c95a6"/>
+                            <TextField fx:id="txtSearchRoom" promptText="Tìm ID hoặc tên phòng..." 
+                                       style="-fx-background-color: transparent; -fx-text-fill: white; -fx-prompt-text-fill: #8c95a6; -fx-padding: 0;" prefWidth="160"/>
+                        </HBox>
+                        
+                        <!-- Filter Toggle -->
+                        <HBox styleClass="segmented-button-bar">
+                            <ToggleButton fx:id="tglFilterAll" text="Tất cả" selected="true" style="-fx-font-size: 12px; -fx-padding: 4 12;">
+                                <toggleGroup>
+                                    <ToggleGroup fx:id="filterGroup" />
+                                </toggleGroup>
+                            </ToggleButton>
+                            <ToggleButton fx:id="tglFilterWaiting" text="Đang chờ" toggleGroup="$filterGroup" style="-fx-font-size: 12px; -fx-padding: 4 12;" />
+                            <ToggleButton fx:id="tglFilterPlaying" text="Đang chơi" toggleGroup="$filterGroup" style="-fx-font-size: 12px; -fx-padding: 4 12;" />
+                        </HBox>
+
+                        <Button fx:id="btnRefreshGrid" styleClass="btn-ghost" style="-fx-padding: 4 8;">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-sync-alt" iconColor="#8c95a6"/>
+                            </graphic>
+                        </Button>
+                    </HBox>
+
+                    <!-- LƯỚI PHÒNG CHƠI -->
+                    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-control-inner-background: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
+                        <FlowPane fx:id="fpRoomContainer" hgap="12" vgap="12" />
+                    </ScrollPane>
                 </VBox>
 
-                <!-- 4 NÚT HÀNH ĐỘNG DƯỚI BẢNG PHÒNG -->
-                <HBox spacing="10.0" alignment="CENTER_LEFT">
-                    <Button fx:id="btnCreateRoom" text="➕ Tạo phòng mới" styleClass="btn-yellow" prefWidth="165.0"/>
-                    <Button fx:id="btnJoinRoom" text="🚪 Vào phòng đã chọn" styleClass="btn-primary" prefWidth="175.0"/>
-                    <Button fx:id="btnSpectate" text="👁 Xem trận đấu" styleClass="btn-ghost" prefWidth="140.0"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Button fx:id="btnRefresh" text="🔄 Làm mới" styleClass="btn-ghost" prefWidth="120.0"/>
+                <!-- NÚT TẠO PHÒNG -->
+                <HBox alignment="CENTER_RIGHT">
+                    <Button fx:id="btnCreateRoom" text="➕ Tạo phòng mới" styleClass="btn-primary" style="-fx-font-size: 14px; -fx-padding: 8 20;" />
                 </HBox>
             </VBox>
 

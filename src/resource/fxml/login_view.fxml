@@ -14,22 +14,7 @@
             styleClass="auth-root"
             stylesheets="@../css/uno_theme.css">
 
-    <!-- 1. TITLEBAR PHONG CÁCH GAME -->
-    <top>
-        <HBox styleClass="titlebar-box" alignment="CENTER_LEFT" spacing="10.0">
-            <ImageView fitWidth="22.0" fitHeight="22.0" pickOnBounds="true" preserveRatio="true">
-                <Image url="@../uno_logo.png"/>
-            </ImageView>
-            <Label text="UNO MULTIPLAYER ONLINE · ĐĂNG NHẬP" styleClass="titlebar-title"/>
-            <Label text="PTIT LTM" styleClass="badge-tag"/>
-            <Region HBox.hgrow="ALWAYS"/>
-            <HBox styleClass="titlebar-controls">
-                <Label text="—" styleClass="window-control-btn"/>
-                <Label text="☐" styleClass="window-control-btn"/>
-                <Label text="✕" styleClass="window-control-btn, window-control-close"/>
-            </HBox>
-        </HBox>
-    </top>
+
 
     <!-- 2. NỘI DUNG CHÍNH (TIÊU ĐỀ LỚN + HERO & FORM 2 CỘT) -->
     <center>
@@ -58,29 +43,12 @@
                         <!-- Quầng sáng tỏa tròn phía sau -->
                         <Circle radius="110.0" styleClass="hero-glow-circle"/>
                         
-                        <!-- Quạt bài minh họa nghệ thuật -->
-                        <HBox alignment="CENTER" spacing="-32.0">
-                            <ImageView fitWidth="100.0" fitHeight="145.0" pickOnBounds="true" preserveRatio="true"
-                                       rotate="-16.0" style="-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 10, 0, -3, 3);">
-                                <Image url="@../card_back.png"/>
-                            </ImageView>
-                            <ImageView fitWidth="125.0" fitHeight="170.0" pickOnBounds="true" preserveRatio="true"
-                                       style="-fx-effect: dropshadow(three-pass-box, rgba(255,200,61,0.6), 18, 0.3, 0, 0);">
-                                <Image url="@../uno_logo.png"/>
-                            </ImageView>
-                            <ImageView fitWidth="100.0" fitHeight="145.0" pickOnBounds="true" preserveRatio="true"
-                                       rotate="16.0" style="-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 10, 0, 3, 3);">
-                                <Image url="@../card_back.png"/>
-                            </ImageView>
-                        </HBox>
+                        <!-- Logo UNO trung tâm tối giản, sang trọng -->
+                        <ImageView fitWidth="180.0" fitHeight="180.0" pickOnBounds="true" preserveRatio="true"
+                                   style="-fx-effect: dropshadow(gaussian, rgba(255,204,0,0.5), 25, 0.4, 0, 5);">
+                            <Image url="@../uno_logo.png"/>
+                        </ImageView>
                     </StackPane>
-
-                    <Label text="Game đấu thẻ bài trực tuyến 1-1 thời gian thực" styleClass="hero-subtitle"/>
-                    <HBox alignment="CENTER" spacing="10.0">
-                        <Label text="⚡ TCP Socket" styleClass="badge-tag"/>
-                        <Label text="🛡 Mô hình MVC Cải tiến" styleClass="badge-tag"/>
-                        <Label text="🏆 Hệ thống Elo" styleClass="badge-tag"/>
-                    </HBox>
                 </VBox>
 
                 <!-- CỘT PHẢI: FORM ĐĂNG NHẬP (CARD PANEL) -->

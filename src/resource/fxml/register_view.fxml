@@ -12,22 +12,7 @@
             styleClass="auth-root"
             stylesheets="@../css/uno_theme.css">
 
-    <!-- 1. TITLEBAR -->
-    <top>
-        <HBox styleClass="titlebar-box" alignment="CENTER_LEFT" spacing="10.0">
-            <ImageView fitWidth="22.0" fitHeight="22.0" pickOnBounds="true" preserveRatio="true">
-                <Image url="@../uno_logo.png"/>
-            </ImageView>
-            <Label text="UNO MULTIPLAYER ONLINE · ĐĂNG KÝ TÀI KHOẢN" styleClass="titlebar-title"/>
-            <Label text="PTIT LTM" styleClass="badge-tag"/>
-            <Region HBox.hgrow="ALWAYS"/>
-            <HBox styleClass="titlebar-controls">
-                <Label text="—" styleClass="window-control-btn"/>
-                <Label text="☐" styleClass="window-control-btn"/>
-                <Label text="✕" styleClass="window-control-btn, window-control-close"/>
-            </HBox>
-        </HBox>
-    </top>
+
 
     <!-- 2. NỘI DUNG FORM ĐĂNG KÝ CĂN GIỮA -->
     <center>

@@ -54,12 +54,14 @@ public class GameManager {
             serverControl.sendHandUpdate(p.getUserId(), p.getHand());
         }
 
-        // Bốc lá bài đầu tiên lật lên bàn (không được là lá Wild)
+        // Bốc lá bài đầu tiên lật lên bàn (chỉ cho phép lá SỐ)
         Card firstCard;
         do {
             firstCard = drawCardFromDeck();
-            if (firstCard.isWild()) {
-                drawPile.add(0, firstCard); // Trả lại nếu là Wild
+            CardValue val = firstCard.getValue();
+            // Nếu không phải lá số (Nghĩa là ordinal > NINE), thì nhét lại xuống cuối nọc và bốc lá khác
+            if (val.ordinal() > CardValue.NINE.ordinal()) {
+                drawPile.add(firstCard); 
             } else {
                 break;
             }
@@ -77,8 +79,8 @@ public class GameManager {
         gameState.setDrawPileCount(drawPile.size());
         gameState.setLastActionLog("Trận đấu bắt đầu! Lá bài khởi đầu: " + firstCard);
 
-        broadcastGameState();
         startTurnTimer();
+        broadcastGameState();
     }
 
     /**
@@ -185,14 +187,36 @@ public class GameManager {
         // Xử lý hiệu ứng lá bài đặc biệt
         applyCardEffects(foundCard);
 
+        // Kiểm tra phạt quên hô UNO: Nếu còn 1 lá mà chưa hô UNO -> cho 5 giây để hô, nếu không phạt 2 lá
+        if (player.getCardCount() == 1 && !player.isUno()) {
+            scheduleUnoPenalty(player.getUserId());
+        }
+
         // Chuyển lượt kế tiếp
         advanceTurn();
+        startTurnTimer();
         broadcastGameState();
         serverControl.sendHandUpdate(userId, player.getHand());
-        startTurnTimer();
 
         checkBotAutoPlay();
         return true;
+    }
+
+    private void scheduleUnoPenalty(int userId) {
+        timerExecutor.schedule(() -> {
+            Player p = room.getPlayer(userId);
+            // Nếu 5 giây trôi qua mà vẫn có 1 lá và CHƯA hô UNO thì phạt!
+            if (p != null && p.getCardCount() == 1 && !p.isUno()) {
+                Card c1 = drawCardFromDeck();
+                Card c2 = drawCardFromDeck();
+                if (c1 != null) p.addCard(c1);
+                if (c2 != null) p.addCard(c2);
+                
+                gameState.setLastActionLog("HỆ THỐNG: " + p.getUsername() + " quên hô UNO! Bị phạt rút 2 lá.");
+                serverControl.sendHandUpdate(userId, p.getHand());
+                broadcastGameState();
+            }
+        }, 5, TimeUnit.SECONDS);
     }
 
     /**
@@ -207,13 +231,16 @@ public class GameManager {
         Card newCard = drawCardFromDeck();
         if (newCard != null) {
             player.addCard(newCard);
+            if (player.getCardCount() > 1) {
+                player.setUno(false); // Hủy trạng thái UNO nếu bài > 1
+            }
             gameState.setLastActionLog(player.getUsername() + " đã bốc 1 lá bài.");
             serverControl.sendHandUpdate(userId, player.getHand());
         }
 
         advanceTurn();
-        broadcastGameState();
         startTurnTimer();
+        broadcastGameState();
 
         checkBotAutoPlay();
     }

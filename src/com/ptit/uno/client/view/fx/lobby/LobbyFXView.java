@@ -20,8 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * LobbyFXView: Cầu nối View chuẩn MVC giữa ClientControl và giao diện Sảnh chính JavaFX FXML.
- * Kế thừa LobbyFrm để tương thích hoàn toàn theo mô hình MVC Cải tiến (Slide b02-2 & b05).
+ * LobbyFXView: Cầu nối View chuẩn MVC giữa ClientControl và giao diện Sảnh
+ * chính JavaFX FXML.
+ * Kế thừa LobbyFrm để tương thích hoàn toàn theo mô hình MVC Cải tiến (Slide
+ * b02-2 & b05).
  */
 public class LobbyFXView extends LobbyFrm {
     private Stage stage;
@@ -39,8 +41,10 @@ public class LobbyFXView extends LobbyFrm {
         super.setVisible(false);
 
         try {
-            Platform.startup(() -> {});
-        } catch (IllegalStateException ignored) {}
+            Platform.startup(() -> {
+            });
+        } catch (IllegalStateException ignored) {
+        }
 
         Platform.runLater(this::initFX);
     }
@@ -152,7 +156,8 @@ public class LobbyFXView extends LobbyFrm {
                 });
                 try {
                     latch.await();
-                } catch (InterruptedException ignored) {}
+                } catch (InterruptedException ignored) {
+                }
                 return result[0];
             }
         }
@@ -172,36 +177,43 @@ public class LobbyFXView extends LobbyFrm {
 
     @Override
     public void addCreateRoomListener(ActionListener log) {
-        if (log != null && !createRoomListeners.contains(log)) createRoomListeners.add(log);
+        if (log != null && !createRoomListeners.contains(log))
+            createRoomListeners.add(log);
     }
 
     @Override
     public void addJoinRoomListener(ActionListener log) {
-        if (log != null && !joinRoomListeners.contains(log)) joinRoomListeners.add(log);
+        if (log != null && !joinRoomListeners.contains(log))
+            joinRoomListeners.add(log);
     }
 
     @Override
     public void addRefreshListener(ActionListener log) {
-        if (log != null && !refreshListeners.contains(log)) refreshListeners.add(log);
+        if (log != null && !refreshListeners.contains(log))
+            refreshListeners.add(log);
     }
 
     @Override
     public void addLeaderboardListener(ActionListener log) {
-        if (log != null && !leaderboardListeners.contains(log)) leaderboardListeners.add(log);
+        if (log != null && !leaderboardListeners.contains(log))
+            leaderboardListeners.add(log);
     }
 
     @Override
     public void addHistoryListener(ActionListener log) {
-        if (log != null && !historyListeners.contains(log)) historyListeners.add(log);
+        if (log != null && !historyListeners.contains(log))
+            historyListeners.add(log);
     }
 
     @Override
     public void addLogoutListener(ActionListener log) {
-        if (log != null && !logoutListeners.contains(log)) logoutListeners.add(log);
+        if (log != null && !logoutListeners.contains(log))
+            logoutListeners.add(log);
     }
 
     public void addSpectateRoomListener(ActionListener log) {
-        if (log != null && !spectateListeners.contains(log)) spectateListeners.add(log);
+        if (log != null && !spectateListeners.contains(log))
+            spectateListeners.add(log);
     }
 
     @Override

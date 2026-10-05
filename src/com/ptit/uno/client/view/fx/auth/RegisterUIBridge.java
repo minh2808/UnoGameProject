@@ -8,16 +8,23 @@ import javafx.scene.control.TextField;
 
 /**
  * RegisterUIBridge: Lớp cầu nối UI Code-Behind cho register_view.fxml.
- * Xử lý kiểm tra mật khẩu xác nhận realtime và chuyển giao sự kiện cho RegisterFXView.
+ * Xử lý kiểm tra mật khẩu xác nhận realtime và chuyển giao sự kiện cho
+ * RegisterFXView.
  */
 public class RegisterUIBridge {
 
-    @FXML private TextField txtUsername;
-    @FXML private PasswordField txtPassword;
-    @FXML private PasswordField txtConfirmPassword;
-    @FXML private Label lblError;
-    @FXML private Button btnRegister;
-    @FXML private Button btnBackToLogin;
+    @FXML
+    private TextField txtUsername;
+    @FXML
+    private PasswordField txtPassword;
+    @FXML
+    private PasswordField txtConfirmPassword;
+    @FXML
+    private Label lblError;
+    @FXML
+    private Button btnRegister;
+    @FXML
+    private Button btnBackToLogin;
 
     private Runnable onRegisterAction;
     private Runnable onBackAction;
@@ -120,8 +127,10 @@ public class RegisterUIBridge {
     }
 
     public void resetForm() {
-        if (txtUsername != null) txtUsername.clear();
-        if (txtPassword != null) txtPassword.clear();
+        if (txtUsername != null)
+            txtUsername.clear();
+        if (txtPassword != null)
+            txtPassword.clear();
         if (txtConfirmPassword != null) {
             txtConfirmPassword.clear();
             txtConfirmPassword.getStyleClass().remove("input-error");
