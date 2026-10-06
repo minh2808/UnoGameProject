@@ -13,26 +13,10 @@
             styleClass="auth-root"
             stylesheets="@../css/uno_theme.css">
 
-    <!-- 1. TITLEBAR PHONG CÁCH GAME -->
+    <!-- 1. TOP BAR THÔNG TIN NGƯỜI DÙNG & TIỆN ÍCH -->
     <top>
-        <VBox spacing="0">
-            <HBox styleClass="titlebar-box" alignment="CENTER_LEFT" spacing="10.0">
-                <ImageView fitWidth="22.0" fitHeight="22.0" pickOnBounds="true" preserveRatio="true">
-                    <Image url="@../uno_logo.png"/>
-                </ImageView>
-                <Label text="UNO MULTIPLAYER ONLINE · SẢNH CHÍNH (LOBBY)" styleClass="titlebar-title"/>
-                <Label text="PTIT LTM" styleClass="badge-tag"/>
-                <Region HBox.hgrow="ALWAYS"/>
-                <HBox styleClass="titlebar-controls">
-                    <Label text="—" styleClass="window-control-btn"/>
-                    <Label text="☐" styleClass="window-control-btn"/>
-                    <Label text="✕" styleClass="window-control-btn, window-control-close"/>
-                </HBox>
-            </HBox>
-
-            <!-- 2. TOP BAR THÔNG TIN NGƯỜI DÙNG & TIỆN ÍCH -->
-            <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="auth-card"
-                  style="-fx-padding: 10px 20px; -fx-background-color: #12151c; -fx-background-radius: 0; -fx-border-color: #2a303c; -fx-border-width: 0 0 1px 0;">
+        <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="auth-card"
+              style="-fx-padding: 10px 20px; -fx-background-color: #12151c; -fx-background-radius: 0; -fx-border-color: #2a303c; -fx-border-width: 0 0 1px 0;">
                 
                 <!-- WIDGET NGƯỜI DÙNG -->
                 <HBox alignment="CENTER_LEFT" spacing="12">
@@ -80,7 +64,6 @@
                     </Button>
                 </HBox>
             </HBox>
-        </VBox>
     </top>
 
     <!-- 3. NỘI DUNG CHÍNH: CHIA 2 CỘT (PHÒNG CHƠI & ONLINE) -->

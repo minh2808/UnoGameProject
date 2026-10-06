@@ -46,6 +46,19 @@ public class RoomManager {
             if (gm != null && Room.STATUS_PLAYING.equals(r.getStatus())) {
                 // Đang trong trận: người chơi rời bàn sẽ bị chuyển thành Bot
                 gm.handlePlayerDisconnect(userId);
+                // Kiểm tra nếu tất cả người chơi trong phòng đều là bot thì dừng ván và hủy phòng
+                boolean hasHuman = false;
+                for (Player p : r.getPlayers()) {
+                    if (!p.isBot()) {
+                        hasHuman = true;
+                        break;
+                    }
+                }
+                if (!hasHuman) {
+                    gm.stopGame();
+                    rooms.remove(roomId);
+                    gameManagers.remove(roomId);
+                }
             } else {
                 r.removePlayer(userId);
                 if (r.getCurrentPlayerCount() == 0) {

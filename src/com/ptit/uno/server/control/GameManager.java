@@ -376,9 +376,15 @@ public class GameManager {
         Player p = room.getPlayer(userId);
         if (p != null) {
             p.setBot(true);
-            gameState.setLastActionLog(p.getUsername() + " đã ngắt kết nối. Bot sẽ tự động đánh thay!");
+            gameState.setLastActionLog(p.getUsername() + " đã thoát bàn. Bot sẽ tự động đánh thay!");
             broadcastGameState();
             checkBotAutoPlay();
+        }
+    }
+
+    public synchronized void stopGame() {
+        if (timerTask != null && !timerTask.isDone()) {
+            timerTask.cancel(true);
         }
     }
 
@@ -408,6 +414,13 @@ public class GameManager {
         matchDAO.saveMatchResult(room.getName(), winner.getUserId(), totalTurnsCount, room.getPlayers(), scoreChanges);
 
         room.setStatus(Room.STATUS_WAITING);
+        // Xóa các player bot (người đã thoát bàn trong ván đấu) khỏi phòng khi về trạng thái chờ
+        room.getPlayers().removeIf(Player::isBot);
+        if (room.getCurrentPlayerCount() > 0 && room.getPlayer(room.getHostId()) == null) {
+            Player newHost = room.getPlayers().get(0);
+            room.setHostId(newHost.getUserId());
+            room.setHostName(newHost.getUsername());
+        }
         serverControl.updateRoomUsersStatus(room.getId(), "Đang trong phòng");
         broadcastGameState();
     }

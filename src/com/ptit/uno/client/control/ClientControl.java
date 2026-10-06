@@ -136,13 +136,12 @@ public class ClientControl {
 
             @Override
             public void onLeaveGame() {
-                int confirm = JOptionPane.showConfirmDialog(null,
-                        "Bạn có chắc muốn thoát ván đấu? Bot sẽ đánh thay bạn!", "Xác nhận thoát", JOptionPane.YES_NO_OPTION);
-                if (confirm == JOptionPane.YES_OPTION) {
-                    sendData(new Message(MessageType.LEAVE_ROOM_REQUEST));
-                    gameView.setVisible(false);
-                    lobbyFrm.setVisible(true);
-                }
+                sendData(new Message(MessageType.LEAVE_ROOM_REQUEST));
+                currentRoom = null;
+                gameView.setVisible(false);
+                lobbyFrm.setVisible(true);
+                sendData(new Message(MessageType.GET_ROOMS_REQUEST));
+                sendData(new Message(MessageType.GET_ONLINE_USERS_REQUEST));
             }
 
             @Override
@@ -252,10 +251,12 @@ public class ClientControl {
         @Override
         public void actionPerformed(ActionEvent e) {
             sendData(new Message(MessageType.LEAVE_ROOM_REQUEST));
+            currentRoom = null;
             roomWaitingFrm.setVisible(false);
             if (spectatorView != null) spectatorView.setVisible(false);
             lobbyFrm.setVisible(true);
             sendData(new Message(MessageType.GET_ROOMS_REQUEST));
+            sendData(new Message(MessageType.GET_ONLINE_USERS_REQUEST));
         }
     }
 
@@ -338,6 +339,9 @@ public class ClientControl {
                         break;
 
                     case ROOM_UPDATE_BROADCAST:
+                        if (currentRoom == null) {
+                            break;
+                        }
                         this.currentRoom = (Room) msg.getPayload();
                         if (roomWaitingFrm.isVisible()) {
                             roomWaitingFrm.renderRoom(currentRoom, currentUser.getId());
@@ -345,6 +349,9 @@ public class ClientControl {
                         break;
 
                     case GAME_STATE_BROADCAST:
+                        if (currentRoom == null) {
+                            break;
+                        }
                         GameState state = (GameState) msg.getPayload();
                         if (!gameView.isVisible()) {
                             roomWaitingFrm.setVisible(false);
@@ -357,6 +364,9 @@ public class ClientControl {
                         break;
 
                     case PLAYER_HAND_UPDATE:
+                        if (currentRoom == null) {
+                            break;
+                        }
                         List<Card> newHand = (List<Card>) msg.getPayload();
                         gameView.renderHand(newHand);
                         break;

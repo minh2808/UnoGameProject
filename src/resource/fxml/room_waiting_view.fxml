@@ -13,30 +13,13 @@
             styleClass="auth-root"
             stylesheets="@../css/uno_theme.css">
 
-    <!-- 1. TITLEBAR & THÔNG TIN PHÒNG -->
+    <!-- 1. THÔNG TIN PHÒNG -->
     <top>
-        <VBox spacing="0">
-            <HBox styleClass="titlebar-box" alignment="CENTER_LEFT" spacing="10.0">
-                <ImageView fitWidth="22.0" fitHeight="22.0" pickOnBounds="true" preserveRatio="true">
-                    <Image url="@../uno_logo.png"/>
-                </ImageView>
-                <Label text="UNO MULTIPLAYER ONLINE · PHÒNG CHỜ (ĐẤU TRƯỜNG 1-1)" styleClass="titlebar-title"/>
-                <Label text="PTIT LTM" styleClass="badge-tag"/>
-                <Region HBox.hgrow="ALWAYS"/>
-                <HBox styleClass="titlebar-controls">
-                    <Label text="—" styleClass="window-control-btn"/>
-                    <Label text="☐" styleClass="window-control-btn"/>
-                    <Label text="✕" styleClass="window-control-btn, window-control-close"/>
-                </HBox>
-            </HBox>
-
-            <!-- Tiêu đề phòng -->
-            <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="auth-card"
-                  style="-fx-padding: 8px 18px; -fx-background-radius: 0; -fx-border-width: 0 0 1.5px 0;">
-                <Label fx:id="lblRoomInfo" text="Phòng #... (Chủ phòng: ...)"
-                       style="-fx-text-fill: #4ff0a0; -fx-font-size: 17px; -fx-font-weight: bold;"/>
-            </HBox>
-        </VBox>
+        <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="auth-card"
+              style="-fx-padding: 8px 18px; -fx-background-radius: 0; -fx-border-width: 0 0 1.5px 0;">
+            <Label fx:id="lblRoomInfo" text="Phòng #... (Chủ phòng: ...)"
+                   style="-fx-text-fill: #4ff0a0; -fx-font-size: 17px; -fx-font-weight: bold;"/>
+        </HBox>
     </top>
 
     <!-- 2. SÀN ĐẤU VS 1-1 & KHUNG CHAT -->

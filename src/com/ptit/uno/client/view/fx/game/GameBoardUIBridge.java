@@ -955,13 +955,21 @@ public class GameBoardUIBridge implements Initializable {
     }
 
     @FXML
-    private void handleLeave(ActionEvent event) {
+    public void handleLeave(ActionEvent event) {
         FXSoundHelper.playButtonClick();
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Bạn có chắc muốn thoát ván đấu? Bot sẽ đánh thay bạn!",
                 ButtonType.YES, ButtonType.NO);
+        if (btnLeave != null && btnLeave.getScene() != null && btnLeave.getScene().getWindow() != null) {
+            confirm.initOwner(btnLeave.getScene().getWindow());
+        }
         confirm.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.YES && actionListener != null) {
-                actionListener.onLeaveGame();
+            if (response == ButtonType.YES) {
+                if (countdownTimeline != null) {
+                    countdownTimeline.stop();
+                }
+                if (actionListener != null) {
+                    actionListener.onLeaveGame();
+                }
             }
         });
     }

@@ -152,15 +152,17 @@ public class ClientHandler extends Thread {
                 }
                 case LEAVE_ROOM_REQUEST: {
                     if (currentRoomId != -1) {
-                        if (!isSpectator) {
-                            serverControl.getRoomManager().leaveRoom(currentRoomId, currentUser.getId());
-                            Room current = serverControl.getRoomManager().getRoom(currentRoomId);
-                            if (current != null) {
-                                serverControl.broadcastToRoom(currentRoomId, new Message(MessageType.ROOM_UPDATE_BROADCAST, current));
-                            }
-                        }
+                        int leavingRoomId = currentRoomId;
+                        boolean wasSpectator = isSpectator;
                         currentRoomId = -1;
                         isSpectator = false;
+                        if (!wasSpectator) {
+                            serverControl.getRoomManager().leaveRoom(leavingRoomId, currentUser.getId());
+                            Room current = serverControl.getRoomManager().getRoom(leavingRoomId);
+                            if (current != null) {
+                                serverControl.broadcastToRoom(leavingRoomId, new Message(MessageType.ROOM_UPDATE_BROADCAST, current));
+                            }
+                        }
                         currentUser.setStatus("Rảnh");
                         serverControl.broadcastRoomList();
                         serverControl.broadcastOnlineUsers();
@@ -248,8 +250,12 @@ public class ClientHandler extends Thread {
     public void close() {
         isRunning = false;
         if (currentRoomId != -1 && currentUser != null) {
-            if (!isSpectator) {
-                serverControl.getRoomManager().leaveRoom(currentRoomId, currentUser.getId());
+            int leavingRoomId = currentRoomId;
+            boolean wasSpectator = isSpectator;
+            currentRoomId = -1;
+            isSpectator = false;
+            if (!wasSpectator) {
+                serverControl.getRoomManager().leaveRoom(leavingRoomId, currentUser.getId());
             }
             serverControl.broadcastRoomList();
         }

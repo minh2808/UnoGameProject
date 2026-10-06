@@ -52,6 +52,9 @@ public class UnoGameFXView {
             FXMLLoader loader = new FXMLLoader(fxmlUrl);
             Parent root = loader.load();
             this.controller = loader.getController();
+            if (pendingListener != null) {
+                this.controller.setActionListener(pendingListener);
+            }
 
             stage = new Stage();
             stage.setTitle("UNO Multiplayer Online - PTIT LTM");
@@ -62,6 +65,9 @@ public class UnoGameFXView {
 
             stage.setOnCloseRequest(e -> {
                 e.consume();
+                if (controller != null) {
+                    controller.handleLeave(null);
+                }
             });
 
         } catch (Exception e) {
@@ -70,7 +76,10 @@ public class UnoGameFXView {
         }
     }
 
+    private GameBoardUIBridge.GameActionListener pendingListener;
+
     public void setActionListener(GameBoardUIBridge.GameActionListener listener) {
+        this.pendingListener = listener;
         Platform.runLater(() -> {
             if (controller != null) {
                 controller.setActionListener(listener);
