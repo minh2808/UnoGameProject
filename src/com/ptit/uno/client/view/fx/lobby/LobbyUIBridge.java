@@ -2,6 +2,7 @@ package com.ptit.uno.client.view.fx.lobby;
 
 import com.ptit.uno.model.Room;
 import com.ptit.uno.model.User;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -13,8 +14,10 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.util.Duration;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -37,7 +40,9 @@ public class LobbyUIBridge implements Initializable {
     private Button btnLogout;
 
     @FXML private Label lblRoomCount;
+    @FXML private HBox searchBoxContainer;
     @FXML private TextField txtSearchRoom;
+    @FXML private ToggleGroup filterGroup;
     @FXML private ToggleButton tglFilterAll;
     @FXML private ToggleButton tglFilterWaiting;
     @FXML private ToggleButton tglFilterPlaying;
@@ -46,11 +51,10 @@ public class LobbyUIBridge implements Initializable {
     @FXML private Button btnCreateRoom;
 
     private int selectedRoomId = -1;
+    private final List<Room> allRooms = new ArrayList<>();
 
     @FXML
     private TableView<OnlineUserRow> tblOnline;
-    @FXML
-    private TableColumn<OnlineUserRow, Number> colOnlineId;
     @FXML
     private TableColumn<OnlineUserRow, String> colOnlineName;
     @FXML
@@ -58,7 +62,11 @@ public class LobbyUIBridge implements Initializable {
     @FXML
     private TableColumn<OnlineUserRow, String> colOnlineStatus;
 
+    @FXML private Button btnQuickMatch;
+    @FXML private Button btnInviteSelected;
+
     private final ObservableList<OnlineUserRow> onlineList = FXCollections.observableArrayList();
+    private String currentUsername = "";
 
     private Runnable onCreateRoomAction;
     private Runnable onJoinRoomAction;
@@ -67,6 +75,7 @@ public class LobbyUIBridge implements Initializable {
     private Runnable onHistoryAction;
     private Runnable onLogoutAction;
     private Runnable onSpectateAction;
+    private java.util.function.Consumer<String> onInvitePlayerAction;
 
     private String lastCreatedRoomName = null;
 
@@ -78,33 +87,87 @@ public class LobbyUIBridge implements Initializable {
             });
         }
 
-        // Cấu hình bảng Người chơi trực tuyến
-        colOnlineId.setCellValueFactory(d -> d.getValue().idProperty());
-        colOnlineName.setCellValueFactory(d -> d.getValue().nameProperty());
-        colOnlineElo.setCellValueFactory(d -> d.getValue().eloProperty());
-        colOnlineStatus.setCellValueFactory(d -> d.getValue().statusProperty());
+        // Bắt sự kiện ô tìm kiếm phòng (Search Box)
+        if (txtSearchRoom != null) {
+            txtSearchRoom.textProperty().addListener((obs, oldVal, newVal) -> applyRoomFilter());
 
-        colOnlineStatus.setCellFactory(col -> new TableCell<OnlineUserRow, String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                    setStyle("");
-                } else {
-                    setText(item);
-                    if ("Rảnh".equalsIgnoreCase(item)) {
-                        setStyle("-fx-text-fill: #4ff0a0; -fx-font-weight: bold;");
+            if (searchBoxContainer != null) {
+                txtSearchRoom.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+                    if (isFocused) {
+                        if (!searchBoxContainer.getStyleClass().contains("lobby-search-box-focused")) {
+                            searchBoxContainer.getStyleClass().add("lobby-search-box-focused");
+                        }
                     } else {
-                        setStyle("-fx-text-fill: #ff5b62; -fx-font-weight: bold;");
+                        searchBoxContainer.getStyleClass().remove("lobby-search-box-focused");
+                    }
+                });
+            }
+        }
+
+        // Bắt sự kiện bộ lọc trạng thái phòng (Segmented buttons)
+        if (filterGroup != null) {
+            filterGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal == null) {
+                    // Ngăn không cho bỏ chọn tất cả nút (luôn giữ 1 nút active)
+                    if (oldVal != null) {
+                        oldVal.setSelected(true);
+                    } else if (tglFilterAll != null) {
+                        tglFilterAll.setSelected(true);
+                    }
+                } else {
+                    applyRoomFilter();
+                }
+            });
+        } else {
+            // Fallback nếu filterGroup không được bind
+            if (tglFilterAll != null) tglFilterAll.setOnAction(e -> applyRoomFilter());
+            if (tglFilterWaiting != null) tglFilterWaiting.setOnAction(e -> applyRoomFilter());
+            if (tglFilterPlaying != null) tglFilterPlaying.setOnAction(e -> applyRoomFilter());
+        }
+
+        // Cấu hình bảng Người chơi trực tuyến (3 cột chuẩn: Tên, Elo, Trạng thái)
+        if (colOnlineName != null) {
+            colOnlineName.setCellValueFactory(d -> d.getValue().nameProperty());
+        }
+        if (colOnlineElo != null) {
+            colOnlineElo.setCellValueFactory(d -> d.getValue().eloProperty());
+        }
+        if (colOnlineStatus != null) {
+            colOnlineStatus.setCellValueFactory(d -> d.getValue().statusProperty());
+            colOnlineStatus.setCellFactory(col -> new TableCell<OnlineUserRow, String>() {
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                        setStyle("");
+                    } else {
+                        setText("• " + item);
+                        if ("Rảnh".equalsIgnoreCase(item)) {
+                            setStyle("-fx-text-fill: #4ff0a0; -fx-font-weight: bold; -fx-alignment: CENTER;");
+                        } else if ("Đang chơi".equalsIgnoreCase(item)) {
+                            setStyle("-fx-text-fill: #ff9f1c; -fx-font-weight: bold; -fx-alignment: CENTER;");
+                        } else {
+                            setStyle("-fx-text-fill: #ff5b62; -fx-font-weight: bold; -fx-alignment: CENTER;");
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
 
-        tblOnline.setItems(onlineList);
+        if (tblOnline != null) {
+            tblOnline.setItems(onlineList);
+        }
 
-        // Bắt sự kiện các nút
+        // Bắt sự kiện 2 nút ở dưới cùng bảng Người chơi trực tuyến
+        if (btnQuickMatch != null) {
+            btnQuickMatch.setOnAction(e -> handleQuickMatch());
+        }
+        if (btnInviteSelected != null) {
+            btnInviteSelected.setOnAction(e -> handleInviteSelected());
+        }
+
+        // Bắt sự kiện các nút khác
         if (btnCreateRoom != null) {
             btnCreateRoom.setOnAction(e -> {
                 if (onCreateRoomAction != null) onCreateRoomAction.run();
@@ -124,32 +187,220 @@ public class LobbyUIBridge implements Initializable {
         });
     }
 
+    /**
+     * Xử lý nút "⚡ Ghép ngẫu nhiên":
+     * Tự động tìm phòng chờ khả dụng đầu tiên và vào ngay. Nếu không có phòng, hỏi người chơi có muốn tạo phòng mới không.
+     */
+    private void handleQuickMatch() {
+        Room targetRoom = null;
+        for (Room r : allRooms) {
+            boolean isPlaying = "PLAYING".equalsIgnoreCase(r.getStatus()) || r.isFull();
+            if (!isPlaying) {
+                targetRoom = r;
+                break;
+            }
+        }
+
+        if (targetRoom != null) {
+            selectedRoomId = targetRoom.getId();
+            if (onJoinRoomAction != null) {
+                onJoinRoomAction.run();
+            }
+        } else {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Ghép trận ngẫu nhiên");
+            alert.setHeaderText("Không tìm thấy phòng chơi đang chờ");
+            alert.setContentText("Hiện tại không có phòng nào còn chỗ trống. Bạn có muốn tạo phòng mới ngay bây giờ không?");
+            ButtonType btnYes = new ButtonType("Tạo phòng ngay", ButtonBar.ButtonData.OK_DONE);
+            ButtonType btnCancel = new ButtonType("Để sau", ButtonBar.ButtonData.CANCEL_CLOSE);
+            alert.getButtonTypes().setAll(btnYes, btnCancel);
+
+            try {
+                alert.getDialogPane().getStylesheets().add(
+                        getClass().getResource("/resource/css/uno_theme.css").toExternalForm());
+                alert.getDialogPane().getStyleClass().add("auth-card");
+            } catch (Exception ignored) {}
+
+            Optional<ButtonType> opt = alert.showAndWait();
+            if (opt.isPresent() && opt.get() == btnYes) {
+                if (onCreateRoomAction != null) {
+                    onCreateRoomAction.run();
+                }
+            }
+        }
+    }
+
+    /**
+     * Xử lý nút "✉ Mời bạn":
+     * Kiểm tra người chơi được chọn trên bảng tblOnline và gửi lời mời nếu hợp lệ (đang Rảnh và không phải chính mình).
+     */
+    private void handleInviteSelected() {
+        if (tblOnline == null) return;
+        OnlineUserRow selected = tblOnline.getSelectionModel().getSelectedItem();
+
+        if (selected == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Mời bạn chơi");
+            alert.setHeaderText("Chưa chọn người chơi");
+            alert.setContentText("Vui lòng nhấp chọn một người chơi đang 'Rảnh' trong bảng trước khi gửi lời mời!");
+            try {
+                alert.getDialogPane().getStylesheets().add(
+                        getClass().getResource("/resource/css/uno_theme.css").toExternalForm());
+                alert.getDialogPane().getStyleClass().add("auth-card");
+            } catch (Exception ignored) {}
+            alert.showAndWait();
+            return;
+        }
+
+        if (currentUsername != null && !currentUsername.isEmpty()
+                && currentUsername.equalsIgnoreCase(selected.getName())) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Mời bạn chơi");
+            alert.setHeaderText("Không hợp lệ");
+            alert.setContentText("Bạn không thể tự gửi lời mời thách đấu cho chính mình!");
+            try {
+                alert.getDialogPane().getStylesheets().add(
+                        getClass().getResource("/resource/css/uno_theme.css").toExternalForm());
+                alert.getDialogPane().getStyleClass().add("auth-card");
+            } catch (Exception ignored) {}
+            alert.showAndWait();
+            return;
+        }
+
+        if (!"Rảnh".equalsIgnoreCase(selected.getStatus())) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Mời bạn chơi");
+            alert.setHeaderText("Người chơi đang bận");
+            alert.setContentText("Người chơi '" + selected.getName() + "' hiện đang ở trạng thái '" + selected.getStatus() + "', không thể mời lúc này!");
+            try {
+                alert.getDialogPane().getStylesheets().add(
+                        getClass().getResource("/resource/css/uno_theme.css").toExternalForm());
+                alert.getDialogPane().getStyleClass().add("auth-card");
+            } catch (Exception ignored) {}
+            alert.showAndWait();
+            return;
+        }
+
+        // Debounce hiệu ứng nút
+        if (btnInviteSelected != null) {
+            String originalText = btnInviteSelected.getText();
+            btnInviteSelected.setText("✓ Đã gửi mời!");
+            btnInviteSelected.setDisable(true);
+
+            PauseTransition pause = new PauseTransition(Duration.seconds(3));
+            pause.setOnFinished(ev -> {
+                btnInviteSelected.setText(originalText);
+                btnInviteSelected.setDisable(false);
+            });
+            pause.play();
+        }
+
+        if (onInvitePlayerAction != null) {
+            onInvitePlayerAction.accept(selected.getName());
+        }
+    }
+
     public void updateUserInfo(User user) {
         Platform.runLater(() -> {
             if (user != null) {
+                this.currentUsername = user.getUsername();
                 if (lblUsername != null) lblUsername.setText(user.getUsername());
                 if (lblElo != null) lblElo.setText(user.getScore() + " Elo");
                 if (lblWinRate != null) lblWinRate.setText(String.format("Thắng %d/%d", user.getWinMatches(), user.getTotalMatches()));
+                if (tblOnline != null) tblOnline.refresh();
             }
         });
     }
 
     public void updateRoomList(List<Room> rooms) {
         Platform.runLater(() -> {
-            if (fpRoomContainer != null) {
-                fpRoomContainer.getChildren().clear();
-                if (rooms != null) {
-                    if (lblRoomCount != null) {
-                        lblRoomCount.setText(rooms.size() + " phòng");
-                    }
-                    for (Room r : rooms) {
-                        fpRoomContainer.getChildren().add(createRoomCard(r));
-                    }
-                } else {
-                    if (lblRoomCount != null) lblRoomCount.setText("0 phòng");
+            allRooms.clear();
+            if (rooms != null) {
+                allRooms.addAll(rooms);
+            }
+            applyRoomFilter();
+        });
+    }
+
+    private void applyRoomFilter() {
+        if (fpRoomContainer == null) return;
+
+        String keyword = (txtSearchRoom != null && txtSearchRoom.getText() != null)
+                ? txtSearchRoom.getText().trim().toLowerCase() : "";
+
+        String statusFilter = "ALL";
+        if (tglFilterWaiting != null && tglFilterWaiting.isSelected()) {
+            statusFilter = "WAITING";
+        } else if (tglFilterPlaying != null && tglFilterPlaying.isSelected()) {
+            statusFilter = "PLAYING";
+        }
+
+        List<Room> filtered = new ArrayList<>();
+        for (Room r : allRooms) {
+            boolean isPlaying = "PLAYING".equalsIgnoreCase(r.getStatus()) || r.isFull();
+
+            // 1. Lọc theo trạng thái phòng
+            if ("WAITING".equals(statusFilter) && isPlaying) {
+                continue;
+            }
+            if ("PLAYING".equals(statusFilter) && !isPlaying) {
+                continue;
+            }
+
+            // 2. Lọc theo từ khóa tìm kiếm (ID, tên phòng, hoặc chủ phòng)
+            if (!keyword.isEmpty()) {
+                String idStr = String.valueOf(r.getId());
+                String formattedId = String.format("#%02d", r.getId()).toLowerCase();
+                String name = (r.getName() != null) ? r.getName().toLowerCase() : "";
+                String host = (r.getHostName() != null) ? r.getHostName().toLowerCase() : "";
+
+                boolean matchId = idStr.contains(keyword) || formattedId.contains(keyword);
+                boolean matchName = name.contains(keyword);
+                boolean matchHost = host.contains(keyword);
+
+                if (!matchId && !matchName && !matchHost) {
+                    continue;
                 }
             }
-        });
+
+            filtered.add(r);
+        }
+
+        renderRoomsToContainer(filtered);
+    }
+
+    private void renderRoomsToContainer(List<Room> rooms) {
+        fpRoomContainer.getChildren().clear();
+
+        if (lblRoomCount != null) {
+            if (allRooms.isEmpty()) {
+                lblRoomCount.setText("0 phòng");
+            } else if (rooms.size() == allRooms.size()) {
+                lblRoomCount.setText(rooms.size() + " phòng");
+            } else {
+                lblRoomCount.setText(rooms.size() + "/" + allRooms.size() + " phòng");
+            }
+        }
+
+        if (rooms.isEmpty()) {
+            VBox emptyBox = new VBox(8);
+            emptyBox.setAlignment(Pos.CENTER);
+            emptyBox.setPadding(new Insets(50, 20, 50, 20));
+            emptyBox.prefWidthProperty().bind(fpRoomContainer.widthProperty().subtract(30));
+
+            Label lblEmpty = new Label("Không tìm thấy phòng chơi nào phù hợp");
+            lblEmpty.setStyle("-fx-text-fill: #8c95a6; -fx-font-size: 14px; -fx-font-weight: bold;");
+
+            Label lblSub = new Label("Vui lòng thử đổi từ khóa tìm kiếm hoặc chọn bộ lọc 'Tất cả'");
+            lblSub.setStyle("-fx-text-fill: #5b6577; -fx-font-size: 12px;");
+
+            emptyBox.getChildren().addAll(lblEmpty, lblSub);
+            fpRoomContainer.getChildren().add(emptyBox);
+        } else {
+            for (Room r : rooms) {
+                fpRoomContainer.getChildren().add(createRoomCard(r));
+            }
+        }
     }
 
     private VBox createRoomCard(Room r) {
@@ -304,6 +555,10 @@ public class LobbyUIBridge implements Initializable {
         this.onSpectateAction = r;
     }
 
+    public void setOnInvitePlayerAction(java.util.function.Consumer<String> action) {
+        this.onInvitePlayerAction = action;
+    }
+
 
 
     public static class OnlineUserRow {
@@ -333,6 +588,22 @@ public class LobbyUIBridge implements Initializable {
 
         public SimpleStringProperty statusProperty() {
             return status;
+        }
+
+        public int getId() {
+            return id.get();
+        }
+
+        public String getName() {
+            return name.get();
+        }
+
+        public int getElo() {
+            return elo.get();
+        }
+
+        public String getStatus() {
+            return status.get();
         }
     }
 }

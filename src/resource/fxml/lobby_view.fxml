@@ -9,7 +9,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.ptit.uno.client.view.fx.lobby.LobbyUIBridge"
-            prefWidth="1100.0" prefHeight="680.0"
+            prefWidth="1140.0" prefHeight="700.0"
             styleClass="auth-root"
             stylesheets="@../css/uno_theme.css">
 
@@ -77,30 +77,30 @@
             <VBox spacing="10.0" HBox.hgrow="ALWAYS">
                 <VBox styleClass="auth-card" spacing="12.0" VBox.vgrow="ALWAYS" style="-fx-padding: 14px; -fx-background-color: #12151c;">
                     <!-- HEADER -->
-                    <HBox alignment="CENTER_LEFT" spacing="12">
-                        <Label text="Danh sách phòng" style="-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: white;" />
-                        <Label fx:id="lblRoomCount" text="0 phòng" style="-fx-background-color: #2a303c; -fx-text-fill: #8c95a6; -fx-padding: 2 6; -fx-background-radius: 4; -fx-font-size: 11px;" />
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Danh sách phòng" minWidth="-Infinity" style="-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: white;" />
+                        <Label fx:id="lblRoomCount" text="0 phòng" minWidth="-Infinity" style="-fx-background-color: #2a303c; -fx-text-fill: #8c95a6; -fx-padding: 2 6; -fx-background-radius: 4; -fx-font-size: 11px;" />
                         <Region HBox.hgrow="ALWAYS" />
                         
                         <!-- Search Box -->
-                        <HBox alignment="CENTER_LEFT" spacing="6" style="-fx-background-color: #0b0d13; -fx-background-radius: 4px; -fx-padding: 4 8; -fx-border-color: #2a303c; -fx-border-radius: 4px;">
+                        <HBox fx:id="searchBoxContainer" alignment="CENTER_LEFT" spacing="6" styleClass="lobby-search-box">
                             <FontIcon iconLiteral="fas-search" iconSize="12" iconColor="#8c95a6"/>
-                            <TextField fx:id="txtSearchRoom" promptText="Tìm ID hoặc tên phòng..." 
-                                       style="-fx-background-color: transparent; -fx-text-fill: white; -fx-prompt-text-fill: #8c95a6; -fx-padding: 0;" prefWidth="160"/>
+                            <TextField fx:id="txtSearchRoom" promptText="Tìm phòng..." 
+                                       styleClass="lobby-search-input" prefWidth="130" minWidth="85"/>
                         </HBox>
                         
                         <!-- Filter Toggle -->
-                        <HBox styleClass="segmented-button-bar">
-                            <ToggleButton fx:id="tglFilterAll" text="Tất cả" selected="true" style="-fx-font-size: 12px; -fx-padding: 4 12;">
+                        <HBox styleClass="segmented-button-bar" minWidth="-Infinity">
+                            <ToggleButton fx:id="tglFilterAll" text="Tất cả" selected="true" minWidth="-Infinity">
                                 <toggleGroup>
                                     <ToggleGroup fx:id="filterGroup" />
                                 </toggleGroup>
                             </ToggleButton>
-                            <ToggleButton fx:id="tglFilterWaiting" text="Đang chờ" toggleGroup="$filterGroup" style="-fx-font-size: 12px; -fx-padding: 4 12;" />
-                            <ToggleButton fx:id="tglFilterPlaying" text="Đang chơi" toggleGroup="$filterGroup" style="-fx-font-size: 12px; -fx-padding: 4 12;" />
+                            <ToggleButton fx:id="tglFilterWaiting" text="Đang chờ" toggleGroup="$filterGroup" minWidth="-Infinity" />
+                            <ToggleButton fx:id="tglFilterPlaying" text="Đang chơi" toggleGroup="$filterGroup" minWidth="-Infinity" />
                         </HBox>
 
-                        <Button fx:id="btnRefreshGrid" styleClass="btn-ghost" style="-fx-padding: 4 8;">
+                        <Button fx:id="btnRefreshGrid" styleClass="btn-ghost" style="-fx-padding: 4 8;" minWidth="-Infinity">
                             <graphic>
                                 <FontIcon iconLiteral="fas-sync-alt" iconColor="#8c95a6"/>
                             </graphic>
@@ -120,20 +120,27 @@
             </VBox>
 
             <!-- CỘT PHẢI: NGƯỜI CHƠI TRỰC TUYẾN -->
-            <VBox styleClass="auth-card" spacing="8.0" prefWidth="320.0" style="-fx-padding: 10px;">
+            <VBox styleClass="auth-card" spacing="10.0" prefWidth="290.0" minWidth="280.0" maxWidth="310.0" style="-fx-padding: 12px;">
                 <Label text="NGƯỜI CHƠI TRỰC TUYẾN" styleClass="field-label, highlight-yellow"
                        style="-fx-font-size: 14.5px;"/>
                 <TableView fx:id="tblOnline" VBox.vgrow="ALWAYS">
                     <columns>
-                        <TableColumn fx:id="colOnlineId" text="#" prefWidth="45.0"/>
-                        <TableColumn fx:id="colOnlineName" text="Tên" prefWidth="120.0"/>
-                        <TableColumn fx:id="colOnlineElo" text="Elo" prefWidth="65.0"/>
-                        <TableColumn fx:id="colOnlineStatus" text="Trạng thái" prefWidth="80.0"/>
+                        <TableColumn fx:id="colOnlineName" text="Tên người chơi" prefWidth="120.0"/>
+                        <TableColumn fx:id="colOnlineElo" text="Elo" prefWidth="55.0"/>
+                        <TableColumn fx:id="colOnlineStatus" text="Trạng thái" prefWidth="85.0"/>
                     </columns>
                     <columnResizePolicy>
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
                     </columnResizePolicy>
                 </TableView>
+
+                <!-- KHU VỰC 2 NÚT THAO TÁC Ở DƯỚI CÙNG -->
+                <HBox spacing="8.0" alignment="CENTER">
+                    <Button fx:id="btnQuickMatch" text="⚡ Ghép ngẫu nhiên" HBox.hgrow="ALWAYS" maxWidth="Infinity"
+                            styleClass="btn-quick-match" />
+                    <Button fx:id="btnInviteSelected" text="✉ Mời bạn" HBox.hgrow="ALWAYS" maxWidth="Infinity"
+                            styleClass="btn-invite-selected" />
+                </HBox>
             </VBox>
 
         </HBox>

@@ -49,7 +49,10 @@ public enum MessageType implements Serializable {
     GET_MATCH_HISTORY_REQUEST,
     MATCH_HISTORY_RESPONSE,
 
-    // --- Giao tiếp & Trò chuyện ---
+    // --- Giao tiếp, Mời bạn & Trò chuyện ---
+    INVITE_PLAYER_REQUEST,
+    INVITE_PLAYER_NOTIFICATION,
+    INVITE_FEEDBACK,
     CHAT_MESSAGE,
     ERROR_NOTIFICATION
 }

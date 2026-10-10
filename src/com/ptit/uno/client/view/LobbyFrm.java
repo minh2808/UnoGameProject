@@ -188,4 +188,7 @@ public class LobbyFrm extends JFrame {
     public void addLogoutListener(ActionListener log) {
         btnLogout.addActionListener(log);
     }
+
+    public void addInvitePlayerListener(ActionListener log) {}
+    public String getLastInvitedTarget() { return null; }
 }

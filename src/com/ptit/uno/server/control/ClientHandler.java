@@ -227,6 +227,71 @@ public class ClientHandler extends Thread {
                     sendMessage(new Message(MessageType.MATCH_HISTORY_RESPONSE, hist));
                     break;
                 }
+                case INVITE_PLAYER_REQUEST: {
+                    String targetUsername = (String) req.getPayload();
+                    if (targetUsername == null || targetUsername.trim().isEmpty()) {
+                        sendMessage(new Message(MessageType.INVITE_FEEDBACK, null, false, "Tên người chơi không hợp lệ!"));
+                        break;
+                    }
+
+                    ClientHandler targetClient = serverControl.getClientByUsername(targetUsername);
+                    if (targetClient == null) {
+                        sendMessage(new Message(MessageType.INVITE_FEEDBACK, null, false, "Người chơi '" + targetUsername + "' hiện không trực tuyến!"));
+                        break;
+                    }
+
+                    if (targetClient == this) {
+                        sendMessage(new Message(MessageType.INVITE_FEEDBACK, null, false, "Bạn không thể tự mời chính mình!"));
+                        break;
+                    }
+
+                    User targetUser = targetClient.getCurrentUser();
+                    if (targetUser != null && "Đang chơi".equalsIgnoreCase(targetUser.getStatus())) {
+                        sendMessage(new Message(MessageType.INVITE_FEEDBACK, null, false, "Người chơi '" + targetUsername + "' hiện đang trong ván đấu!"));
+                        break;
+                    }
+
+                    // Tìm hoặc tạo phòng chơi để mời vào
+                    Room room = null;
+                    if (this.currentRoomId > 0) {
+                        room = serverControl.getRoomManager().getRoom(this.currentRoomId);
+                    }
+
+                    if (room == null || room.isFull()) {
+                        room = serverControl.getRoomManager().createRoom(
+                                "Phòng của " + currentUser.getUsername(),
+                                currentUser.getId(),
+                                currentUser.getUsername(),
+                                2
+                        );
+                        this.currentRoomId = room.getId();
+                        currentUser.setStatus("Đang trong phòng");
+                        sendMessage(new Message(MessageType.CREATE_ROOM_RESPONSE, room, true, "Đã tạo phòng mới để mời bạn!"));
+                        serverControl.broadcastRoomList();
+                        serverControl.broadcastOnlineUsers();
+                    }
+
+                    // Gửi thông báo mời thách đấu tới người chơi B
+                    targetClient.sendMessage(new Message(
+                            MessageType.INVITE_PLAYER_NOTIFICATION,
+                            new Object[]{currentUser.getUsername(), room.getId(), room.getName()},
+                            true,
+                            currentUser.getUsername() + " đã gửi lời mời tham gia phòng!"
+                    ));
+
+                    sendMessage(new Message(MessageType.INVITE_FEEDBACK, null, true, "Đã gửi lời mời tới " + targetUsername + "! Đang chờ phản hồi..."));
+                    break;
+                }
+                case INVITE_FEEDBACK: {
+                    String inviterName = (String) req.getPayload();
+                    if (inviterName != null && !inviterName.isEmpty()) {
+                        ClientHandler inviterClient = serverControl.getClientByUsername(inviterName);
+                        if (inviterClient != null) {
+                            inviterClient.sendMessage(new Message(MessageType.INVITE_FEEDBACK, null, false, req.getMessage()));
+                        }
+                    }
+                    break;
+                }
                 default:
                     break;
             }

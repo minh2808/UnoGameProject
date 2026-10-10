@@ -102,6 +102,7 @@ public class ClientControl {
         if (lobbyFrm instanceof LobbyFXView) {
             ((LobbyFXView) lobbyFrm).addSpectateRoomListener(new SpectateRoomListener());
         }
+        lobbyFrm.addInvitePlayerListener(new InvitePlayerListener());
 
         // --- 4. Sự kiện trên RoomWaitingFrm ---
         roomWaitingFrm.addStartGameListener(new StartGameListener());
@@ -286,6 +287,16 @@ public class ClientControl {
         }
     }
 
+    class InvitePlayerListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String targetName = lobbyFrm.getLastInvitedTarget();
+            if (targetName != null && !targetName.isEmpty()) {
+                sendData(new Message(MessageType.INVITE_PLAYER_REQUEST, targetName));
+            }
+        }
+    }
+
     // =========================================================================
     // XỬ LÝ GÓI TIN TỪ SERVER GỬI VỀ (ĐƯỢC GỌI TỪ CLIENT RECEIVER THREAD)
     // =========================================================================
@@ -415,6 +426,62 @@ public class ClientControl {
                     case ERROR_NOTIFICATION:
                         JOptionPane.showMessageDialog(null, msg.getMessage(), "Thông báo từ Server", JOptionPane.WARNING_MESSAGE);
                         break;
+
+                    case INVITE_PLAYER_NOTIFICATION: {
+                        Object[] data = (Object[]) msg.getPayload();
+                        String inviter = (String) data[0];
+                        int roomId = (Integer) data[1];
+                        String roomName = (String) data[2];
+
+                        javafx.application.Platform.runLater(() -> {
+                            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
+                            alert.setTitle("Lời mời thách đấu UNO");
+                            alert.setHeaderText("🎮 " + inviter + " mời bạn vào chơi!");
+                            alert.setContentText("Người chơi '" + inviter + "' muốn thách đấu với bạn trong phòng:\n\n"
+                                    + "» " + roomName + " (#" + String.format("%02d", roomId) + ")\n\n"
+                                    + "Bạn có muốn chấp nhận và vào phòng ngay không?");
+
+                            javafx.scene.control.ButtonType btnAccept = new javafx.scene.control.ButtonType("Vào phòng ngay", javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
+                            javafx.scene.control.ButtonType btnDecline = new javafx.scene.control.ButtonType("Từ chối", javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE);
+                            alert.getButtonTypes().setAll(btnAccept, btnDecline);
+
+                            try {
+                                alert.getDialogPane().getStylesheets().add(
+                                        getClass().getResource("/resource/css/uno_theme.css").toExternalForm());
+                                alert.getDialogPane().getStyleClass().add("auth-card");
+                            } catch (Exception ignored) {}
+
+                            java.util.Optional<javafx.scene.control.ButtonType> result = alert.showAndWait();
+                            if (result.isPresent() && result.get() == btnAccept) {
+                                sendData(new Message(MessageType.JOIN_ROOM_REQUEST, roomId));
+                            } else {
+                                String senderName = (currentUser != null) ? currentUser.getUsername() : "Đối thủ";
+                                sendData(new Message(MessageType.INVITE_FEEDBACK, inviter, false, senderName + " đã từ chối lời mời thách đấu."));
+                            }
+                        });
+                        break;
+                    }
+
+                    case INVITE_FEEDBACK: {
+                        String feedback = msg.getMessage();
+                        javafx.application.Platform.runLater(() -> {
+                            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                                    msg.isSuccess() ? javafx.scene.control.Alert.AlertType.INFORMATION : javafx.scene.control.Alert.AlertType.WARNING
+                            );
+                            alert.setTitle("Lời mời thách đấu");
+                            alert.setHeaderText(msg.isSuccess() ? "Thông báo mời chơi" : "Phản hồi lời mời");
+                            alert.setContentText(feedback);
+
+                            try {
+                                alert.getDialogPane().getStylesheets().add(
+                                        getClass().getResource("/resource/css/uno_theme.css").toExternalForm());
+                                alert.getDialogPane().getStyleClass().add("auth-card");
+                            } catch (Exception ignored) {}
+
+                            alert.show();
+                        });
+                        break;
+                    }
 
                     default:
                         break;

@@ -36,6 +36,8 @@ public class LobbyFXView extends LobbyFrm {
     private final List<ActionListener> historyListeners = new ArrayList<>();
     private final List<ActionListener> logoutListeners = new ArrayList<>();
     private final List<ActionListener> spectateListeners = new ArrayList<>();
+    private final List<ActionListener> invitePlayerListeners = new ArrayList<>();
+    private String lastInvitedTarget = null;
 
     public LobbyFXView() {
         super.setVisible(false);
@@ -73,11 +75,11 @@ public class LobbyFXView extends LobbyFrm {
 
             stage = new Stage();
             stage.setTitle("UNO Multiplayer - Sảnh chính (Lobby)");
-            Scene scene = new Scene(root, 1100, 680);
+            Scene scene = new Scene(root, 1140, 700);
             scene.setFill(Color.TRANSPARENT);
             stage.setScene(scene);
-            stage.setMinWidth(1000);
-            stage.setMinHeight(620);
+            stage.setMinWidth(1060);
+            stage.setMinHeight(640);
             stage.centerOnScreen();
 
             // Đăng ký kích hoạt listeners
@@ -89,6 +91,10 @@ public class LobbyFXView extends LobbyFrm {
                 controller.setOnHistoryAction(() -> fireEvent(historyListeners, "HISTORY"));
                 controller.setOnLogoutAction(() -> fireEvent(logoutListeners, "LOGOUT"));
                 controller.setOnSpectateAction(() -> fireEvent(spectateListeners, "SPECTATE_ROOM"));
+                controller.setOnInvitePlayerAction(targetName -> {
+                    this.lastInvitedTarget = targetName;
+                    fireEvent(invitePlayerListeners, "INVITE_PLAYER");
+                });
             }
 
             stage.setOnCloseRequest(e -> {
@@ -214,6 +220,17 @@ public class LobbyFXView extends LobbyFrm {
     public void addSpectateRoomListener(ActionListener log) {
         if (log != null && !spectateListeners.contains(log))
             spectateListeners.add(log);
+    }
+
+    @Override
+    public void addInvitePlayerListener(ActionListener log) {
+        if (log != null && !invitePlayerListeners.contains(log))
+            invitePlayerListeners.add(log);
+    }
+
+    @Override
+    public String getLastInvitedTarget() {
+        return lastInvitedTarget;
     }
 
     @Override

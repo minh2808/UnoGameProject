@@ -87,6 +87,16 @@ public class ServerControl {
         return list;
     }
 
+    public ClientHandler getClientByUsername(String username) {
+        if (username == null) return null;
+        for (ClientHandler ch : activeClients) {
+            if (ch.getCurrentUser() != null && username.equalsIgnoreCase(ch.getCurrentUser().getUsername())) {
+                return ch;
+            }
+        }
+        return null;
+    }
+
     public void broadcastOnlineUsers() {
         List<User> list = getOnlineUsers();
         Message msg = new Message(MessageType.ONLINE_USERS_RESPONSE, list);

@@ -441,3 +441,193 @@
     -fx-font-size: 12.5px;
     -fx-text-fill: #4ff0a0;
 }
+
+/* ==========================================================
+   LOBBY SEARCH & FILTER SEGMENTED BUTTONS
+   ========================================================== */
+.lobby-search-box {
+    -fx-background-color: #0b0d13;
+    -fx-background-radius: 5px;
+    -fx-padding: 4px 8px;
+    -fx-border-color: #2a303c;
+    -fx-border-radius: 5px;
+    -fx-border-width: 1px;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.lobby-search-box:hover {
+    -fx-border-color: #3f4756;
+}
+
+.lobby-search-box-focused {
+    -fx-border-color: #2563eb !important;
+    -fx-effect: dropshadow(three-pass-box, rgba(37, 99, 235, 0.4), 6, 0.2, 0, 0);
+}
+
+.lobby-search-input,
+.lobby-search-input:focused {
+    -fx-background-color: transparent !important;
+    -fx-background-insets: 0 !important;
+    -fx-border-color: transparent !important;
+    -fx-border-width: 0 !important;
+    -fx-text-fill: #ffffff;
+    -fx-prompt-text-fill: #8c95a6;
+    -fx-padding: 0 4px;
+    -fx-font-size: 12px;
+    -fx-effect: null !important;
+}
+
+.segmented-button-bar {
+    -fx-background-color: #0b0d13;
+    -fx-background-radius: 5px;
+    -fx-border-color: #2a303c;
+    -fx-border-radius: 5px;
+    -fx-border-width: 1px;
+    -fx-padding: 2px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 2px;
+}
+
+.segmented-button-bar .toggle-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #8c95a6;
+    -fx-font-size: 12px;
+    -fx-padding: 4px 10px;
+    -fx-background-radius: 4px;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-cursor: hand;
+    -fx-font-weight: 500;
+    -fx-min-width: -Infinity;
+    -fx-text-overrun: clip;
+}
+
+.segmented-button-bar .toggle-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-text-fill: #cbd5e1;
+}
+
+.segmented-button-bar .toggle-button:selected {
+    -fx-background-color: #2563eb;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(three-pass-box, rgba(37, 99, 235, 0.45), 6, 0.2, 0, 1);
+}
+
+.segmented-button-bar .toggle-button:selected:hover {
+    -fx-background-color: #3b82f6;
+}
+
+/* ==========================================================
+   NÚT MỜI BẠN ĐANG RẢNH (ONLINE USERS INVITE ACTION)
+   ========================================================== */
+.btn-invite-online {
+    -fx-background-color: linear-gradient(to bottom, #10b981, #059669);
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-padding: 3px 10px;
+    -fx-background-radius: 4px;
+    -fx-border-color: #34d399;
+    -fx-border-width: 0.8px;
+    -fx-border-radius: 4px;
+    -fx-cursor: hand;
+    -fx-alignment: CENTER;
+    -fx-effect: dropshadow(three-pass-box, rgba(16, 185, 129, 0.4), 6, 0.2, 0, 1);
+}
+
+.btn-invite-online:hover {
+    -fx-background-color: linear-gradient(to bottom, #34d399, #10b981);
+    -fx-border-color: #6ee7b7;
+    -fx-effect: dropshadow(three-pass-box, rgba(52, 211, 153, 0.65), 10, 0.35, 0, 0);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.btn-invite-online:pressed {
+    -fx-background-color: #047857;
+    -fx-scale-x: 0.96;
+    -fx-scale-y: 0.96;
+}
+
+.btn-invited {
+    -fx-background-color: #1e2430;
+    -fx-text-fill: #8c95a6;
+    -fx-font-size: 10.5px;
+    -fx-font-weight: normal;
+    -fx-padding: 3px 8px;
+    -fx-background-radius: 4px;
+    -fx-border-color: #2a303c;
+    -fx-border-width: 0.8px;
+    -fx-border-radius: 4px;
+    -fx-cursor: default;
+    -fx-effect: null;
+}
+
+.badge-you {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 11px;
+    -fx-font-style: italic;
+    -fx-font-weight: bold;
+}
+
+/* ==========================================================
+   LOBBY BOTTOM ACTION BUTTONS (GHÉP NGẪU NHIÊN & MỜI BẠN)
+   ========================================================== */
+.btn-quick-match {
+    -fx-background-color: linear-gradient(to bottom, #f59e0b, #d97706);
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-padding: 8px 12px;
+    -fx-background-radius: 6px;
+    -fx-border-color: #fbbf24;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-cursor: hand;
+    -fx-alignment: CENTER;
+    -fx-effect: dropshadow(three-pass-box, rgba(245, 158, 11, 0.4), 8, 0.2, 0, 2);
+}
+
+.btn-quick-match:hover {
+    -fx-background-color: linear-gradient(to bottom, #fbbf24, #f59e0b);
+    -fx-border-color: #fde68a;
+    -fx-effect: dropshadow(three-pass-box, rgba(251, 191, 36, 0.65), 12, 0.35, 0, 0);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.btn-quick-match:pressed {
+    -fx-background-color: #b45309;
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
+
+.btn-invite-selected {
+    -fx-background-color: linear-gradient(to bottom, #10b981, #059669);
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-padding: 8px 12px;
+    -fx-background-radius: 6px;
+    -fx-border-color: #34d399;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-cursor: hand;
+    -fx-alignment: CENTER;
+    -fx-effect: dropshadow(three-pass-box, rgba(16, 185, 129, 0.4), 8, 0.2, 0, 2);
+}
+
+.btn-invite-selected:hover {
+    -fx-background-color: linear-gradient(to bottom, #34d399, #10b981);
+    -fx-border-color: #6ee7b7;
+    -fx-effect: dropshadow(three-pass-box, rgba(52, 211, 153, 0.65), 12, 0.35, 0, 0);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.btn-invite-selected:pressed {
+    -fx-background-color: #047857;
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
