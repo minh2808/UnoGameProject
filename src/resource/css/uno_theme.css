@@ -631,3 +631,55 @@
     -fx-scale-x: 0.98;
     -fx-scale-y: 0.98;
 }
+
+/* ==========================================================
+   CONTROLSFX NOTIFICATIONS - CYBER DARK THEME
+   ========================================================== */
+
+.notification-bar > .pane,
+.notification-bar.dark > .pane {
+    -fx-background-color: #040b1f, #0d276b, linear-gradient(to bottom, #0c2050 0%, #061230 100%);
+    -fx-background-insets: 0, 1, 2;
+    -fx-background-radius: 12px;
+    -fx-border-color: #2f7bff;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 12px;
+    -fx-padding: 14px 18px;
+    -fx-effect: dropshadow(three-pass-box, rgba(47, 123, 255, 0.5), 24, 0.25, 0, 4);
+    -fx-min-width: 360px;
+    -fx-max-width: 440px;
+}
+
+.notification-bar > .pane .title,
+.notification-bar.dark > .pane .title {
+    -fx-font-size: 15px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #ffc83d;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.8), 3, 0.5, 0, 1);
+}
+
+.notification-bar > .pane .label,
+.notification-bar.dark > .pane .label {
+    -fx-font-size: 13px;
+    -fx-text-fill: #eaf1ff;
+    -fx-line-spacing: 4px;
+}
+
+.notification-bar .close-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+    -fx-padding: 4px;
+}
+
+.notification-bar .close-button:hover {
+    -fx-background-color: rgba(229, 56, 59, 0.35);
+}
+
+.notification-bar .button-bar {
+    -fx-padding: 8px 0 0 0;
+}
+
+.notification-bar .button-bar .button {
+    -fx-cursor: hand;
+}

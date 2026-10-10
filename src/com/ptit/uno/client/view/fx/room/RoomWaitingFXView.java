@@ -1,6 +1,7 @@
 package com.ptit.uno.client.view.fx.room;
 
 import com.ptit.uno.client.view.RoomWaitingFrm;
+import com.ptit.uno.client.view.fx.util.UnoNotification;
 import com.ptit.uno.model.ChatMessage;
 import com.ptit.uno.model.Room;
 import javafx.application.Platform;
@@ -118,11 +119,7 @@ public class RoomWaitingFXView extends RoomWaitingFrm {
     @Override
     public void showMessage(String msg) {
         Platform.runLater(() -> {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Thông báo");
-            alert.setHeaderText(null);
-            alert.setContentText(msg);
-            alert.show();
+            UnoNotification.showInfo(stage, "Thông báo phòng chờ", msg);
         });
     }
 

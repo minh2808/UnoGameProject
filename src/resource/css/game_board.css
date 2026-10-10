@@ -145,31 +145,63 @@
     -fx-effect: dropshadow(gaussian, rgba(0, 168, 255, 0.6), 15, 0, 0, 0);
 }
 
-/* Nút Đánh Bài bên trái */
-.btn-play-card-side {
-    -fx-background-color: linear-gradient(to bottom, #27ae60, #1b6a3b);
+/* ==========================================================
+   NÚT ĐÁNH BÀI HIỆN ĐẠI (ACTION DASHBOARD)
+   ========================================================== */
+
+.btn-play-card-action {
+    -fx-background-color: linear-gradient(to bottom, #10b981 0%, #059669 60%, #047857 100%);
     -fx-background-radius: 12px;
-    -fx-border-color: #f1c40f;
+    -fx-border-color: #34d399;
     -fx-border-radius: 12px;
-    -fx-border-width: 2px;
+    -fx-border-width: 1.8px;
     -fx-text-fill: #ffffff;
     -fx-font-size: 15px;
-    -fx-font-weight: bold;
-    -fx-padding: 30px 10px;
+    -fx-font-weight: 900;
+    -fx-letter-spacing: 0.8px;
+    -fx-padding: 8px 16px;
+    -fx-min-width: 125px;
+    -fx-pref-width: 135px;
+    -fx-min-height: 52px;
+    -fx-pref-height: 58px;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 8, 0, 0, 3);
+    -fx-alignment: CENTER;
+    -fx-effect: dropshadow(three-pass-box, rgba(16, 185, 129, 0.6), 18, 0.35, 0, 2);
 }
 
-.btn-play-card-side:hover {
+.btn-play-card-action:hover {
+    -fx-background-color: linear-gradient(to bottom, #34d399 0%, #10b981 60%, #059669 100%);
+    -fx-border-color: #a7f3d0;
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(three-pass-box, rgba(52, 211, 153, 0.85), 24, 0.45, 0, 0);
     -fx-scale-x: 1.05;
     -fx-scale-y: 1.05;
-    -fx-background-color: linear-gradient(to bottom, #2ecc71, #218c4e);
 }
 
-.btn-play-card-side:disabled {
-    -fx-opacity: 0.35;
+.btn-play-card-action:pressed {
+    -fx-background-color: #065f46;
+    -fx-scale-x: 0.96;
+    -fx-scale-y: 0.96;
+    -fx-effect: dropshadow(three-pass-box, rgba(16, 185, 129, 0.3), 8, 0.2, 0, 1);
+}
+
+.btn-play-card-action:disabled {
+    -fx-background-color: linear-gradient(to bottom, #1a2233, #0f1624);
+    -fx-border-color: #2b3952;
+    -fx-border-width: 1.2px;
+    -fx-text-fill: #5a6e8c;
+    -fx-opacity: 0.6;
     -fx-scale-x: 1.0;
     -fx-scale-y: 1.0;
+    -fx-cursor: default;
+    -fx-effect: none;
+}
+
+.btn-play-card-hint {
+    -fx-font-size: 10px;
+    -fx-font-weight: normal;
+    -fx-text-fill: #94a3b8;
+    -fx-opacity: 0.85;
 }
 
 /* Nút Hô UNO! dùng ảnh gốc */

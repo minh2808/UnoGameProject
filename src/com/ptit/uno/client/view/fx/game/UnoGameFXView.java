@@ -148,4 +148,8 @@ public class UnoGameFXView {
     public GameBoardUIBridge getController() {
         return controller;
     }
+
+    public Stage getStage() {
+        return stage;
+    }
 }

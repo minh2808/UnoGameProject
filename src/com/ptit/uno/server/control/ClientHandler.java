@@ -100,8 +100,9 @@ public class ClientHandler extends Thread {
                 }
                 case CREATE_ROOM_REQUEST: {
                     Room r = (Room) req.getPayload();
+                    int maxP = (r.getMaxPlayers() > 0) ? Math.min(r.getMaxPlayers(), 2) : 2;
                     Room created = serverControl.getRoomManager().createRoom(
-                            r.getName(), currentUser.getId(), currentUser.getUsername(), r.getMaxPlayers()
+                            r.getName(), currentUser.getId(), currentUser.getUsername(), maxP
                     );
                     this.currentRoomId = created.getId();
                     currentUser.setStatus("Đang trong phòng");

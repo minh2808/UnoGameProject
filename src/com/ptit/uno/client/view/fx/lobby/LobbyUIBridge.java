@@ -1,5 +1,6 @@
 package com.ptit.uno.client.view.fx.lobby;
 
+import com.ptit.uno.client.view.fx.util.UnoNotification;
 import com.ptit.uno.model.Room;
 import com.ptit.uno.model.User;
 import javafx.animation.PauseTransition;
@@ -87,11 +88,23 @@ public class LobbyUIBridge implements Initializable {
             });
         }
 
-        // Bắt sự kiện ô tìm kiếm phòng (Search Box)
+        // Bắt sự kiện ô tìm kiếm phòng (Search Box) - Gõ xong ấn Enter mới bắt đầu tìm kiếm
         if (txtSearchRoom != null) {
-            txtSearchRoom.textProperty().addListener((obs, oldVal, newVal) -> applyRoomFilter());
+            txtSearchRoom.setOnAction(e -> applyRoomFilter());
+
+            // Tự động khôi phục danh sách đầy đủ khi xóa trắng ô tìm kiếm
+            txtSearchRoom.textProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal == null || newVal.trim().isEmpty()) {
+                    applyRoomFilter();
+                }
+            });
 
             if (searchBoxContainer != null) {
+                searchBoxContainer.setOnMouseClicked(e -> {
+                    txtSearchRoom.requestFocus();
+                    applyRoomFilter();
+                });
+
                 txtSearchRoom.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
                     if (isFocused) {
                         if (!searchBoxContainer.getStyleClass().contains("lobby-search-box-focused")) {
@@ -215,6 +228,10 @@ public class LobbyUIBridge implements Initializable {
             ButtonType btnCancel = new ButtonType("Để sau", ButtonBar.ButtonData.CANCEL_CLOSE);
             alert.getButtonTypes().setAll(btnYes, btnCancel);
 
+            if (tblOnline != null && tblOnline.getScene() != null && tblOnline.getScene().getWindow() != null) {
+                alert.initOwner(tblOnline.getScene().getWindow());
+            }
+
             try {
                 alert.getDialogPane().getStylesheets().add(
                         getClass().getResource("/resource/css/uno_theme.css").toExternalForm());
@@ -230,6 +247,13 @@ public class LobbyUIBridge implements Initializable {
         }
     }
 
+    private javafx.stage.Window getWindow() {
+        if (tblOnline != null && tblOnline.getScene() != null) {
+            return tblOnline.getScene().getWindow();
+        }
+        return null;
+    }
+
     /**
      * Xử lý nút "✉ Mời bạn":
      * Kiểm tra người chơi được chọn trên bảng tblOnline và gửi lời mời nếu hợp lệ (đang Rảnh và không phải chính mình).
@@ -239,45 +263,18 @@ public class LobbyUIBridge implements Initializable {
         OnlineUserRow selected = tblOnline.getSelectionModel().getSelectedItem();
 
         if (selected == null) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Mời bạn chơi");
-            alert.setHeaderText("Chưa chọn người chơi");
-            alert.setContentText("Vui lòng nhấp chọn một người chơi đang 'Rảnh' trong bảng trước khi gửi lời mời!");
-            try {
-                alert.getDialogPane().getStylesheets().add(
-                        getClass().getResource("/resource/css/uno_theme.css").toExternalForm());
-                alert.getDialogPane().getStyleClass().add("auth-card");
-            } catch (Exception ignored) {}
-            alert.showAndWait();
+            UnoNotification.showWarning(getWindow(), "Mời bạn chơi", "Vui lòng nhấp chọn một người chơi đang 'Rảnh' trong bảng trước khi gửi lời mời!");
             return;
         }
 
         if (currentUsername != null && !currentUsername.isEmpty()
                 && currentUsername.equalsIgnoreCase(selected.getName())) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Mời bạn chơi");
-            alert.setHeaderText("Không hợp lệ");
-            alert.setContentText("Bạn không thể tự gửi lời mời thách đấu cho chính mình!");
-            try {
-                alert.getDialogPane().getStylesheets().add(
-                        getClass().getResource("/resource/css/uno_theme.css").toExternalForm());
-                alert.getDialogPane().getStyleClass().add("auth-card");
-            } catch (Exception ignored) {}
-            alert.showAndWait();
+            UnoNotification.showWarning(getWindow(), "Mời bạn chơi", "Bạn không thể tự gửi lời mời thách đấu cho chính mình!");
             return;
         }
 
         if (!"Rảnh".equalsIgnoreCase(selected.getStatus())) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Mời bạn chơi");
-            alert.setHeaderText("Người chơi đang bận");
-            alert.setContentText("Người chơi '" + selected.getName() + "' hiện đang ở trạng thái '" + selected.getStatus() + "', không thể mời lúc này!");
-            try {
-                alert.getDialogPane().getStylesheets().add(
-                        getClass().getResource("/resource/css/uno_theme.css").toExternalForm());
-                alert.getDialogPane().getStyleClass().add("auth-card");
-            } catch (Exception ignored) {}
-            alert.showAndWait();
+            UnoNotification.showWarning(getWindow(), "Mời bạn chơi", "Người chơi '" + selected.getName() + "' hiện đang ở trạng thái '" + selected.getStatus() + "', không thể mời lúc này!");
             return;
         }
 
@@ -446,8 +443,9 @@ public class LobbyUIBridge implements Initializable {
         // Bottom
         javafx.scene.layout.HBox bottom = new javafx.scene.layout.HBox(10);
         bottom.setAlignment(Pos.CENTER_LEFT);
-        String pCount = r.getCurrentPlayerCount() + "/" + r.getMaxPlayers();
-        if (r.isFull()) pCount += " (Đầy)";
+        int maxP = (r.getMaxPlayers() > 0) ? Math.min(r.getMaxPlayers(), 2) : 2;
+        String pCount = r.getCurrentPlayerCount() + "/" + maxP;
+        if (r.getCurrentPlayerCount() >= maxP || r.isFull()) pCount += " (Đầy)";
         Label lblPlayers = new Label("Người: " + pCount);
         lblPlayers.setStyle("-fx-text-fill: #b3bccf; -fx-font-size: 12px; -fx-font-weight: bold;");
         

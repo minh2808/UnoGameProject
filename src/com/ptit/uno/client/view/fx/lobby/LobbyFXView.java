@@ -1,6 +1,7 @@
 package com.ptit.uno.client.view.fx.lobby;
 
 import com.ptit.uno.client.view.LobbyFrm;
+import com.ptit.uno.client.view.fx.util.UnoNotification;
 import com.ptit.uno.model.Room;
 import com.ptit.uno.model.User;
 import javafx.application.Platform;
@@ -173,11 +174,7 @@ public class LobbyFXView extends LobbyFrm {
     @Override
     public void showMessage(String msg) {
         Platform.runLater(() -> {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Thông báo");
-            alert.setHeaderText(null);
-            alert.setContentText(msg);
-            alert.show();
+            UnoNotification.showInfo(stage, "Thông báo Sảnh chính", msg);
         });
     }
 

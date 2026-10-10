@@ -7,6 +7,7 @@ import com.ptit.uno.client.view.fx.game.GameBoardUIBridge;
 import com.ptit.uno.client.view.fx.game.UnoGameFXView;
 import com.ptit.uno.client.view.fx.lobby.LobbyFXView;
 import com.ptit.uno.client.view.fx.room.RoomWaitingFXView;
+import com.ptit.uno.client.view.fx.util.UnoNotification;
 import com.ptit.uno.model.*;
 import com.ptit.uno.protocol.Message;
 import com.ptit.uno.protocol.MessageType;
@@ -223,7 +224,7 @@ public class ClientControl {
         public void actionPerformed(ActionEvent e) {
             String roomName = lobbyFrm.promptCreateRoomName();
             if (roomName != null && !roomName.trim().isEmpty()) {
-                Room r = new Room(0, roomName.trim(), currentUser.getId(), currentUser.getUsername(), 4);
+                Room r = new Room(0, roomName.trim(), currentUser.getId(), currentUser.getUsername(), 2);
                 sendData(new Message(MessageType.CREATE_ROOM_REQUEST, r));
             }
         }
@@ -424,7 +425,7 @@ public class ClientControl {
                         break;
 
                     case ERROR_NOTIFICATION:
-                        JOptionPane.showMessageDialog(null, msg.getMessage(), "Thông báo từ Server", JOptionPane.WARNING_MESSAGE);
+                        UnoNotification.showError(getActiveWindow(), "Thông báo từ Server", msg.getMessage());
                         break;
 
                     case INVITE_PLAYER_NOTIFICATION: {
@@ -433,53 +434,29 @@ public class ClientControl {
                         int roomId = (Integer) data[1];
                         String roomName = (String) data[2];
 
-                        javafx.application.Platform.runLater(() -> {
-                            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
-                            alert.setTitle("Lời mời thách đấu UNO");
-                            alert.setHeaderText("🎮 " + inviter + " mời bạn vào chơi!");
-                            alert.setContentText("Người chơi '" + inviter + "' muốn thách đấu với bạn trong phòng:\n\n"
-                                    + "» " + roomName + " (#" + String.format("%02d", roomId) + ")\n\n"
-                                    + "Bạn có muốn chấp nhận và vào phòng ngay không?");
-
-                            javafx.scene.control.ButtonType btnAccept = new javafx.scene.control.ButtonType("Vào phòng ngay", javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
-                            javafx.scene.control.ButtonType btnDecline = new javafx.scene.control.ButtonType("Từ chối", javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE);
-                            alert.getButtonTypes().setAll(btnAccept, btnDecline);
-
-                            try {
-                                alert.getDialogPane().getStylesheets().add(
-                                        getClass().getResource("/resource/css/uno_theme.css").toExternalForm());
-                                alert.getDialogPane().getStyleClass().add("auth-card");
-                            } catch (Exception ignored) {}
-
-                            java.util.Optional<javafx.scene.control.ButtonType> result = alert.showAndWait();
-                            if (result.isPresent() && result.get() == btnAccept) {
-                                sendData(new Message(MessageType.JOIN_ROOM_REQUEST, roomId));
-                            } else {
-                                String senderName = (currentUser != null) ? currentUser.getUsername() : "Đối thủ";
-                                sendData(new Message(MessageType.INVITE_FEEDBACK, inviter, false, senderName + " đã từ chối lời mời thách đấu."));
-                            }
-                        });
+                        UnoNotification.showInvitation(
+                                getActiveWindow(),
+                                inviter,
+                                roomId,
+                                roomName,
+                                () -> sendData(new Message(MessageType.JOIN_ROOM_REQUEST, roomId)),
+                                () -> {
+                                    String senderName = (currentUser != null) ? currentUser.getUsername() : "Đối thủ";
+                                    sendData(new Message(MessageType.INVITE_FEEDBACK, inviter, false, senderName + " đã từ chối lời mời thách đấu."));
+                                }
+                        );
                         break;
                     }
 
                     case INVITE_FEEDBACK: {
                         String feedback = msg.getMessage();
-                        javafx.application.Platform.runLater(() -> {
-                            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
-                                    msg.isSuccess() ? javafx.scene.control.Alert.AlertType.INFORMATION : javafx.scene.control.Alert.AlertType.WARNING
-                            );
-                            alert.setTitle("Lời mời thách đấu");
-                            alert.setHeaderText(msg.isSuccess() ? "Thông báo mời chơi" : "Phản hồi lời mời");
-                            alert.setContentText(feedback);
-
-                            try {
-                                alert.getDialogPane().getStylesheets().add(
-                                        getClass().getResource("/resource/css/uno_theme.css").toExternalForm());
-                                alert.getDialogPane().getStyleClass().add("auth-card");
-                            } catch (Exception ignored) {}
-
-                            alert.show();
-                        });
+                        boolean isSuccess = msg.isSuccess();
+                        UnoNotification.showFeedback(
+                                getActiveWindow(),
+                                isSuccess,
+                                isSuccess ? "Thông báo mời chơi" : "Phản hồi lời mời",
+                                feedback
+                        );
                         break;
                     }
 
@@ -490,6 +467,32 @@ public class ClientControl {
                 ex.printStackTrace();
             }
         });
+    }
+
+    public javafx.stage.Window getActiveWindow() {
+        if (gameView != null && gameView.getStage() != null && gameView.getStage().isShowing()) {
+            return gameView.getStage();
+        }
+        if (spectatorView != null && spectatorView.getStage() != null && spectatorView.getStage().isShowing()) {
+            return spectatorView.getStage();
+        }
+        if (roomWaitingFrm instanceof RoomWaitingFXView) {
+            javafx.stage.Stage s = ((RoomWaitingFXView) roomWaitingFrm).getStage();
+            if (s != null && s.isShowing()) return s;
+        }
+        if (lobbyFrm instanceof LobbyFXView) {
+            javafx.stage.Stage s = ((LobbyFXView) lobbyFrm).getStage();
+            if (s != null && s.isShowing()) return s;
+        }
+        if (loginFrm instanceof LoginFXView) {
+            javafx.stage.Stage s = ((LoginFXView) loginFrm).getStage();
+            if (s != null && s.isShowing()) return s;
+        }
+        if (registerFrm instanceof RegisterFXView) {
+            javafx.stage.Stage s = ((RegisterFXView) registerFrm).getStage();
+            if (s != null && s.isShowing()) return s;
+        }
+        return null;
     }
 
     // =========================================================================

@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.ResourceBundle;
+import com.ptit.uno.client.view.fx.util.UnoNotification;
 
 /**
  * GameBoardUIBridge: Cầu nối UI Code-Behind điều khiển giao diện bàn chơi UNO (JavaFX FXML).
@@ -147,7 +148,9 @@ public class GameBoardUIBridge implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         chatListView.setItems(chatMessages);
-        gameLogListView.setItems(gameLogMessages);
+        if (gameLogListView != null) {
+            gameLogListView.setItems(gameLogMessages);
+        }
 
         // Nạp ảnh nọc rút mặc định
         Image backImg = FXCardHelper.getCardBackImage();
@@ -159,7 +162,9 @@ public class GameBoardUIBridge implements Initializable {
         lblOpponentName.setText("Đối thủ");
         lblOpponentCards.setText("🂠 0 lá");
         lblOpponentStatus.setText("Đang chờ");
-        btnPlayCard.setDisable(true);
+        if (btnPlayCard != null) {
+            btnPlayCard.setDisable(true);
+        }
 
         addGameLog("HỆ THỐNG: ", "Trận đấu đang chuẩn bị...", Color.web("#f1c40f"), Color.web("#ecf0f1"));
     }
@@ -170,6 +175,16 @@ public class GameBoardUIBridge implements Initializable {
                 lblPlayerName.setText(username);
             }
         });
+    }
+
+    private javafx.stage.Window getBoardWindow() {
+        if (mainBoardPane != null && mainBoardPane.getScene() != null) {
+            return mainBoardPane.getScene().getWindow();
+        }
+        if (btnLeave != null && btnLeave.getScene() != null) {
+            return btnLeave.getScene().getWindow();
+        }
+        return null;
     }
 
     // ==========================================
@@ -306,6 +321,9 @@ public class GameBoardUIBridge implements Initializable {
                 winAlert.setTitle("Kết quả trận đấu");
                 winAlert.setHeaderText("TRẬN ĐẤU ĐÃ KẾT THÚC!");
                 winAlert.setContentText("Người chiến thắng: " + state.getWinnerUsername());
+                if (getBoardWindow() != null) {
+                    winAlert.initOwner(getBoardWindow());
+                }
                 winAlert.showAndWait();
 
                 if (actionListener != null) {
@@ -512,6 +530,9 @@ public class GameBoardUIBridge implements Initializable {
         container.setOnMouseClicked((MouseEvent e) -> {
             FXSoundHelper.playButtonClick();
             selectCard(card, container);
+            if (e.getClickCount() == 2) {
+                handlePlayCard(null);
+            }
         });
 
         return container;
@@ -523,7 +544,9 @@ public class GameBoardUIBridge implements Initializable {
         selectedCardView = cardView;
 
         selectedCardView.getStyleClass().add("hand-card-selected");
-        btnPlayCard.setDisable(false);
+        if (btnPlayCard != null) {
+            btnPlayCard.setDisable(false);
+        }
     }
 
     private void clearSelection() {
@@ -532,7 +555,9 @@ public class GameBoardUIBridge implements Initializable {
         }
         selectedCard = null;
         selectedCardView = null;
-        btnPlayCard.setDisable(true);
+        if (btnPlayCard != null) {
+            btnPlayCard.setDisable(true);
+        }
     }
 
     // ==========================================
@@ -869,26 +894,25 @@ public class GameBoardUIBridge implements Initializable {
     // ==========================================
 
     @FXML
+    private void handleDiscardPileClick(MouseEvent event) {
+        if (selectedCard != null) {
+            handlePlayCard(null);
+        }
+    }
+
+    @FXML
     private void handlePlayCard(ActionEvent event) {
         FXSoundHelper.playButtonClick();
         if (selectedCard == null)
             return;
 
         if (!isMyTurn) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Thông báo");
-            alert.setHeaderText(null);
-            alert.setContentText("Chưa đến lượt của bạn!");
-            alert.showAndWait();
+            UnoNotification.showWarning(getBoardWindow(), "Chưa đến lượt của bạn!");
             return;
         }
 
         if (currentTopCard != null && !selectedCard.canPlayOn(currentTopCard, currentActiveColor)) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Nước đi không hợp lệ");
-            alert.setHeaderText(null);
-            alert.setContentText("Lá bài này không thể đánh! Phải cùng màu, cùng số/chức năng, hoặc bài Đen (Wild).");
-            alert.showAndWait();
+            UnoNotification.showWarning(getBoardWindow(), "Lá bài này không thể đánh! Phải cùng màu, cùng số/chức năng, hoặc bài Đen (Wild).");
             return;
         }
 
@@ -904,11 +928,7 @@ public class GameBoardUIBridge implements Initializable {
     private void handleDrawCard(MouseEvent event) {
         FXSoundHelper.playButtonClick();
         if (!isMyTurn) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Thông báo");
-            alert.setHeaderText(null);
-            alert.setContentText("Chưa đến lượt của bạn!");
-            alert.showAndWait();
+            UnoNotification.showWarning(getBoardWindow(), "Chưa đến lượt của bạn!");
             return;
         }
 
@@ -951,6 +971,9 @@ public class GameBoardUIBridge implements Initializable {
                 "2. Lá Đổi màu (Wild) có thể đánh bất cứ lúc nào.\n" +
                 "3. Khi còn 2 lá chuẩn bị đánh xuống 1 lá, nhớ bấm 'HÔ UNO!'.\n" +
                 "4. Nếu không có bài đánh, bấm vào chồng bài úp để bốc bài.");
+        if (getBoardWindow() != null) {
+            alert.initOwner(getBoardWindow());
+        }
         alert.showAndWait();
     }
 
@@ -992,6 +1015,9 @@ public class GameBoardUIBridge implements Initializable {
 
     public void addGameLog(String prefix, String message, Color prefixColor, Color messageColor) {
         Platform.runLater(() -> {
+            if (gameLogListView == null) {
+                return;
+            }
             Text prefixText = new Text(prefix);
             prefixText.setFill(prefixColor);
             prefixText.setStyle("-fx-font-weight: bold; -fx-font-size: 12px;");

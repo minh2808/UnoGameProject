@@ -22,7 +22,8 @@ public class RoomManager {
 
     public synchronized Room createRoom(String roomName, int hostId, String hostName, int maxPlayers) {
         int id = roomIdCounter++;
-        Room r = new Room(id, roomName, hostId, hostName, maxPlayers);
+        int actualMax = (maxPlayers > 0) ? Math.min(maxPlayers, 2) : 2;
+        Room r = new Room(id, roomName, hostId, hostName, actualMax);
         Player hostPlayer = new Player(hostId, hostName, 0);
         hostPlayer.setReady(true);
         r.addPlayer(hostPlayer);

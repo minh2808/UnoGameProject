@@ -121,4 +121,8 @@ public class SpectatorFXView extends JFrame {
     public boolean isVisible() {
         return stage != null && stage.isShowing();
     }
+
+    public Stage getStage() {
+        return stage;
+    }
 }

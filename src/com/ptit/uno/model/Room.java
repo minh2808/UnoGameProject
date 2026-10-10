@@ -22,7 +22,7 @@ public class Room implements Serializable {
     private List<Player> players;
 
     public Room() {
-        this.maxPlayers = 4;
+        this.maxPlayers = 2;
         this.status = STATUS_WAITING;
         this.players = new ArrayList<Player>();
     }
@@ -33,7 +33,7 @@ public class Room implements Serializable {
         this.name = name;
         this.hostId = hostId;
         this.hostName = hostName;
-        this.maxPlayers = maxPlayers;
+        this.maxPlayers = (maxPlayers > 0) ? Math.min(maxPlayers, 2) : 2;
     }
 
     public int getId() {
@@ -73,7 +73,7 @@ public class Room implements Serializable {
     }
 
     public void setMaxPlayers(int maxPlayers) {
-        this.maxPlayers = maxPlayers;
+        this.maxPlayers = (maxPlayers > 0) ? Math.min(maxPlayers, 2) : 2;
     }
 
     public String getStatus() {
