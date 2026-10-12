@@ -21,7 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * RoomWaitingFXView: Cầu nối View chuẩn MVC giữa ClientControl và giao diện Phòng chờ JavaFX FXML.
+ * RoomWaitingFXView: Cầu nối View chuẩn MVC giữa ClientControl và giao diện
+ * Phòng chờ JavaFX FXML.
  * Kế thừa RoomWaitingFrm để tương thích hoàn toàn theo mô hình MVC Cải tiến.
  */
 public class RoomWaitingFXView extends RoomWaitingFrm {
@@ -36,8 +37,10 @@ public class RoomWaitingFXView extends RoomWaitingFrm {
         super.setVisible(false);
 
         try {
-            Platform.startup(() -> {});
-        } catch (IllegalStateException ignored) {}
+            Platform.startup(() -> {
+            });
+        } catch (IllegalStateException ignored) {
+        }
 
         Platform.runLater(this::initFX);
     }
@@ -119,23 +122,33 @@ public class RoomWaitingFXView extends RoomWaitingFrm {
     @Override
     public void showMessage(String msg) {
         Platform.runLater(() -> {
-            UnoNotification.showInfo(stage, "Thông báo phòng chờ", msg);
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Thông báo");
+            alert.setHeaderText(null);
+            alert.setContentText(msg);
+            if (stage != null && stage.isShowing()) {
+                alert.initOwner(stage);
+            }
+            alert.showAndWait();
         });
     }
 
     @Override
     public void addStartGameListener(ActionListener log) {
-        if (log != null && !startGameListeners.contains(log)) startGameListeners.add(log);
+        if (log != null && !startGameListeners.contains(log))
+            startGameListeners.add(log);
     }
 
     @Override
     public void addLeaveRoomListener(ActionListener log) {
-        if (log != null && !leaveRoomListeners.contains(log)) leaveRoomListeners.add(log);
+        if (log != null && !leaveRoomListeners.contains(log))
+            leaveRoomListeners.add(log);
     }
 
     @Override
     public void addSendChatListener(ActionListener log) {
-        if (log != null && !sendChatListeners.contains(log)) sendChatListeners.add(log);
+        if (log != null && !sendChatListeners.contains(log))
+            sendChatListeners.add(log);
     }
 
     @Override

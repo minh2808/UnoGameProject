@@ -117,8 +117,11 @@ public class SpectatorUIBridge implements Initializable {
                 appendGameLog("HỆ THỐNG: Trận đấu kết thúc! Thắng: " + state.getWinnerUsername(), true);
                 javafx.scene.control.Alert winAlert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
                 winAlert.setTitle("Kết quả trận đấu");
-                winAlert.setHeaderText("TRẬN ĐẤU ĐÃ KẾT THÚC!");
-                winAlert.setContentText("Người chiến thắng: " + state.getWinnerUsername());
+                winAlert.setHeaderText(null);
+                winAlert.setContentText("Trận đấu đã kết thúc!\nNgười chiến thắng: " + state.getWinnerUsername());
+                if (lblTurnInfo != null && lblTurnInfo.getScene() != null && lblTurnInfo.getScene().getWindow() != null) {
+                    winAlert.initOwner(lblTurnInfo.getScene().getWindow());
+                }
                 winAlert.showAndWait();
                 
                 if (onLeaveAction != null) {

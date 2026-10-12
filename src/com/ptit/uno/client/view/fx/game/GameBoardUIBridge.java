@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.ResourceBundle;
 import javax.swing.JOptionPane;
@@ -941,14 +942,28 @@ public class GameBoardUIBridge implements Initializable {
     }
 
     private void showSwingWarning(String message) {
-        SwingUtilities.invokeLater(() -> {
-            JOptionPane.showMessageDialog(null, message, "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Cảnh báo");
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            if (mainBoardPane != null && mainBoardPane.getScene() != null && mainBoardPane.getScene().getWindow() != null) {
+                alert.initOwner(mainBoardPane.getScene().getWindow());
+            }
+            alert.showAndWait();
         });
     }
 
     private void showSwingInfo(String title, String message) {
-        SwingUtilities.invokeLater(() -> {
-            JOptionPane.showMessageDialog(null, message, title, JOptionPane.INFORMATION_MESSAGE);
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle(title);
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            if (mainBoardPane != null && mainBoardPane.getScene() != null && mainBoardPane.getScene().getWindow() != null) {
+                alert.initOwner(mainBoardPane.getScene().getWindow());
+            }
+            alert.showAndWait();
         });
     }
 
@@ -1038,25 +1053,24 @@ public class GameBoardUIBridge implements Initializable {
     @FXML
     public void handleLeave(ActionEvent event) {
         FXSoundHelper.playButtonClick();
-        SwingUtilities.invokeLater(() -> {
-            int choice = JOptionPane.showConfirmDialog(
-                null,
-                "Bạn có chắc muốn thoát ván đấu? Bot sẽ đánh thay bạn!",
-                "Xác nhận thoát bàn",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE
-            );
-            if (choice == JOptionPane.YES_OPTION) {
-                Platform.runLater(() -> {
-                    if (countdownTimeline != null) {
-                        countdownTimeline.stop();
-                    }
-                    if (actionListener != null) {
-                        actionListener.onLeaveGame();
-                    }
-                });
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Xác nhận");
+        alert.setHeaderText(null);
+        alert.setContentText("Bạn có chắc muốn thoát ván đấu không?");
+
+        if (mainBoardPane != null && mainBoardPane.getScene() != null && mainBoardPane.getScene().getWindow() != null) {
+            alert.initOwner(mainBoardPane.getScene().getWindow());
+        }
+
+        Optional<ButtonType> opt = alert.showAndWait();
+        if (opt.isPresent() && opt.get() == ButtonType.OK) {
+            if (countdownTimeline != null) {
+                countdownTimeline.stop();
             }
-        });
+            if (actionListener != null) {
+                actionListener.onLeaveGame();
+            }
+        }
     }
 
     public void addChatMessage(String sender, String message, Color senderColor) {
@@ -1339,30 +1353,31 @@ public class GameBoardUIBridge implements Initializable {
      * Nhận lời mời đấu lại từ đối thủ: hiển thị thông báo Swing xác nhận
      */
     public void promptRematch(String opponentUsername) {
-        SwingUtilities.invokeLater(() -> {
-            int ans = JOptionPane.showConfirmDialog(
-                null,
-                "Đối thủ [" + opponentUsername + "] muốn đấu lại với bạn!\nBạn có đồng ý không?",
-                "Lời mời Đấu lại",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE
-            );
-            Platform.runLater(() -> {
-                if (ans == JOptionPane.YES_OPTION) {
-                    if (actionListener != null) {
-                        actionListener.onRematchResponse(true);
-                    }
-                } else {
-                    if (gameOverOverlay != null && animationLayer != null) {
-                        animationLayer.getChildren().remove(gameOverOverlay);
-                        gameOverOverlay = null;
-                    }
-                    if (actionListener != null) {
-                        actionListener.onRematchResponse(false);
-                        actionListener.onLeaveGame();
-                    }
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Lời mời Đấu lại");
+            alert.setHeaderText(null);
+            alert.setContentText("Đối thủ [" + opponentUsername + "] muốn đấu lại với bạn! Bạn có đồng ý không?");
+
+            if (mainBoardPane != null && mainBoardPane.getScene() != null && mainBoardPane.getScene().getWindow() != null) {
+                alert.initOwner(mainBoardPane.getScene().getWindow());
+            }
+
+            Optional<ButtonType> ans = alert.showAndWait();
+            if (ans.isPresent() && ans.get() == ButtonType.OK) {
+                if (actionListener != null) {
+                    actionListener.onRematchResponse(true);
                 }
-            });
+            } else {
+                if (gameOverOverlay != null && animationLayer != null) {
+                    animationLayer.getChildren().remove(gameOverOverlay);
+                    gameOverOverlay = null;
+                }
+                if (actionListener != null) {
+                    actionListener.onRematchResponse(false);
+                    actionListener.onLeaveGame();
+                }
+            }
         });
     }
 

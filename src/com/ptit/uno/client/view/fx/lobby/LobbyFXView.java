@@ -174,7 +174,14 @@ public class LobbyFXView extends LobbyFrm {
     @Override
     public void showMessage(String msg) {
         Platform.runLater(() -> {
-            UnoNotification.showInfo(stage, "Thông báo Sảnh chính", msg);
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Thông báo");
+            alert.setHeaderText(null);
+            alert.setContentText(msg);
+            if (stage != null && stage.isShowing()) {
+                alert.initOwner(stage);
+            }
+            alert.showAndWait();
         });
     }
 

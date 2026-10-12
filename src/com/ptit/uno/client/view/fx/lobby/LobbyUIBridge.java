@@ -30,9 +30,12 @@ import java.util.ResourceBundle;
  */
 public class LobbyUIBridge implements Initializable {
 
-    @FXML private Label lblUsername;
-    @FXML private Label lblElo;
-    @FXML private Label lblWinRate;
+    @FXML
+    private Label lblUsername;
+    @FXML
+    private Label lblElo;
+    @FXML
+    private Label lblWinRate;
     @FXML
     private Button btnLeaderboard;
     @FXML
@@ -40,16 +43,26 @@ public class LobbyUIBridge implements Initializable {
     @FXML
     private Button btnLogout;
 
-    @FXML private Label lblRoomCount;
-    @FXML private HBox searchBoxContainer;
-    @FXML private TextField txtSearchRoom;
-    @FXML private ToggleGroup filterGroup;
-    @FXML private ToggleButton tglFilterAll;
-    @FXML private ToggleButton tglFilterWaiting;
-    @FXML private ToggleButton tglFilterPlaying;
-    @FXML private Button btnRefreshGrid;
-    @FXML private FlowPane fpRoomContainer;
-    @FXML private Button btnCreateRoom;
+    @FXML
+    private Label lblRoomCount;
+    @FXML
+    private HBox searchBoxContainer;
+    @FXML
+    private TextField txtSearchRoom;
+    @FXML
+    private ToggleGroup filterGroup;
+    @FXML
+    private ToggleButton tglFilterAll;
+    @FXML
+    private ToggleButton tglFilterWaiting;
+    @FXML
+    private ToggleButton tglFilterPlaying;
+    @FXML
+    private Button btnRefreshGrid;
+    @FXML
+    private FlowPane fpRoomContainer;
+    @FXML
+    private Button btnCreateRoom;
 
     private int selectedRoomId = -1;
     private final List<Room> allRooms = new ArrayList<>();
@@ -63,8 +76,10 @@ public class LobbyUIBridge implements Initializable {
     @FXML
     private TableColumn<OnlineUserRow, String> colOnlineStatus;
 
-    @FXML private Button btnQuickMatch;
-    @FXML private Button btnInviteSelected;
+    @FXML
+    private Button btnQuickMatch;
+    @FXML
+    private Button btnInviteSelected;
 
     private final ObservableList<OnlineUserRow> onlineList = FXCollections.observableArrayList();
     private String currentUsername = "";
@@ -84,11 +99,13 @@ public class LobbyUIBridge implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         if (btnRefreshGrid != null) {
             btnRefreshGrid.setOnAction(e -> {
-                if (onRefreshAction != null) onRefreshAction.run();
+                if (onRefreshAction != null)
+                    onRefreshAction.run();
             });
         }
 
-        // Bắt sự kiện ô tìm kiếm phòng (Search Box) - Gõ xong ấn Enter mới bắt đầu tìm kiếm
+        // Bắt sự kiện ô tìm kiếm phòng (Search Box) - Gõ xong ấn Enter mới bắt đầu tìm
+        // kiếm
         if (txtSearchRoom != null) {
             txtSearchRoom.setOnAction(e -> applyRoomFilter());
 
@@ -133,9 +150,12 @@ public class LobbyUIBridge implements Initializable {
             });
         } else {
             // Fallback nếu filterGroup không được bind
-            if (tglFilterAll != null) tglFilterAll.setOnAction(e -> applyRoomFilter());
-            if (tglFilterWaiting != null) tglFilterWaiting.setOnAction(e -> applyRoomFilter());
-            if (tglFilterPlaying != null) tglFilterPlaying.setOnAction(e -> applyRoomFilter());
+            if (tglFilterAll != null)
+                tglFilterAll.setOnAction(e -> applyRoomFilter());
+            if (tglFilterWaiting != null)
+                tglFilterWaiting.setOnAction(e -> applyRoomFilter());
+            if (tglFilterPlaying != null)
+                tglFilterPlaying.setOnAction(e -> applyRoomFilter());
         }
 
         // Cấu hình bảng Người chơi trực tuyến (3 cột chuẩn: Tên, Elo, Trạng thái)
@@ -183,7 +203,8 @@ public class LobbyUIBridge implements Initializable {
         // Bắt sự kiện các nút khác
         if (btnCreateRoom != null) {
             btnCreateRoom.setOnAction(e -> {
-                if (onCreateRoomAction != null) onCreateRoomAction.run();
+                if (onCreateRoomAction != null)
+                    onCreateRoomAction.run();
             });
         }
         btnLeaderboard.setOnAction(e -> {
@@ -202,7 +223,8 @@ public class LobbyUIBridge implements Initializable {
 
     /**
      * Xử lý nút "Ghép ngẫu nhiên":
-     * Tự động tìm phòng chờ khả dụng đầu tiên và vào ngay. Nếu không có phòng, hỏi người chơi có muốn tạo phòng mới không.
+     * Tự động tìm phòng chờ khả dụng đầu tiên và vào ngay. Nếu không có phòng, hỏi
+     * người chơi có muốn tạo phòng mới không.
      */
     private void handleQuickMatch() {
         Room targetRoom = null;
@@ -222,24 +244,15 @@ public class LobbyUIBridge implements Initializable {
         } else {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Ghép trận ngẫu nhiên");
-            alert.setHeaderText("Không tìm thấy phòng chơi đang chờ");
+            alert.setHeaderText(null);
             alert.setContentText("Hiện tại không có phòng nào còn chỗ trống. Bạn có muốn tạo phòng mới ngay bây giờ không?");
-            ButtonType btnYes = new ButtonType("Tạo phòng ngay", ButtonBar.ButtonData.OK_DONE);
-            ButtonType btnCancel = new ButtonType("Để sau", ButtonBar.ButtonData.CANCEL_CLOSE);
-            alert.getButtonTypes().setAll(btnYes, btnCancel);
 
             if (tblOnline != null && tblOnline.getScene() != null && tblOnline.getScene().getWindow() != null) {
                 alert.initOwner(tblOnline.getScene().getWindow());
             }
 
-            try {
-                alert.getDialogPane().getStylesheets().add(
-                        getClass().getResource("/resource/css/uno_theme.css").toExternalForm());
-                alert.getDialogPane().getStyleClass().add("auth-card");
-            } catch (Exception ignored) {}
-
             Optional<ButtonType> opt = alert.showAndWait();
-            if (opt.isPresent() && opt.get() == btnYes) {
+            if (opt.isPresent() && opt.get() == ButtonType.OK) {
                 if (onCreateRoomAction != null) {
                     onCreateRoomAction.run();
                 }
@@ -256,25 +269,30 @@ public class LobbyUIBridge implements Initializable {
 
     /**
      * Xử lý nút "Mời bạn":
-     * Kiểm tra người chơi được chọn trên bảng tblOnline và gửi lời mời nếu hợp lệ (đang Rảnh và không phải chính mình).
+     * Kiểm tra người chơi được chọn trên bảng tblOnline và gửi lời mời nếu hợp lệ
+     * (đang Rảnh và không phải chính mình).
      */
     private void handleInviteSelected() {
-        if (tblOnline == null) return;
+        if (tblOnline == null)
+            return;
         OnlineUserRow selected = tblOnline.getSelectionModel().getSelectedItem();
 
         if (selected == null) {
-            UnoNotification.showWarning(getWindow(), "Mời bạn chơi", "Vui lòng nhấp chọn một người chơi đang 'Rảnh' trong bảng trước khi gửi lời mời!");
+            UnoNotification.showWarning(getWindow(), "Mời bạn chơi",
+                    "Vui lòng nhấp chọn một người chơi đang 'Rảnh' trong bảng trước khi gửi lời mời!");
             return;
         }
 
         if (currentUsername != null && !currentUsername.isEmpty()
                 && currentUsername.equalsIgnoreCase(selected.getName())) {
-            UnoNotification.showWarning(getWindow(), "Mời bạn chơi", "Bạn không thể tự gửi lời mời thách đấu cho chính mình!");
+            UnoNotification.showWarning(getWindow(), "Mời bạn chơi",
+                    "Bạn không thể tự gửi lời mời thách đấu cho chính mình!");
             return;
         }
 
         if (!"Rảnh".equalsIgnoreCase(selected.getStatus())) {
-            UnoNotification.showWarning(getWindow(), "Mời bạn chơi", "Người chơi '" + selected.getName() + "' hiện đang ở trạng thái '" + selected.getStatus() + "', không thể mời lúc này!");
+            UnoNotification.showWarning(getWindow(), "Mời bạn chơi", "Người chơi '" + selected.getName()
+                    + "' hiện đang ở trạng thái '" + selected.getStatus() + "', không thể mời lúc này!");
             return;
         }
 
@@ -301,10 +319,14 @@ public class LobbyUIBridge implements Initializable {
         Platform.runLater(() -> {
             if (user != null) {
                 this.currentUsername = user.getUsername();
-                if (lblUsername != null) lblUsername.setText(user.getUsername());
-                if (lblElo != null) lblElo.setText(user.getScore() + " Elo");
-                if (lblWinRate != null) lblWinRate.setText(String.format("Thắng %d/%d", user.getWinMatches(), user.getTotalMatches()));
-                if (tblOnline != null) tblOnline.refresh();
+                if (lblUsername != null)
+                    lblUsername.setText(user.getUsername());
+                if (lblElo != null)
+                    lblElo.setText(user.getScore() + " Elo");
+                if (lblWinRate != null)
+                    lblWinRate.setText(String.format("Thắng %d/%d", user.getWinMatches(), user.getTotalMatches()));
+                if (tblOnline != null)
+                    tblOnline.refresh();
             }
         });
     }
@@ -320,10 +342,12 @@ public class LobbyUIBridge implements Initializable {
     }
 
     private void applyRoomFilter() {
-        if (fpRoomContainer == null) return;
+        if (fpRoomContainer == null)
+            return;
 
         String keyword = (txtSearchRoom != null && txtSearchRoom.getText() != null)
-                ? txtSearchRoom.getText().trim().toLowerCase() : "";
+                ? txtSearchRoom.getText().trim().toLowerCase()
+                : "";
 
         String statusFilter = "ALL";
         if (tglFilterWaiting != null && tglFilterWaiting.isSelected()) {
@@ -402,11 +426,13 @@ public class LobbyUIBridge implements Initializable {
 
     private VBox createRoomCard(Room r) {
         VBox card = new VBox(8);
-        card.setStyle("-fx-background-color: #1a1e27; -fx-border-color: #2a303c; -fx-border-width: 1.5; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 12;");
-        
-        // Tự động scale chiều rộng sao cho 1 hàng 2 thẻ (trừ đi khoảng cách hgap và scrollbar)
+        card.setStyle(
+                "-fx-background-color: #1a1e27; -fx-border-color: #2a303c; -fx-border-width: 1.5; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 12;");
+
+        // Tự động scale chiều rộng sao cho 1 hàng 2 thẻ (trừ đi khoảng cách hgap và
+        // scrollbar)
         card.prefWidthProperty().bind(fpRoomContainer.widthProperty().subtract(30).divide(2));
-        
+
         // Header
         javafx.scene.layout.HBox header = new javafx.scene.layout.HBox(8);
         header.setAlignment(Pos.CENTER_LEFT);
@@ -415,19 +441,20 @@ public class LobbyUIBridge implements Initializable {
         Label lblName = new Label(r.getName());
         lblName.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px;");
         lblName.setMaxWidth(180);
-        
+
         javafx.scene.layout.Region spacer1 = new javafx.scene.layout.Region();
         javafx.scene.layout.HBox.setHgrow(spacer1, javafx.scene.layout.Priority.ALWAYS);
-        
+
         boolean isPlaying = "PLAYING".equalsIgnoreCase(r.getStatus()) || r.isFull();
         String statusText = isPlaying ? "Đang chơi" : "Đang chờ";
         String statusColor = isPlaying ? "#8c95a6" : "#4ff0a0";
-        
+
         Label lblStatus = new Label("• " + statusText);
-        lblStatus.setStyle("-fx-text-fill: " + statusColor + "; -fx-background-color: transparent; -fx-border-color: " + statusColor + "40; -fx-border-radius: 4; -fx-padding: 2 6; -fx-font-size: 11px;");
-        
+        lblStatus.setStyle("-fx-text-fill: " + statusColor + "; -fx-background-color: transparent; -fx-border-color: "
+                + statusColor + "40; -fx-border-radius: 4; -fx-padding: 2 6; -fx-font-size: 11px;");
+
         header.getChildren().addAll(lblId, lblName, spacer1, lblStatus);
-        
+
         // Info
         VBox infoBox = new VBox(4);
         Label lblHost = new Label("Chủ phòng: " + r.getHostName());
@@ -435,46 +462,53 @@ public class LobbyUIBridge implements Initializable {
         Label lblMode = new Label("Chế độ: Cơ bản 1v1 • Cược Elo: 100");
         lblMode.setStyle("-fx-text-fill: #b3bccf; -fx-font-size: 12px;");
         infoBox.getChildren().addAll(lblHost, lblMode);
-        
+
         // Divider
         javafx.scene.control.Separator sep = new javafx.scene.control.Separator();
         sep.setStyle("-fx-background-color: #2a303c; -fx-padding: 0;");
-        
+
         // Bottom
         javafx.scene.layout.HBox bottom = new javafx.scene.layout.HBox(10);
         bottom.setAlignment(Pos.CENTER_LEFT);
         int maxP = (r.getMaxPlayers() > 0) ? Math.min(r.getMaxPlayers(), 2) : 2;
         String pCount = r.getCurrentPlayerCount() + "/" + maxP;
-        if (r.getCurrentPlayerCount() >= maxP || r.isFull()) pCount += " (Đầy)";
+        if (r.getCurrentPlayerCount() >= maxP || r.isFull())
+            pCount += " (Đầy)";
         Label lblPlayers = new Label("Người: " + pCount);
         lblPlayers.setStyle("-fx-text-fill: #b3bccf; -fx-font-size: 12px; -fx-font-weight: bold;");
-        
+
         javafx.scene.layout.Region spacer2 = new javafx.scene.layout.Region();
         javafx.scene.layout.HBox.setHgrow(spacer2, javafx.scene.layout.Priority.ALWAYS);
-        
+
         Button btnAction = new Button(isPlaying ? "Xem trận" : "Vào phòng");
         if (isPlaying) {
-            btnAction.setStyle("-fx-background-color: #2a303c; -fx-text-fill: white; -fx-padding: 6 12; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 4; -fx-cursor: hand;");
+            btnAction.setStyle(
+                    "-fx-background-color: #2a303c; -fx-text-fill: white; -fx-padding: 6 12; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 4; -fx-cursor: hand;");
             btnAction.setOnAction(e -> {
                 selectedRoomId = r.getId();
-                if (onSpectateAction != null) onSpectateAction.run();
+                if (onSpectateAction != null)
+                    onSpectateAction.run();
             });
         } else {
-            btnAction.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-padding: 6 12; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 4; -fx-cursor: hand;");
+            btnAction.setStyle(
+                    "-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-padding: 6 12; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 4; -fx-cursor: hand;");
             btnAction.setOnAction(e -> {
                 selectedRoomId = r.getId();
-                if (onJoinRoomAction != null) onJoinRoomAction.run();
+                if (onJoinRoomAction != null)
+                    onJoinRoomAction.run();
             });
         }
-        
+
         bottom.getChildren().addAll(lblPlayers, spacer2, btnAction);
-        
+
         card.getChildren().addAll(header, infoBox, sep, bottom);
-        
+
         // Hover
-        card.setOnMouseEntered(e -> card.setStyle("-fx-background-color: #1a1e27; -fx-border-color: #3b82f6; -fx-border-width: 1.5; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 12;"));
-        card.setOnMouseExited(e -> card.setStyle("-fx-background-color: #1a1e27; -fx-border-color: #2a303c; -fx-border-width: 1.5; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 12;"));
-        
+        card.setOnMouseEntered(e -> card.setStyle(
+                "-fx-background-color: #1a1e27; -fx-border-color: #3b82f6; -fx-border-width: 1.5; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 12;"));
+        card.setOnMouseExited(e -> card.setStyle(
+                "-fx-background-color: #1a1e27; -fx-border-color: #2a303c; -fx-border-width: 1.5; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 12;"));
+
         return card;
     }
 
@@ -502,15 +536,11 @@ public class LobbyUIBridge implements Initializable {
     public String promptCreateRoomName() {
         TextInputDialog dialog = new TextInputDialog("Phòng UNO mới");
         dialog.setTitle("Tạo phòng UNO");
-        dialog.setHeaderText("Nhập tên phòng mới để bắt đầu ván đấu:");
-        dialog.setContentText("Tên phòng:");
+        dialog.setHeaderText(null);
+        dialog.setContentText("Nhập tên phòng mới:");
 
-        // Load stylesheet cho dialog
-        try {
-            dialog.getDialogPane().getStylesheets().add(
-                    getClass().getResource("/resource/css/uno_theme.css").toExternalForm());
-            dialog.getDialogPane().getStyleClass().add("auth-card");
-        } catch (Exception ignored) {
+        if (tblOnline != null && tblOnline.getScene() != null && tblOnline.getScene().getWindow() != null) {
+            dialog.initOwner(tblOnline.getScene().getWindow());
         }
 
         Optional<String> result = dialog.showAndWait();
@@ -556,8 +586,6 @@ public class LobbyUIBridge implements Initializable {
     public void setOnInvitePlayerAction(java.util.function.Consumer<String> action) {
         this.onInvitePlayerAction = action;
     }
-
-
 
     public static class OnlineUserRow {
         private final SimpleIntegerProperty id;

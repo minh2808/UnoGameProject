@@ -636,8 +636,8 @@
    CONTROLSFX NOTIFICATIONS - CYBER DARK THEME
    ========================================================== */
 
-.notification-bar > .pane,
-.notification-bar.dark > .pane {
+.notification-bar>.pane,
+.notification-bar.dark>.pane {
     -fx-background-color: #040b1f, #0d276b, linear-gradient(to bottom, #0c2050 0%, #061230 100%);
     -fx-background-insets: 0, 1, 2;
     -fx-background-radius: 12px;
@@ -650,16 +650,16 @@
     -fx-max-width: 440px;
 }
 
-.notification-bar > .pane .title,
-.notification-bar.dark > .pane .title {
+.notification-bar>.pane .title,
+.notification-bar.dark>.pane .title {
     -fx-font-size: 15px;
     -fx-font-weight: 800;
     -fx-text-fill: #ffc83d;
     -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.8), 3, 0.5, 0, 1);
 }
 
-.notification-bar > .pane .label,
-.notification-bar.dark > .pane .label {
+.notification-bar>.pane .label,
+.notification-bar.dark>.pane .label {
     -fx-font-size: 13px;
     -fx-text-fill: #eaf1ff;
     -fx-line-spacing: 4px;

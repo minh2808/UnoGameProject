@@ -131,12 +131,12 @@
                 <HBox alignment="CENTER_RIGHT" spacing="6.0">
                     <Button fx:id="btnHelp" text="Trợ giúp" styleClass="btn-utility" onAction="#handleHelp">
                         <graphic>
-                            <FontIcon iconLiteral="fas-question-circle" iconSize="12" iconColor="#b3c2b8"/>
+                            <FontIcon iconLiteral="fas-question-circle" iconSize="12" iconColor="#b3c2b8" mouseTransparent="true"/>
                         </graphic>
                     </Button>
                     <Button fx:id="btnLeave" text="Thoát bàn" styleClass="btn-utility" onAction="#handleLeave">
                         <graphic>
-                            <FontIcon iconLiteral="fas-sign-out-alt" iconSize="12" iconColor="#b3c2b8"/>
+                            <FontIcon iconLiteral="fas-sign-out-alt" iconSize="12" iconColor="#b3c2b8" mouseTransparent="true"/>
                         </graphic>
                     </Button>
                 </HBox>
