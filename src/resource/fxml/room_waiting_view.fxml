@@ -6,6 +6,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Circle?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.ptit.uno.client.view.fx.room.RoomWaitingUIBridge"
@@ -39,12 +40,16 @@
                     
                     <!-- GHẾ 1: CHỦ PHÒNG (HOST) -->
                     <VBox alignment="CENTER" spacing="8.0" prefWidth="190.0">
-                        <Label fx:id="lblHostElo" text="👑 Elo: 1250" styleClass="elo-badge"/>
+                        <Label fx:id="lblHostElo" text="Elo: 1250" styleClass="elo-badge"/>
                         <StackPane>
                             <!-- Vòng hào quang đỏ quanh chân ghế -->
                             <Circle radius="75.0" styleClass="seat-ring-host"/>
                             <VBox styleClass="seat-frame" alignment="CENTER" spacing="6.0">
-                                <Label text="🦊" style="-fx-font-size: 54px;"/>
+                                <Label fx:id="lblHostAvatar" alignment="CENTER">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-user-shield" iconSize="54" iconColor="#ff9f1c"/>
+                                    </graphic>
+                                </Label>
                                 <Label text="Chủ phòng" styleClass="badge-host"/>
                             </VBox>
                         </StackPane>
@@ -58,12 +63,16 @@
 
                     <!-- GHẾ 2: KHÁCH (GUEST) -->
                     <VBox alignment="CENTER" spacing="8.0" prefWidth="190.0">
-                        <Label fx:id="lblGuestElo" text="👤 Elo: 1100" styleClass="elo-badge"/>
+                        <Label fx:id="lblGuestElo" text="Elo: 1100" styleClass="elo-badge"/>
                         <StackPane>
                             <!-- Vòng hào quang xanh -->
                             <Circle fx:id="guestRing" radius="75.0" styleClass="seat-ring-guest"/>
                             <VBox fx:id="guestFrame" styleClass="seat-frame" alignment="CENTER" spacing="6.0">
-                                <Label fx:id="lblGuestAvatar" text="🐯" style="-fx-font-size: 54px;"/>
+                                <Label fx:id="lblGuestAvatar" alignment="CENTER">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-user" iconSize="54" iconColor="#4ff0a0"/>
+                                    </graphic>
+                                </Label>
                                 <Label text="Đối thủ" styleClass="badge-tag"/>
                             </VBox>
                         </StackPane>

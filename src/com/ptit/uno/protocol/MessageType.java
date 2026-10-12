@@ -54,5 +54,10 @@ public enum MessageType implements Serializable {
     INVITE_PLAYER_NOTIFICATION,
     INVITE_FEEDBACK,
     CHAT_MESSAGE,
-    ERROR_NOTIFICATION
+    ERROR_NOTIFICATION,
+
+    // --- Đấu lại (Rematch) ---
+    REMATCH_REQUEST,
+    REMATCH_RESPONSE,
+    REMATCH_START_COUNTDOWN
 }

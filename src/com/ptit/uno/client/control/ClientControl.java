@@ -151,6 +151,16 @@ public class ClientControl {
                 gameView.setVisible(false);
                 roomWaitingFrm.setVisible(true);
             }
+
+            @Override
+            public void onRematchRequest() {
+                sendData(new Message(MessageType.REMATCH_REQUEST));
+            }
+
+            @Override
+            public void onRematchResponse(boolean accept) {
+                sendData(new Message(MessageType.REMATCH_RESPONSE, accept));
+            }
         });
 
         // --- 6. Sự kiện trên SpectatorView ---
@@ -457,6 +467,17 @@ public class ClientControl {
                                 isSuccess ? "Thông báo mời chơi" : "Phản hồi lời mời",
                                 feedback
                         );
+                        break;
+                    }
+
+                    case REMATCH_REQUEST: {
+                        String requester = (String) msg.getPayload();
+                        gameView.promptRematch(requester != null ? requester : "Đối thủ");
+                        break;
+                    }
+
+                    case REMATCH_START_COUNTDOWN: {
+                        gameView.startRematchCountdown();
                         break;
                     }
 

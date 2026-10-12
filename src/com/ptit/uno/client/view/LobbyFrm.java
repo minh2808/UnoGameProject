@@ -51,8 +51,8 @@ public class LobbyFrm extends JFrame {
         lblUserInfo.setForeground(new Color(20, 100, 20));
 
         JPanel headerButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
-        btnLeaderboard = new JButton("🏆 Bảng xếp hạng");
-        btnHistory = new JButton("📜 Lịch sử đấu");
+        btnLeaderboard = new JButton("Bảng xếp hạng");
+        btnHistory = new JButton("Lịch sử đấu");
         btnLogout = new JButton("Đăng xuất");
         btnLogout.setForeground(Color.RED);
 
@@ -84,7 +84,7 @@ public class LobbyFrm extends JFrame {
         roomPanel.add(new JScrollPane(tblRooms), BorderLayout.CENTER);
 
         JPanel roomButtons = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        btnCreateRoom = new JButton("➕ Tạo phòng mới");
+        btnCreateRoom = new JButton("Tạo phòng mới");
         btnCreateRoom.setBackground(new Color(40, 140, 40));
         btnCreateRoom.setForeground(Color.WHITE);
         btnCreateRoom.setFont(new Font("Arial", Font.BOLD, 12));
@@ -92,7 +92,7 @@ public class LobbyFrm extends JFrame {
         btnJoinRoom = new JButton("Vào phòng đã chọn");
         btnJoinRoom.setFont(new Font("Arial", Font.BOLD, 12));
 
-        btnRefresh = new JButton("🔄 Làm mới");
+        btnRefresh = new JButton("Làm mới");
         roomButtons.add(btnCreateRoom);
         roomButtons.add(btnJoinRoom);
         roomButtons.add(btnRefresh);

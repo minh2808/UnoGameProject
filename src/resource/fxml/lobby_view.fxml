@@ -115,7 +115,11 @@
 
                 <!-- NÚT TẠO PHÒNG -->
                 <HBox alignment="CENTER_RIGHT">
-                    <Button fx:id="btnCreateRoom" text="➕ Tạo phòng mới" styleClass="btn-primary" style="-fx-font-size: 14px; -fx-padding: 8 20;" />
+                    <Button fx:id="btnCreateRoom" text="Tạo phòng mới" styleClass="btn-primary" style="-fx-font-size: 14px; -fx-padding: 8 20;">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-plus" iconSize="13" iconColor="white"/>
+                        </graphic>
+                    </Button>
                 </HBox>
             </VBox>
 
@@ -136,10 +140,18 @@
 
                 <!-- KHU VỰC 2 NÚT THAO TÁC Ở DƯỚI CÙNG -->
                 <HBox spacing="8.0" alignment="CENTER">
-                    <Button fx:id="btnQuickMatch" text="⚡ Ghép ngẫu nhiên" HBox.hgrow="ALWAYS" maxWidth="Infinity"
-                            styleClass="btn-quick-match" />
-                    <Button fx:id="btnInviteSelected" text="✉ Mời bạn" HBox.hgrow="ALWAYS" maxWidth="Infinity"
-                            styleClass="btn-invite-selected" />
+                    <Button fx:id="btnQuickMatch" text="Ghép ngẫu nhiên" HBox.hgrow="ALWAYS" maxWidth="Infinity"
+                            styleClass="btn-quick-match">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-bolt" iconSize="13" iconColor="white"/>
+                        </graphic>
+                    </Button>
+                    <Button fx:id="btnInviteSelected" text="Mời bạn" HBox.hgrow="ALWAYS" maxWidth="Infinity"
+                            styleClass="btn-invite-selected">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-envelope" iconSize="13" iconColor="white"/>
+                        </graphic>
+                    </Button>
                 </HBox>
             </VBox>
 

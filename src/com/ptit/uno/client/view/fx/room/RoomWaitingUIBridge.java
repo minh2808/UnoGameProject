@@ -97,18 +97,22 @@ public class RoomWaitingUIBridge implements Initializable {
             if (players != null && !players.isEmpty()) {
                 Player host = players.get(0);
                 lblHostName.setText(host.getUsername());
-                lblHostElo.setText(host.isReady() ? "👑 Chủ phòng (Sẵn sàng)" : "👑 Chủ phòng (Đang chờ)");
+                lblHostElo.setText(host.isReady() ? "Chủ phòng (Sẵn sàng)" : "Chủ phòng (Đang chờ)");
             } else {
                 lblHostName.setText(room.getHostName());
-                lblHostElo.setText("👑 Chủ phòng");
+                lblHostElo.setText("Chủ phòng");
             }
 
             // Ghế 2: Khách
             if (players != null && players.size() >= 2) {
                 Player guest = players.get(1);
                 lblGuestName.setText(guest.getUsername());
-                lblGuestElo.setText(guest.isReady() ? "👤 Đối thủ (Sẵn sàng)" : "👤 Đối thủ (Đã vào phòng)");
-                lblGuestAvatar.setText("🐯");
+                lblGuestElo.setText(guest.isReady() ? "Đối thủ (Sẵn sàng)" : "Đối thủ (Đã vào phòng)");
+                org.kordamp.ikonli.javafx.FontIcon guestIcon = new org.kordamp.ikonli.javafx.FontIcon("fas-user");
+                guestIcon.setIconSize(54);
+                guestIcon.setIconColor(javafx.scene.paint.Color.web("#4ff0a0"));
+                lblGuestAvatar.setText("");
+                lblGuestAvatar.setGraphic(guestIcon);
                 guestFrame.getStyleClass().remove("seat-frame-empty");
                 if (!guestFrame.getStyleClass().contains("seat-frame")) {
                     guestFrame.getStyleClass().add("seat-frame");
@@ -116,8 +120,12 @@ public class RoomWaitingUIBridge implements Initializable {
                 guestRing.setVisible(true);
             } else {
                 lblGuestName.setText("Ghế trống");
-                lblGuestElo.setText("👤 Đang chờ...");
-                lblGuestAvatar.setText("⏳");
+                lblGuestElo.setText("Đang chờ...");
+                org.kordamp.ikonli.javafx.FontIcon waitIcon = new org.kordamp.ikonli.javafx.FontIcon("fas-clock");
+                waitIcon.setIconSize(54);
+                waitIcon.setIconColor(javafx.scene.paint.Color.web("#95a5a6"));
+                lblGuestAvatar.setText("");
+                lblGuestAvatar.setGraphic(waitIcon);
                 guestFrame.getStyleClass().remove("seat-frame");
                 if (!guestFrame.getStyleClass().contains("seat-frame-empty")) {
                     guestFrame.getStyleClass().add("seat-frame-empty");

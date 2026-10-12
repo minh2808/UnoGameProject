@@ -293,6 +293,85 @@ public class ClientHandler extends Thread {
                     }
                     break;
                 }
+                case REMATCH_REQUEST: {
+                    Room r = serverControl.getRoomManager().getRoom(currentRoomId);
+                    if (r == null || currentUser == null) {
+                        sendMessage(new Message(MessageType.ERROR_NOTIFICATION, "Phòng không tồn tại!"));
+                        break;
+                    }
+
+                    Player opponent = null;
+                    for (Player p : r.getPlayers()) {
+                        if (p.getUserId() != currentUser.getId()) {
+                            opponent = p;
+                            break;
+                        }
+                    }
+
+                    if (opponent == null) {
+                        sendMessage(new Message(MessageType.ERROR_NOTIFICATION, "Đối thủ đã rời phòng!"));
+                        break;
+                    }
+
+                    if (opponent.isBot()) {
+                        serverControl.broadcastToRoom(currentRoomId, new Message(MessageType.REMATCH_START_COUNTDOWN));
+                        java.util.concurrent.Executors.newSingleThreadScheduledExecutor().schedule(() -> {
+                            Room rm = serverControl.getRoomManager().getRoom(currentRoomId);
+                            if (rm != null && rm.getCurrentPlayerCount() >= 2) {
+                                GameManager gm = new GameManager(rm, serverControl);
+                                serverControl.getRoomManager().setGameManager(currentRoomId, gm);
+                                gm.startGame();
+                                serverControl.getView().showMessage("Phòng #" + currentRoomId + " bắt đầu ván đấu lại!");
+                                serverControl.updateRoomUsersStatus(currentRoomId, "Đang chơi");
+                            }
+                        }, 3500, java.util.concurrent.TimeUnit.MILLISECONDS);
+                    } else {
+                        ClientHandler opponentClient = serverControl.getClientById(opponent.getUserId());
+                        if (opponentClient != null) {
+                            opponentClient.sendMessage(new Message(MessageType.REMATCH_REQUEST, currentUser.getUsername()));
+                        } else {
+                            sendMessage(new Message(MessageType.ERROR_NOTIFICATION, "Đối thủ đã rời phòng!"));
+                        }
+                    }
+                    break;
+                }
+                case REMATCH_RESPONSE: {
+                    boolean accepted = false;
+                    if (req.getPayload() instanceof Boolean) {
+                        accepted = (Boolean) req.getPayload();
+                    }
+                    Room r = serverControl.getRoomManager().getRoom(currentRoomId);
+                    if (r == null || currentUser == null) break;
+
+                    Player opponent = null;
+                    for (Player p : r.getPlayers()) {
+                        if (p.getUserId() != currentUser.getId()) {
+                            opponent = p;
+                            break;
+                        }
+                    }
+
+                    ClientHandler opponentClient = (opponent != null) ? serverControl.getClientById(opponent.getUserId()) : null;
+
+                    if (!accepted) {
+                        if (opponentClient != null) {
+                            opponentClient.sendMessage(new Message(MessageType.ERROR_NOTIFICATION, currentUser.getUsername() + " đã từ chối đấu lại!"));
+                        }
+                    } else {
+                        serverControl.broadcastToRoom(currentRoomId, new Message(MessageType.REMATCH_START_COUNTDOWN));
+                        java.util.concurrent.Executors.newSingleThreadScheduledExecutor().schedule(() -> {
+                            Room rm = serverControl.getRoomManager().getRoom(currentRoomId);
+                            if (rm != null && rm.getCurrentPlayerCount() >= 2) {
+                                GameManager gm = new GameManager(rm, serverControl);
+                                serverControl.getRoomManager().setGameManager(currentRoomId, gm);
+                                gm.startGame();
+                                serverControl.getView().showMessage("Phòng #" + currentRoomId + " bắt đầu ván đấu lại!");
+                                serverControl.updateRoomUsersStatus(currentRoomId, "Đang chơi");
+                            }
+                        }, 3500, java.util.concurrent.TimeUnit.MILLISECONDS);
+                    }
+                    break;
+                }
                 default:
                     break;
             }

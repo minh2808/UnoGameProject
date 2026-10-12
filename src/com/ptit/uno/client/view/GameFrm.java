@@ -152,7 +152,7 @@ public class GameFrm extends JFrame {
         // Thanh nút điều khiển
         JPanel bottomBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         bottomBar.setOpaque(false);
-        btnCallUno = new JButton("🚨 HÔ UNO!");
+        btnCallUno = new JButton("HÔ UNO!");
         btnCallUno.setBackground(new Color(220, 40, 40));
         btnCallUno.setForeground(Color.WHITE);
         btnCallUno.setFont(new Font("Arial", Font.BOLD, 13));
@@ -183,7 +183,7 @@ public class GameFrm extends JFrame {
     }
 
     private JLabel createOpponentLabel(String text) {
-        JLabel lbl = new JLabel("<html><center>👤 " + text + "<br><font color='yellow'>🂠 7 lá</font></center></html>", JLabel.CENTER);
+        JLabel lbl = new JLabel("<html><center>" + text + "<br><font color='yellow'>7 lá</font></center></html>", JLabel.CENTER);
         lbl.setFont(new Font("Arial", Font.BOLD, 13));
         lbl.setForeground(Color.WHITE);
         lbl.setBorder(BorderFactory.createCompoundBorder(
@@ -298,13 +298,13 @@ public class GameFrm extends JFrame {
             for (GameState.PlayerSummary p : list) {
                 if (p.getUserId() == currentUserId) {
                     boolean isMyTurn = (p.getSeatNumber() == state.getCurrentTurnSeat());
-                    lblTurnInfo.setText(isMyTurn ? "👉 LƯỢT CỦA BẠN!" : "Lượt của: " + getTurnPlayerName(list, state.getCurrentTurnSeat()));
+                    lblTurnInfo.setText(isMyTurn ? "LƯỢT CỦA BẠN!" : "Lượt của: " + getTurnPlayerName(list, state.getCurrentTurnSeat()));
                     lblTurnInfo.setForeground(isMyTurn ? Color.YELLOW : Color.WHITE);
                 } else if (oppIndex < oppLabels.length) {
                     boolean isTheirTurn = (p.getSeatNumber() == state.getCurrentTurnSeat());
-                    oppLabels[oppIndex].setText("<html><center>" + (isTheirTurn ? "👉 " : "") +
+                    oppLabels[oppIndex].setText("<html><center>" + (isTheirTurn ? "[LƯỢT] " : "") +
                             p.getUsername() + (p.isBot() ? " (Bot)" : "") + "<br>" +
-                            "<font color='yellow'>🂠 " + p.getCardCount() + " lá</font>" +
+                            "<font color='yellow'>" + p.getCardCount() + " lá</font>" +
                             (p.isUno() ? " <font color='red'><b>[UNO!]</b></font>" : "") +
                             "</center></html>");
                     oppIndex++;
@@ -314,7 +314,7 @@ public class GameFrm extends JFrame {
 
         if (state.isGameOver()) {
             JOptionPane.showMessageDialog(this,
-                    "🎉 TRẬN ĐẤU ĐÃ KẾT THÚC!\nNgười chiến thắng: " + state.getWinnerUsername(),
+                    "TRẬN ĐẤU ĐÃ KẾT THÚC!\nNgười chiến thắng: " + state.getWinnerUsername(),
                     "Kết quả ván đấu", JOptionPane.INFORMATION_MESSAGE);
         }
     }

@@ -84,6 +84,20 @@
     -fx-font-weight: bold;
 }
 
+.turn-timer-pill-my-turn {
+    -fx-background-color: rgba(12, 42, 22, 0.95);
+    -fx-border-color: #2ecc71;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(46, 204, 113, 0.5), 14, 0, 0, 0);
+}
+
+.turn-timer-pill-opponent-turn {
+    -fx-background-color: rgba(36, 20, 10, 0.92);
+    -fx-border-color: rgba(230, 126, 34, 0.75);
+    -fx-border-width: 1.5px;
+    -fx-effect: dropshadow(gaussian, rgba(230, 126, 34, 0.3), 10, 0, 0, 0);
+}
+
 /* Khu vực 2 cọc bài giữa bàn */
 .center-pile {
     -fx-cursor: hand;

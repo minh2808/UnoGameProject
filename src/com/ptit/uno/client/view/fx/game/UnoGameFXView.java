@@ -145,6 +145,18 @@ public class UnoGameFXView {
         });
     }
 
+    public void promptRematch(String opponentUsername) {
+        if (controller != null) {
+            controller.promptRematch(opponentUsername);
+        }
+    }
+
+    public void startRematchCountdown() {
+        if (controller != null) {
+            controller.startRematchCountdownAnimation();
+        }
+    }
+
     public GameBoardUIBridge getController() {
         return controller;
     }

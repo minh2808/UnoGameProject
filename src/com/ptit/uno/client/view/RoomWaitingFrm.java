@@ -103,7 +103,7 @@ public class RoomWaitingFrm extends JFrame {
             if (players != null && i < players.size()) {
                 Player p = players.get(i);
                 boolean isHost = p.getUserId() == room.getHostId();
-                lblSeats[i].setText("Ghế #" + (i + 1) + ": " + p.getUsername() + (isHost ? " 👑 (Chủ phòng)" : ""));
+                lblSeats[i].setText("Ghế #" + (i + 1) + ": " + p.getUsername() + (isHost ? " [Chủ phòng]" : ""));
                 lblSeats[i].setForeground(new Color(0, 100, 0));
             } else {
                 lblSeats[i].setText("Ghế #" + (i + 1) + ": [Đang chờ người chơi...]");
@@ -117,7 +117,7 @@ public class RoomWaitingFrm extends JFrame {
         if (isHost) {
             if (room.getCurrentPlayerCount() >= 2) {
                 btnStartGame.setEnabled(true);
-                btnStartGame.setText("▶ BẮT ĐẦU VÁN ĐẤU (" + room.getCurrentPlayerCount() + " người)");
+                btnStartGame.setText("BẮT ĐẦU VÁN ĐẤU (" + room.getCurrentPlayerCount() + " người)");
                 btnStartGame.setBackground(new Color(34, 139, 34)); // Xanh lá cây nổi bật khi đã sẵn sàng
             } else {
                 btnStartGame.setEnabled(false);

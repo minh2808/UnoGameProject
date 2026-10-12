@@ -201,7 +201,7 @@ public class LobbyUIBridge implements Initializable {
     }
 
     /**
-     * Xử lý nút "⚡ Ghép ngẫu nhiên":
+     * Xử lý nút "Ghép ngẫu nhiên":
      * Tự động tìm phòng chờ khả dụng đầu tiên và vào ngay. Nếu không có phòng, hỏi người chơi có muốn tạo phòng mới không.
      */
     private void handleQuickMatch() {
@@ -255,7 +255,7 @@ public class LobbyUIBridge implements Initializable {
     }
 
     /**
-     * Xử lý nút "✉ Mời bạn":
+     * Xử lý nút "Mời bạn":
      * Kiểm tra người chơi được chọn trên bảng tblOnline và gửi lời mời nếu hợp lệ (đang Rảnh và không phải chính mình).
      */
     private void handleInviteSelected() {
@@ -281,7 +281,7 @@ public class LobbyUIBridge implements Initializable {
         // Debounce hiệu ứng nút
         if (btnInviteSelected != null) {
             String originalText = btnInviteSelected.getText();
-            btnInviteSelected.setText("✓ Đã gửi mời!");
+            btnInviteSelected.setText("Đã gửi mời!");
             btnInviteSelected.setDisable(true);
 
             PauseTransition pause = new PauseTransition(Duration.seconds(3));

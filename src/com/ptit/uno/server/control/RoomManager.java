@@ -45,17 +45,9 @@ public class RoomManager {
         if (r != null) {
             GameManager gm = gameManagers.get(roomId);
             if (gm != null && Room.STATUS_PLAYING.equals(r.getStatus())) {
-                // Đang trong trận: người chơi rời bàn sẽ bị chuyển thành Bot
+                // Đang trong trận: người chơi rời bàn / mất kết nối -> người còn lại thắng luôn
                 gm.handlePlayerDisconnect(userId);
-                // Kiểm tra nếu tất cả người chơi trong phòng đều là bot thì dừng ván và hủy phòng
-                boolean hasHuman = false;
-                for (Player p : r.getPlayers()) {
-                    if (!p.isBot()) {
-                        hasHuman = true;
-                        break;
-                    }
-                }
-                if (!hasHuman) {
+                if (r.getCurrentPlayerCount() == 0) {
                     gm.stopGame();
                     rooms.remove(roomId);
                     gameManagers.remove(roomId);

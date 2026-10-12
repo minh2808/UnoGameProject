@@ -10,6 +10,9 @@ import javafx.util.Duration;
 import org.controlsfx.control.Notifications;
 import org.controlsfx.control.action.Action;
 
+import org.kordamp.ikonli.javafx.FontIcon;
+import javafx.scene.paint.Color;
+
 import java.awt.Toolkit;
 
 /**
@@ -36,9 +39,9 @@ public class UnoNotification {
                 Toolkit.getDefaultToolkit().beep();
             } catch (Exception ignored) {}
 
-            StackPane iconPane = createGlowingBadge("🎮", "#38bdf8", "#1e40af");
+            StackPane iconPane = createGlowingBadge("fas-gamepad", "#38bdf8", "#1e40af");
 
-            Action acceptAction = new Action("✓ Vào phòng ngay", ae -> {
+            Action acceptAction = new Action("Vào phòng ngay", ae -> {
                 dismiss(ae);
                 if (onAccept != null) {
                     onAccept.run();
@@ -57,7 +60,7 @@ public class UnoNotification {
                     "-fx-cursor: hand;"
             );
 
-            Action declineAction = new Action("✕ Từ chối", ae -> {
+            Action declineAction = new Action("Từ chối", ae -> {
                 dismiss(ae);
                 if (onDecline != null) {
                     onDecline.run();
@@ -77,7 +80,7 @@ public class UnoNotification {
             );
 
             String message = "Người chơi '" + inviter + "' muốn thách đấu với bạn!\n"
-                    + "» Phòng: " + roomName + " (#" + String.format("%02d", roomId) + ")\n"
+                    + "Phòng: " + roomName + " (#" + String.format("%02d", roomId) + ")\n"
                     + "Tự động đóng sau 20 giây";
 
             Notifications notify = Notifications.create()
@@ -103,8 +106,8 @@ public class UnoNotification {
     public static void showFeedback(Window owner, boolean success, String title, String message) {
         Platform.runLater(() -> {
             StackPane iconPane = success
-                    ? createGlowingBadge("✓", "#34d399", "#065f46")
-                    : createGlowingBadge("⚠️", "#f59e0b", "#78350f");
+                    ? createGlowingBadge("fas-check-circle", "#34d399", "#065f46")
+                    : createGlowingBadge("fas-exclamation-triangle", "#f59e0b", "#78350f");
 
             Notifications notify = Notifications.create()
                     .title(title)
@@ -128,7 +131,7 @@ public class UnoNotification {
 
     public static void showInfo(Window owner, String title, String message) {
         Platform.runLater(() -> {
-            StackPane iconPane = createGlowingBadge("ℹ", "#38bdf8", "#1e3a8a");
+            StackPane iconPane = createGlowingBadge("fas-info-circle", "#38bdf8", "#1e3a8a");
             Notifications notify = Notifications.create()
                     .title(title)
                     .text(message)
@@ -150,7 +153,7 @@ public class UnoNotification {
 
     public static void showWarning(Window owner, String title, String message) {
         Platform.runLater(() -> {
-            StackPane iconPane = createGlowingBadge("⚠️", "#fbbf24", "#78350f");
+            StackPane iconPane = createGlowingBadge("fas-exclamation-triangle", "#fbbf24", "#78350f");
             Notifications notify = Notifications.create()
                     .title(title)
                     .text(message)
@@ -172,7 +175,7 @@ public class UnoNotification {
 
     public static void showError(Window owner, String title, String message) {
         Platform.runLater(() -> {
-            StackPane iconPane = createGlowingBadge("✕", "#f87171", "#7f1d1d");
+            StackPane iconPane = createGlowingBadge("fas-times-circle", "#f87171", "#7f1d1d");
             Notifications notify = Notifications.create()
                     .title(title)
                     .text(message)
@@ -188,7 +191,7 @@ public class UnoNotification {
         });
     }
 
-    private static StackPane createGlowingBadge(String emoji, String borderColor, String bgDark) {
+    private static StackPane createGlowingBadge(String iconLiteral, String borderColor, String bgDark) {
         StackPane badge = new StackPane();
         badge.setStyle(
                 "-fx-background-color: radial-gradient(center 50% 50%, radius 70%, " + borderColor + "33, " + bgDark + ");" +
@@ -202,9 +205,10 @@ public class UnoNotification {
                 "-fx-min-height: 44px;" +
                 "-fx-effect: dropshadow(three-pass-box, " + borderColor + "80, 10, 0, 0, 0);"
         );
-        Label lbl = new Label(emoji);
-        lbl.setStyle("-fx-font-size: 20px; -fx-alignment: center; -fx-text-fill: white;");
-        badge.getChildren().add(lbl);
+        FontIcon icon = new FontIcon(iconLiteral);
+        icon.setIconSize(18);
+        icon.setIconColor(Color.WHITE);
+        badge.getChildren().add(icon);
         return badge;
     }
 

@@ -28,7 +28,7 @@ public class LeaderboardFrm extends JFrame {
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
 
-        JLabel lblTitle = new JLabel("🏆 TOP CAO THỦ UNO ONLINE", JLabel.CENTER);
+        JLabel lblTitle = new JLabel("TOP CAO THỦ UNO ONLINE", JLabel.CENTER);
         lblTitle.setFont(new Font("Arial", Font.BOLD, 18));
         lblTitle.setForeground(new Color(180, 120, 0));
         mainPanel.add(lblTitle, BorderLayout.NORTH);

@@ -115,6 +115,21 @@ public class FXSoundHelper {
         playSound("change_color.mp3");
     }
 
+    public static void stopSound(String fileName) {
+        try {
+            AudioClip clip = soundCache.get(fileName);
+            if (clip != null && clip.isPlaying()) {
+                clip.stop();
+            }
+        } catch (Exception e) {
+            System.err.println("[FXSoundHelper] Lỗi dừng âm thanh " + fileName + ": " + e.getMessage());
+        }
+    }
+
+    public static void stopChangeColor() {
+        stopSound("change_color.mp3");
+    }
+
     public static void setSoundEnabled(boolean enabled) {
         soundEnabled = enabled;
     }

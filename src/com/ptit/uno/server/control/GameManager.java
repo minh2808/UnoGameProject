@@ -1,6 +1,7 @@
 package com.ptit.uno.server.control;
 
 import com.ptit.uno.model.*;
+import com.ptit.uno.protocol.*;
 import com.ptit.uno.server.dao.MatchDAO;
 import com.ptit.uno.server.dao.UserDAO;
 
@@ -12,7 +13,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * GameManager: Trọng tài quản lý toàn bộ vòng lặp và luật chơi bài UNO cho một phòng đấu.
- * Xử lý: Xào bài 108 lá, chia bài, bắt luật, timer đếm ngược 15s, Bot đánh thay khi ngắt kết nối.
+ * Xử lý: Xào bài 108 lá, chia bài, bắt luật, timer đếm ngược 15s (hết giờ tự bốc bài),
+ * xử người còn lại thắng luôn khi đối thủ ngắt kết nối / thoát bàn (không dùng Bot).
  */
 public class GameManager {
     private final Room room;
@@ -197,8 +199,6 @@ public class GameManager {
         startTurnTimer();
         broadcastGameState();
         serverControl.sendHandUpdate(userId, player.getHand());
-
-        checkBotAutoPlay();
         return true;
     }
 
@@ -241,8 +241,6 @@ public class GameManager {
         advanceTurn();
         startTurnTimer();
         broadcastGameState();
-
-        checkBotAutoPlay();
     }
 
     /**
@@ -339,46 +337,44 @@ public class GameManager {
     }
 
     /**
-     * Kiểm tra nếu người đến lượt là Bot (do người chơi ngắt kết nối), Bot tự động đánh.
+     * Xử lý người chơi mất kết nối / thoát trận giữa chừng:
+     * Luật game không dùng Bot đánh thay. Người còn lại sẽ được xử thắng ngay lập tức.
      */
-    private void checkBotAutoPlay() {
-        Player current = room.getPlayerBySeat(gameState.getCurrentTurnSeat());
-        if (current != null && current.isBot()) {
-            timerExecutor.schedule(() -> {
-                synchronized (GameManager.this) {
-                    botPlay(current);
-                }
-            }, 1500, TimeUnit.MILLISECONDS);
+    public synchronized void handlePlayerDisconnect(int userId) {
+        if (gameState == null || gameState.isGameOver()) {
+            return;
         }
-    }
 
-    private void botPlay(Player bot) {
-        // Tìm lá bài hợp lệ đầu tiên để đánh
-        Card validCard = null;
-        for (Card c : bot.getHand()) {
-            if (c.canPlayOn(gameState.getTopCard(), gameState.getActiveColor())) {
-                validCard = c;
+        Player disconnectedPlayer = room.getPlayer(userId);
+        if (disconnectedPlayer == null) {
+            return;
+        }
+
+        // Tìm người chơi đối thủ còn lại trong phòng
+        Player remainingWinner = null;
+        for (Player p : room.getPlayers()) {
+            if (p.getUserId() != userId) {
+                remainingWinner = p;
                 break;
             }
         }
 
-        if (validCard != null) {
-            handlePlayCard(bot.getUserId(), validCard, CardColor.RED);
-        } else {
-            handleDrawCard(bot.getUserId());
-        }
-    }
+        if (remainingWinner != null) {
+            String log = disconnectedPlayer.getUsername() + " đã ngắt kết nối/thoát trận! " 
+                    + remainingWinner.getUsername() + " giành chiến thắng!";
+            handleGameOver(remainingWinner, log);
 
-    /**
-     * Xử lý người chơi thoát trận: chuyển sang chế độ Bot để ván chơi tiếp tục.
-     */
-    public synchronized void handlePlayerDisconnect(int userId) {
-        Player p = room.getPlayer(userId);
-        if (p != null) {
-            p.setBot(true);
-            gameState.setLastActionLog(p.getUsername() + " đã thoát bàn. Bot sẽ tự động đánh thay!");
-            broadcastGameState();
-            checkBotAutoPlay();
+            // Sau khi ván kết thúc, xóa người chơi đã thoát khỏi phòng
+            room.removePlayer(userId);
+            // Chuyển chủ phòng cho người còn lại nếu người thoát là chủ phòng
+            if (room.getHostId() == userId) {
+                room.setHostId(remainingWinner.getUserId());
+                room.setHostName(remainingWinner.getUsername());
+            }
+            serverControl.broadcastRoomList();
+            serverControl.broadcastToRoom(room.getId(), new Message(MessageType.ROOM_UPDATE_BROADCAST, room));
+        } else {
+            stopGame();
         }
     }
 
@@ -392,16 +388,27 @@ public class GameManager {
      * Kết thúc ván chơi: Tính điểm và ghi nhận CSDL.
      */
     private void handleGameOver(Player winner) {
+        handleGameOver(winner, "VÁN ĐẤU KẾT THÚC! NGƯỜI CHIẾN THẮNG: " + winner.getUsername());
+    }
+
+    /**
+     * Kết thúc ván chơi kèm thông báo nguyên nhân cụ thể.
+     */
+    private void handleGameOver(Player winner, String actionLog) {
         if (timerTask != null) timerTask.cancel(true);
 
         gameState.setGameOver(true);
         gameState.setWinnerUsername(winner.getUsername());
-        gameState.setLastActionLog("VÁN ĐẤU KẾT THÚC! NGƯỜI CHIẾN THẮNG: " + winner.getUsername());
+        if (actionLog != null && !actionLog.isEmpty()) {
+            gameState.setLastActionLog(actionLog);
+        } else {
+            gameState.setLastActionLog("VÁN ĐẤU KẾT THÚC! NGƯỜI CHIẾN THẮNG: " + winner.getUsername());
+        }
 
-        // Tính điểm: Người thắng được +100 điểm, người thua bị trừ điểm
+        // Tính điểm: Người thắng được +20 điểm, người thua bị -20 điểm
         Map<Integer, Integer> scoreChanges = new HashMap<Integer, Integer>();
-        scoreChanges.put(winner.getUserId(), 100);
-        userDAO.updateStats(winner.getUserId(), 100, true);
+        scoreChanges.put(winner.getUserId(), 20);
+        userDAO.updateStats(winner.getUserId(), 20, true);
 
         for (Player p : room.getPlayers()) {
             if (p.getUserId() != winner.getUserId()) {
@@ -413,8 +420,11 @@ public class GameManager {
         // Lưu vào CSDL qua MatchDAO
         matchDAO.saveMatchResult(room.getName(), winner.getUserId(), totalTurnsCount, room.getPlayers(), scoreChanges);
 
+        // Phát sóng trạng thái bàn cờ (Game Over) đến người chơi trước khi cập nhật phòng
+        broadcastGameState();
+
         room.setStatus(Room.STATUS_WAITING);
-        // Xóa các player bot (người đã thoát bàn trong ván đấu) khỏi phòng khi về trạng thái chờ
+        // Xóa bot nếu có
         room.getPlayers().removeIf(Player::isBot);
         if (room.getCurrentPlayerCount() > 0 && room.getPlayer(room.getHostId()) == null) {
             Player newHost = room.getPlayers().get(0);
@@ -422,7 +432,6 @@ public class GameManager {
             room.setHostName(newHost.getUsername());
         }
         serverControl.updateRoomUsersStatus(room.getId(), "Đang trong phòng");
-        broadcastGameState();
     }
 
     /**

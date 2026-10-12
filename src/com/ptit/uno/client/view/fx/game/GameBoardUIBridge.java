@@ -33,6 +33,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.ResourceBundle;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import org.kordamp.ikonli.javafx.FontIcon;
 import com.ptit.uno.client.view.fx.util.UnoNotification;
 
 /**
@@ -75,6 +78,8 @@ public class GameBoardUIBridge implements Initializable {
     @FXML
     private ImageView discardPileImageView;
     @FXML
+    private HBox turnIndicatorBox;
+    @FXML
     private Label lblTurnTimer;
     @FXML
     private Label lblTurnInfo;
@@ -84,6 +89,8 @@ public class GameBoardUIBridge implements Initializable {
     private Button btnPlayCard;
     @FXML
     private ImageView currentColorIndicator;
+    @FXML
+    private Button btnCallUno;
 
     // 4. RIGHT: Chat & Tiện ích
     @FXML
@@ -100,6 +107,10 @@ public class GameBoardUIBridge implements Initializable {
     // 5. BOTTOM: Người chơi & Bài trên tay
     @FXML
     private Label lblPlayerName;
+    @FXML
+    private Label lblPlayerStatus;
+    @FXML
+    private Label lblPlayHint;
     @FXML
     private ScrollPane handScrollPane;
     @FXML
@@ -139,6 +150,10 @@ public class GameBoardUIBridge implements Initializable {
         void onLeaveGame();
 
         void onGameFinished();
+
+        default void onRematchRequest() {}
+
+        default void onRematchResponse(boolean accept) {}
     }
 
     public void setActionListener(GameActionListener listener) {
@@ -160,11 +175,22 @@ public class GameBoardUIBridge implements Initializable {
 
         // Khởi tạo trạng thái ban đầu sạch sẽ
         lblOpponentName.setText("Đối thủ");
-        lblOpponentCards.setText("🂠 0 lá");
+        lblOpponentCards.setText("0 lá");
         lblOpponentStatus.setText("Đang chờ");
+        if (lblTurnInfo != null) {
+            lblTurnInfo.setText("Lượt: Đang kết nối...");
+        }
+        if (lblPlayerStatus != null) {
+            lblPlayerStatus.setText("Đang chờ");
+        }
+        if (lblPlayHint != null) {
+            lblPlayHint.setText("Hoặc nhấp đúp thẻ");
+        }
         if (btnPlayCard != null) {
             btnPlayCard.setDisable(true);
         }
+
+        updateUnoButtonVisual();
 
         addGameLog("HỆ THỐNG: ", "Trận đấu đang chuẩn bị...", Color.web("#f1c40f"), Color.web("#ecf0f1"));
     }
@@ -244,36 +270,28 @@ public class GameBoardUIBridge implements Initializable {
                 }
             }
 
-            // Ghi log lượt đi khi có thay đổi
+            // 3. Xác định chính xác lượt đi hiện tại thuộc về ai
+            boolean myTurnStatus = false;
+            String turnPlayerName = "Đối thủ";
+            if (state.getPlayerSummaries() != null) {
+                for (GameState.PlayerSummary p : state.getPlayerSummaries()) {
+                    if (p.getSeatNumber() == state.getCurrentTurnSeat()) {
+                        turnPlayerName = p.getUsername() + (p.isBot() ? " (Bot)" : "");
+                        if (p.getUserId() == currentUserId) {
+                            myTurnStatus = true;
+                        }
+                    }
+                }
+            }
+            this.isMyTurn = myTurnStatus;
+            updateTurnPillDisplay(this.isMyTurn, turnPlayerName);
+
+            // Ghi log lượt đi và cập nhật bộ đếm khi lượt chuyển sang người mới
             if (state.getCurrentTurnSeat() != lastTurnSeat) {
                 lastTurnSeat = state.getCurrentTurnSeat();
-                boolean myTurnStatus = false;
-                String turnName = "Đối thủ";
-                if (state.getPlayerSummaries() != null) {
-                    for (GameState.PlayerSummary p : state.getPlayerSummaries()) {
-                        if (p.getUserId() == currentUserId) {
-                            if (p.getSeatNumber() == lastTurnSeat) myTurnStatus = true;
-                        }
-                        if (p.getSeatNumber() == lastTurnSeat) {
-                            turnName = p.getUsername();
-                        }
-                    }
-                }
-                this.isMyTurn = myTurnStatus;
-                updateTurnPillDisplay(this.isMyTurn);
-                addGameLog("HỆ THỐNG: ", isMyTurn ? "Đến lượt BẠN" : "Đến lượt " + turnName, Color.web("#f1c40f"),
-                        Color.web("#a0c4ab"));
-                
+                addGameLog("HỆ THỐNG: ", isMyTurn ? "Đến lượt BẠN đánh!" : "Đến lượt " + turnPlayerName,
+                        Color.web("#f1c40f"), Color.web("#a0c4ab"));
                 startCountdown(state.getRemainingSeconds() > 0 ? state.getRemainingSeconds() : 15);
-            } else {
-                if (state.getPlayerSummaries() != null) {
-                    for (GameState.PlayerSummary p : state.getPlayerSummaries()) {
-                        if (p.getUserId() == currentUserId && p.getSeatNumber() == state.getCurrentTurnSeat()) {
-                            this.isMyTurn = true;
-                            updateTurnPillDisplay(true);
-                        }
-                    }
-                }
             }
 
             // 3. Đếm ngược
@@ -315,30 +333,50 @@ public class GameBoardUIBridge implements Initializable {
                 if (countdownTimeline != null)
                     countdownTimeline.stop();
                 FXSoundHelper.playGameOver();
-                addGameLog("HỆ THỐNG: ", "Trận đấu kết thúc! Thắng: " + state.getWinnerUsername(), Color.web("#e74c3c"),
-                        Color.web("#f1c40f"));
-                Alert winAlert = new Alert(Alert.AlertType.INFORMATION);
-                winAlert.setTitle("Kết quả trận đấu");
-                winAlert.setHeaderText("TRẬN ĐẤU ĐÃ KẾT THÚC!");
-                winAlert.setContentText("Người chiến thắng: " + state.getWinnerUsername());
-                if (getBoardWindow() != null) {
-                    winAlert.initOwner(getBoardWindow());
-                }
-                winAlert.showAndWait();
-
-                if (actionListener != null) {
-                    actionListener.onGameFinished();
-                }
+                showGameOverModal(state, currentUserId);
             }
         });
     }
 
-    private void updateTurnPillDisplay(boolean myTurn) {
+    private void updateTurnPillDisplay(boolean myTurn, String currentTurnPlayerName) {
         if (lblTurnInfo != null) {
-            lblTurnInfo.setText(myTurn ? "Lượt: BẠN" : "Lượt: ĐỐI THỦ");
+            if (myTurn) {
+                lblTurnInfo.setText("ĐẾN LƯỢT BẠN ĐÁNH!");
+                lblTurnInfo.setStyle("-fx-text-fill: #2ecc71; -fx-font-size: 14px; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, rgba(46, 204, 113, 0.7), 8, 0, 0, 0);");
+            } else {
+                String name = (currentTurnPlayerName != null && !currentTurnPlayerName.isEmpty()) ? currentTurnPlayerName : "Đối thủ";
+                lblTurnInfo.setText("Lượt của: " + name);
+                lblTurnInfo.setStyle("-fx-text-fill: #f39c12; -fx-font-size: 14px; -fx-font-weight: bold;");
+            }
         }
         if (turnIndicatorDot != null) {
-            turnIndicatorDot.setFill(myTurn ? Color.web("#2ecc71") : Color.web("#e74c3c"));
+            turnIndicatorDot.setFill(myTurn ? Color.web("#2ecc71") : Color.web("#e67e22"));
+        }
+        if (turnIndicatorBox != null) {
+            turnIndicatorBox.getStyleClass().removeAll("turn-timer-pill-my-turn", "turn-timer-pill-opponent-turn");
+            if (myTurn) {
+                turnIndicatorBox.getStyleClass().add("turn-timer-pill-my-turn");
+            } else {
+                turnIndicatorBox.getStyleClass().add("turn-timer-pill-opponent-turn");
+            }
+        }
+        if (lblPlayerStatus != null) {
+            if (myTurn) {
+                lblPlayerStatus.setText("LƯỢT CỦA BẠN");
+                lblPlayerStatus.setStyle("-fx-text-fill: #2ecc71; -fx-font-weight: bold;");
+            } else {
+                lblPlayerStatus.setText("Đang chờ đối thủ...");
+                lblPlayerStatus.setStyle("-fx-text-fill: #95a5a6;");
+            }
+        }
+        if (lblPlayHint != null) {
+            if (myTurn) {
+                lblPlayHint.setText("Chọn thẻ bài để đánh");
+                lblPlayHint.setStyle("-fx-text-fill: #2ecc71; -fx-font-size: 11px;");
+            } else {
+                lblPlayHint.setText("Đang chờ đối thủ ra bài...");
+                lblPlayHint.setStyle("-fx-text-fill: #888888; -fx-font-size: 11px;");
+            }
         }
     }
 
@@ -513,6 +551,8 @@ public class GameBoardUIBridge implements Initializable {
                     handCardsBox.getChildren().add(cardView);
                 }
             }
+
+            updateUnoButtonVisual();
         });
     }
 
@@ -545,7 +585,7 @@ public class GameBoardUIBridge implements Initializable {
 
         selectedCardView.getStyleClass().add("hand-card-selected");
         if (btnPlayCard != null) {
-            btnPlayCard.setDisable(false);
+            btnPlayCard.setDisable(!isMyTurn);
         }
     }
 
@@ -900,6 +940,18 @@ public class GameBoardUIBridge implements Initializable {
         }
     }
 
+    private void showSwingWarning(String message) {
+        SwingUtilities.invokeLater(() -> {
+            JOptionPane.showMessageDialog(null, message, "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+        });
+    }
+
+    private void showSwingInfo(String title, String message) {
+        SwingUtilities.invokeLater(() -> {
+            JOptionPane.showMessageDialog(null, message, title, JOptionPane.INFORMATION_MESSAGE);
+        });
+    }
+
     @FXML
     private void handlePlayCard(ActionEvent event) {
         FXSoundHelper.playButtonClick();
@@ -907,12 +959,12 @@ public class GameBoardUIBridge implements Initializable {
             return;
 
         if (!isMyTurn) {
-            UnoNotification.showWarning(getBoardWindow(), "Chưa đến lượt của bạn!");
+            showSwingWarning("Chưa đến lượt của bạn!");
             return;
         }
 
         if (currentTopCard != null && !selectedCard.canPlayOn(currentTopCard, currentActiveColor)) {
-            UnoNotification.showWarning(getBoardWindow(), "Lá bài này không thể đánh! Phải cùng màu, cùng số/chức năng, hoặc bài Đen (Wild).");
+            showSwingWarning("Lá bài này không thể đánh!\nPhải cùng màu, cùng số/chức năng, hoặc bài Đen (Wild).");
             return;
         }
 
@@ -928,7 +980,7 @@ public class GameBoardUIBridge implements Initializable {
     private void handleDrawCard(MouseEvent event) {
         FXSoundHelper.playButtonClick();
         if (!isMyTurn) {
-            UnoNotification.showWarning(getBoardWindow(), "Chưa đến lượt của bạn!");
+            showSwingWarning("Chưa đến lượt của bạn!");
             return;
         }
 
@@ -942,10 +994,23 @@ public class GameBoardUIBridge implements Initializable {
 
     @FXML
     private void handleCallUno(ActionEvent event) {
+        if (currentHand == null || currentHand.size() != 1) {
+            showSwingWarning("Bạn chỉ được hô UNO khi trên tay còn đúng 1 lá bài!");
+            return;
+        }
         FXSoundHelper.playUnoSnap();
         showUnoCloud(true);
         if (actionListener != null) {
             actionListener.onCallUno();
+        }
+    }
+
+    private void updateUnoButtonVisual() {
+        if (btnCallUno == null) return;
+        if (currentHand != null && currentHand.size() == 1) {
+            btnCallUno.setStyle("-fx-effect: dropshadow(gaussian, #f39c12, 18, 0.7, 0, 0);");
+        } else {
+            btnCallUno.setStyle("-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 8, 0, 0, 3);");
         }
     }
 
@@ -964,35 +1029,32 @@ public class GameBoardUIBridge implements Initializable {
     @FXML
     private void handleHelp(ActionEvent event) {
         FXSoundHelper.playButtonClick();
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Trợ giúp UNO");
-        alert.setHeaderText("Luật chơi UNO cơ bản");
-        alert.setContentText("1. Đánh lá bài cùng màu hoặc cùng số/ký hiệu với lá bài trên bàn.\n" +
+        showSwingInfo("Trợ giúp UNO", "1. Đánh lá bài cùng màu hoặc cùng số/ký hiệu với lá bài trên bàn.\n" +
                 "2. Lá Đổi màu (Wild) có thể đánh bất cứ lúc nào.\n" +
                 "3. Khi còn 2 lá chuẩn bị đánh xuống 1 lá, nhớ bấm 'HÔ UNO!'.\n" +
                 "4. Nếu không có bài đánh, bấm vào chồng bài úp để bốc bài.");
-        if (getBoardWindow() != null) {
-            alert.initOwner(getBoardWindow());
-        }
-        alert.showAndWait();
     }
 
     @FXML
     public void handleLeave(ActionEvent event) {
         FXSoundHelper.playButtonClick();
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Bạn có chắc muốn thoát ván đấu? Bot sẽ đánh thay bạn!",
-                ButtonType.YES, ButtonType.NO);
-        if (btnLeave != null && btnLeave.getScene() != null && btnLeave.getScene().getWindow() != null) {
-            confirm.initOwner(btnLeave.getScene().getWindow());
-        }
-        confirm.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.YES) {
-                if (countdownTimeline != null) {
-                    countdownTimeline.stop();
-                }
-                if (actionListener != null) {
-                    actionListener.onLeaveGame();
-                }
+        SwingUtilities.invokeLater(() -> {
+            int choice = JOptionPane.showConfirmDialog(
+                null,
+                "Bạn có chắc muốn thoát ván đấu? Bot sẽ đánh thay bạn!",
+                "Xác nhận thoát bàn",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE
+            );
+            if (choice == JOptionPane.YES_OPTION) {
+                Platform.runLater(() -> {
+                    if (countdownTimeline != null) {
+                        countdownTimeline.stop();
+                    }
+                    if (actionListener != null) {
+                        actionListener.onLeaveGame();
+                    }
+                });
             }
         });
     }
@@ -1032,8 +1094,13 @@ public class GameBoardUIBridge implements Initializable {
         });
     }
 
+    private StackPane gameOverOverlay = null;
+
     private void showChooseColorDialog(Card card) {
         if (animationLayer == null) return;
+
+        // Bắt đầu phát âm thanh đổi màu khi bảng chọn màu xuất hiện
+        FXSoundHelper.playChangeColor();
 
         StackPane overlay = new StackPane();
         overlay.setStyle("-fx-background-color: rgba(0,0,0,0.6);");
@@ -1078,8 +1145,9 @@ public class GameBoardUIBridge implements Initializable {
             });
             
             btn.setOnMouseClicked(e -> {
+                // Tắt ngay âm thanh đổi màu khi người dùng chọn xong màu
+                FXSoundHelper.stopChangeColor();
                 FXSoundHelper.playButtonClick();
-                FXSoundHelper.playChangeColor(); // Chỉ kêu khi đã chọn xong màu
                 animationLayer.getChildren().remove(overlay);
                 animatePlayerPlayCard(card, chosenColor);
             });
@@ -1098,5 +1166,262 @@ public class GameBoardUIBridge implements Initializable {
         st.setToY(1.0);
         st.setInterpolator(Interpolator.SPLINE(0.25, 0.1, 0.25, 1.0)); // Fixed spline control point
         st.play();
+    }
+
+    /**
+     * Hiển thị bảng kết quả khi kết thúc trận đấu:
+     * - player1 thắng thì cộng 20, player2 thua thì -20
+     * - 2 nút: 1 là Đấu lại, 2 là Sảnh chính
+     */
+    private void showGameOverModal(GameState state, int currentUserId) {
+        if (animationLayer == null) return;
+        if (gameOverOverlay != null) {
+            animationLayer.getChildren().remove(gameOverOverlay);
+            gameOverOverlay = null;
+        }
+
+        gameOverOverlay = new StackPane();
+        gameOverOverlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.78);");
+        gameOverOverlay.setPrefSize(mainBoardPane.getWidth(), mainBoardPane.getHeight());
+
+        VBox cardBox = new VBox(15);
+        cardBox.setAlignment(Pos.CENTER);
+        cardBox.setMaxWidth(440);
+        cardBox.setStyle(
+            "-fx-background-color: linear-gradient(to bottom, #112217, #09130d);" +
+            "-fx-background-radius: 18px;" +
+            "-fx-border-color: #f1c40f;" +
+            "-fx-border-width: 2px;" +
+            "-fx-border-radius: 18px;" +
+            "-fx-padding: 25px 30px;" +
+            "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 25, 0, 0, 6);"
+        );
+
+        FontIcon trophyIcon = new FontIcon("fas-trophy");
+        trophyIcon.setIconSize(22);
+        trophyIcon.setIconColor(Color.web("#f1c40f"));
+
+        Label lblTitle = new Label("KẾT QUẢ TRẬN ĐẤU");
+        lblTitle.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #f1c40f; -fx-effect: dropshadow(gaussian, rgba(241, 196, 15, 0.6), 10, 0, 0, 0);");
+
+        HBox titleBox = new HBox(8, trophyIcon, lblTitle);
+        titleBox.setAlignment(Pos.CENTER);
+
+        String winner = state.getWinnerUsername() != null ? state.getWinnerUsername() : "Không rõ";
+        String loser = "Đối thủ";
+        boolean iAmWinner = false;
+
+        if (state.getPlayerSummaries() != null) {
+            for (GameState.PlayerSummary p : state.getPlayerSummaries()) {
+                if (!p.getUsername().equalsIgnoreCase(winner)) {
+                    loser = p.getUsername() + (p.isBot() ? " (Bot)" : "");
+                }
+                if (p.getUserId() == currentUserId && p.getUsername().equalsIgnoreCase(winner)) {
+                    iAmWinner = true;
+                }
+            }
+        }
+
+        FontIcon myStatusIcon = new FontIcon(iAmWinner ? "fas-check-circle" : "fas-times-circle");
+        myStatusIcon.setIconSize(16);
+        myStatusIcon.setIconColor(Color.web(iAmWinner ? "#2ecc71" : "#e74c3c"));
+
+        Label lblMyStatus = new Label(iAmWinner ? "BẠN ĐÃ CHIẾN THẮNG!" : "BẠN ĐÃ THUA CUỘC!");
+        lblMyStatus.setStyle(iAmWinner 
+            ? "-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2ecc71;" 
+            : "-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;");
+
+        HBox myStatusBox = new HBox(8, myStatusIcon, lblMyStatus);
+        myStatusBox.setAlignment(Pos.CENTER);
+
+        // Bảng kết quả điểm: Người thắng +20 điểm, người thua -20 điểm dùng Ikonli FontIcon
+        VBox scoreListBox = new VBox(10);
+        scoreListBox.setAlignment(Pos.CENTER);
+        scoreListBox.setStyle("-fx-background-color: rgba(255, 255, 255, 0.05); -fx-background-radius: 10px; -fx-padding: 12px 20px;");
+
+        FontIcon winnerIcon = new FontIcon("fas-trophy");
+        winnerIcon.setIconSize(16);
+        winnerIcon.setIconColor(Color.web("#f1c40f"));
+
+        Label lblWinnerScore = new Label(winner + " (Thắng) : +20 điểm");
+        lblWinnerScore.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #2ecc71;");
+        HBox winnerRow = new HBox(8, winnerIcon, lblWinnerScore);
+        winnerRow.setAlignment(Pos.CENTER);
+
+        FontIcon loserIcon = new FontIcon("fas-times-circle");
+        loserIcon.setIconSize(16);
+        loserIcon.setIconColor(Color.web("#e74c3c"));
+
+        Label lblLoserScore = new Label(loser + " (Thua) : -20 điểm");
+        lblLoserScore.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;");
+        HBox loserRow = new HBox(8, loserIcon, lblLoserScore);
+        loserRow.setAlignment(Pos.CENTER);
+
+        scoreListBox.getChildren().addAll(winnerRow, loserRow);
+
+        Label lblRematchStatus = new Label("");
+        lblRematchStatus.setStyle("-fx-font-size: 13px; -fx-text-fill: #f39c12; -fx-font-style: italic;");
+
+        HBox buttonBox = new HBox(15);
+        buttonBox.setAlignment(Pos.CENTER);
+
+        Button btnRematch = new Button("ĐẤU LẠI");
+        FontIcon rematchIcon = new FontIcon("fas-sync-alt");
+        rematchIcon.setIconSize(14);
+        rematchIcon.setIconColor(Color.WHITE);
+        btnRematch.setGraphic(rematchIcon);
+        btnRematch.setStyle(
+            "-fx-background-color: linear-gradient(to bottom, #2ecc71, #27ae60);" +
+            "-fx-text-fill: white;" +
+            "-fx-font-size: 14px;" +
+            "-fx-font-weight: bold;" +
+            "-fx-background-radius: 8px;" +
+            "-fx-padding: 9px 22px;" +
+            "-fx-cursor: hand;"
+        );
+
+        Button btnLobby = new Button("SẢNH CHÍNH");
+        FontIcon homeIcon = new FontIcon("fas-home");
+        homeIcon.setIconSize(14);
+        homeIcon.setIconColor(Color.WHITE);
+        btnLobby.setGraphic(homeIcon);
+        btnLobby.setStyle(
+            "-fx-background-color: linear-gradient(to bottom, #e74c3c, #c0392b);" +
+            "-fx-text-fill: white;" +
+            "-fx-font-size: 14px;" +
+            "-fx-font-weight: bold;" +
+            "-fx-background-radius: 8px;" +
+            "-fx-padding: 9px 22px;" +
+            "-fx-cursor: hand;"
+        );
+
+        btnRematch.setOnAction(e -> {
+            FXSoundHelper.playButtonClick();
+            btnRematch.setDisable(true);
+            btnRematch.setText("Đang đợi...");
+            FontIcon waitIcon = new FontIcon("fas-clock");
+            waitIcon.setIconSize(14);
+            waitIcon.setIconColor(Color.WHITE);
+            btnRematch.setGraphic(waitIcon);
+            lblRematchStatus.setText("Đang đợi đối thủ xác nhận sẵn sàng...");
+            if (actionListener != null) {
+                actionListener.onRematchRequest();
+            }
+        });
+
+        btnLobby.setOnAction(e -> {
+            FXSoundHelper.playButtonClick();
+            if (gameOverOverlay != null) {
+                animationLayer.getChildren().remove(gameOverOverlay);
+                gameOverOverlay = null;
+            }
+            if (actionListener != null) {
+                actionListener.onLeaveGame();
+            }
+        });
+
+        buttonBox.getChildren().addAll(btnRematch, btnLobby);
+        cardBox.getChildren().addAll(titleBox, myStatusBox, scoreListBox, lblRematchStatus, buttonBox);
+
+        gameOverOverlay.getChildren().add(cardBox);
+        animationLayer.getChildren().add(gameOverOverlay);
+
+        ScaleTransition st = new ScaleTransition(Duration.millis(350), cardBox);
+        st.setFromX(0.6);
+        st.setFromY(0.6);
+        st.setToX(1.0);
+        st.setToY(1.0);
+        st.setInterpolator(Interpolator.SPLINE(0.25, 0.1, 0.25, 1.0));
+        st.play();
+    }
+
+    /**
+     * Nhận lời mời đấu lại từ đối thủ: hiển thị thông báo Swing xác nhận
+     */
+    public void promptRematch(String opponentUsername) {
+        SwingUtilities.invokeLater(() -> {
+            int ans = JOptionPane.showConfirmDialog(
+                null,
+                "Đối thủ [" + opponentUsername + "] muốn đấu lại với bạn!\nBạn có đồng ý không?",
+                "Lời mời Đấu lại",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE
+            );
+            Platform.runLater(() -> {
+                if (ans == JOptionPane.YES_OPTION) {
+                    if (actionListener != null) {
+                        actionListener.onRematchResponse(true);
+                    }
+                } else {
+                    if (gameOverOverlay != null && animationLayer != null) {
+                        animationLayer.getChildren().remove(gameOverOverlay);
+                        gameOverOverlay = null;
+                    }
+                    if (actionListener != null) {
+                        actionListener.onRematchResponse(false);
+                        actionListener.onLeaveGame();
+                    }
+                }
+            });
+        });
+    }
+
+    /**
+     * Đếm ngược thời gian dùng animation khi cả 2 người chơi đã sẵn sàng đấu lại
+     */
+    public void startRematchCountdownAnimation() {
+        Platform.runLater(() -> {
+            if (gameOverOverlay != null && animationLayer != null) {
+                animationLayer.getChildren().remove(gameOverOverlay);
+                gameOverOverlay = null;
+            }
+
+            Label lblCountdown = new Label();
+            lblCountdown.setAlignment(Pos.CENTER);
+            lblCountdown.setMouseTransparent(true);
+            StackPane.setAlignment(lblCountdown, Pos.CENTER);
+
+            StackPane countPane = new StackPane(lblCountdown);
+            countPane.setMouseTransparent(true);
+            countPane.setPrefSize(mainBoardPane.getWidth(), mainBoardPane.getHeight());
+            animationLayer.getChildren().add(countPane);
+
+            String[] steps = {"3", "2", "1", "BẮT ĐẦU!"};
+            String[] colors = {"#f1c40f", "#e67e22", "#e74c3c", "#2ecc71"};
+
+            Timeline tl = new Timeline();
+            for (int i = 0; i < steps.length; i++) {
+                final int idx = i;
+                KeyFrame kf = new KeyFrame(Duration.millis(i * 900), e -> {
+                    lblCountdown.setText(steps[idx]);
+                    lblCountdown.setStyle(
+                        "-fx-font-size: " + (idx == 3 ? "48px" : "84px") + ";" +
+                        "-fx-font-weight: 900;" +
+                        "-fx-text-fill: " + colors[idx] + ";" +
+                        "-fx-effect: dropshadow(gaussian, " + colors[idx] + ", 25, 0.7, 0, 0);"
+                    );
+                    FXSoundHelper.playUnoSnap();
+
+                    ScaleTransition st = new ScaleTransition(Duration.millis(800), lblCountdown);
+                    st.setFromX(0.4);
+                    st.setFromY(0.4);
+                    st.setToX(1.3);
+                    st.setToY(1.3);
+
+                    FadeTransition ft = new FadeTransition(Duration.millis(800), lblCountdown);
+                    ft.setFromValue(1.0);
+                    ft.setToValue(0.1);
+
+                    ParallelTransition pt = new ParallelTransition(st, ft);
+                    pt.play();
+                });
+                tl.getKeyFrames().add(kf);
+            }
+
+            tl.setOnFinished(e -> {
+                animationLayer.getChildren().remove(countPane);
+            });
+            tl.play();
+        });
     }
 }
