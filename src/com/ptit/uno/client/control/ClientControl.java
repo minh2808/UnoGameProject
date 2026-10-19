@@ -412,7 +412,7 @@ public class ClientControl {
                         break;
 
                     case SPECTATE_ROOM_RESPONSE:
-                        if (msg.isSuccess()) {
+                        if (msg.isSuccess() && msg.getPayload() instanceof Room) {
                             this.currentRoom = (Room) msg.getPayload();
                             lobbyFrm.setVisible(false);
                             if (currentRoom.getPlayers() != null && currentRoom.getPlayers().size() >= 2) {
@@ -422,12 +422,28 @@ public class ClientControl {
                             }
                             spectatorView.setVisible(true);
                         } else {
-                            lobbyFrm.showMessage(msg.getMessage());
+                            String errMsg = (msg.getMessage() != null && !msg.getMessage().isEmpty())
+                                    ? msg.getMessage()
+                                    : "Không thể xem trận: Trận đấu đã kết thúc hoặc phòng không còn tồn tại!";
+                            UnoNotification.showError(getActiveWindow(), "Không thể xem trận", errMsg);
+                            sendData(new Message(MessageType.GET_ROOMS_REQUEST));
                         }
                         break;
 
                     case SPECTATOR_STATE_BROADCAST:
                         SpectatorState specState = (SpectatorState) msg.getPayload();
+                        if (specState == null || specState.getGameState() == null) {
+                            sendData(new Message(MessageType.LEAVE_ROOM_REQUEST));
+                            currentRoom = null;
+                            if (spectatorView != null) {
+                                spectatorView.setVisible(false);
+                            }
+                            lobbyFrm.setVisible(true);
+                            UnoNotification.showError(getActiveWindow(), "Lỗi xem trận đấu",
+                                    "Không thể tải dữ liệu bàn đấu! Trận đấu chưa khởi tạo xong hoặc đã kết thúc.");
+                            sendData(new Message(MessageType.GET_ROOMS_REQUEST));
+                            break;
+                        }
                         spectatorView.updateGameState(specState.getGameState(), specState.getHostHand(),
                                 specState.getGuestHand());
                         spectatorView.updateCountdown(specState.getGameState().getRemainingSeconds());
@@ -494,6 +510,8 @@ public class ClientControl {
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
+                UnoNotification.showError(getActiveWindow(), "Lỗi hệ thống",
+                        "Đã xảy ra lỗi khi xử lý dữ liệu: " + ex.getMessage());
             }
         });
     }

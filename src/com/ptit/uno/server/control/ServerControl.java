@@ -132,14 +132,18 @@ public class ServerControl {
     }
 
     public void broadcastToRoom(int roomId, GameState state) {
+        if (state == null) {
+            return;
+        }
         Message msg = new Message(MessageType.GAME_STATE_BROADCAST, state);
-        
-        GameManager gm = roomManager.getGameManager(roomId);
+
         Room room = roomManager.getRoom(roomId);
         Message specMsg = null;
-        if (gm != null && room != null && room.getPlayers().size() >= 2) {
-            List<Card> hostHand = room.getPlayers().get(0).getHand();
-            List<Card> guestHand = room.getPlayers().get(1).getHand();
+        if (room != null && !room.getPlayers().isEmpty()) {
+            List<Card> hostHand = new ArrayList<Card>(room.getPlayers().get(0).getHand());
+            List<Card> guestHand = room.getPlayers().size() >= 2
+                    ? new ArrayList<Card>(room.getPlayers().get(1).getHand())
+                    : new ArrayList<Card>();
             SpectatorState specState = new SpectatorState(state, hostHand, guestHand);
             specMsg = new Message(MessageType.SPECTATOR_STATE_BROADCAST, specState);
         }

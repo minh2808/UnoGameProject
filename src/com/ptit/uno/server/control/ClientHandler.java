@@ -100,10 +100,20 @@ public class ClientHandler extends Thread {
                 }
                 case CREATE_ROOM_REQUEST: {
                     Room r = (Room) req.getPayload();
+                    String roomName = (r != null && r.getName() != null) ? r.getName().trim() : "";
+                    if (roomName.isEmpty()) {
+                        sendMessage(new Message(MessageType.CREATE_ROOM_RESPONSE, null, false, "Tên phòng không được để trống!"));
+                        break;
+                    }
                     int maxP = (r.getMaxPlayers() > 0) ? Math.min(r.getMaxPlayers(), 2) : 2;
                     Room created = serverControl.getRoomManager().createRoom(
-                            r.getName(), currentUser.getId(), currentUser.getUsername(), maxP
+                            roomName, currentUser.getId(), currentUser.getUsername(), maxP
                     );
+                    if (created == null) {
+                        sendMessage(new Message(MessageType.CREATE_ROOM_RESPONSE, null, false,
+                                "Tên phòng \"" + roomName + "\" đã tồn tại! Vui lòng đặt tên khác."));
+                        break;
+                    }
                     this.currentRoomId = created.getId();
                     currentUser.setStatus("Đang trong phòng");
                     sendMessage(new Message(MessageType.CREATE_ROOM_RESPONSE, created, true, "Tạo phòng thành công!"));
@@ -130,24 +140,28 @@ public class ClientHandler extends Thread {
                 case SPECTATE_ROOM_REQUEST: {
                     int roomId = (Integer) req.getPayload();
                     Room targetRoom = serverControl.getRoomManager().getRoom(roomId);
-                    if (targetRoom != null && targetRoom.getStatus() == Room.STATUS_PLAYING) {
+                    GameManager gm = serverControl.getRoomManager().getGameManager(roomId);
+                    GameState state = (gm != null) ? gm.getGameState() : null;
+                    if (targetRoom != null
+                            && Room.STATUS_PLAYING.equals(targetRoom.getStatus())
+                            && state != null
+                            && !state.isGameOver()
+                            && targetRoom.getPlayers().size() >= 2) {
                         this.currentRoomId = roomId;
                         this.isSpectator = true;
                         currentUser.setStatus("Đang xem");
                         sendMessage(new Message(MessageType.SPECTATE_ROOM_RESPONSE, targetRoom, true, "Đang vào xem..."));
                         serverControl.broadcastOnlineUsers();
-                        
-                        // Nếu đang chơi thì lấy luôn trạng thái hiện tại gửi cho spectator
-                        GameManager gm = serverControl.getRoomManager().getGameManager(roomId);
-                        if (gm != null) {
-                            GameState state = gm.getGameState();
-                            List<Card> hostHand = targetRoom.getPlayers().get(0).getHand();
-                            List<Card> guestHand = targetRoom.getPlayers().get(1).getHand();
-                            SpectatorState specState = new SpectatorState(state, hostHand, guestHand);
-                            sendMessage(new Message(MessageType.SPECTATOR_STATE_BROADCAST, specState));
-                        }
+
+                        List<Card> hostHand = new java.util.ArrayList<Card>(targetRoom.getPlayers().get(0).getHand());
+                        List<Card> guestHand = new java.util.ArrayList<Card>(targetRoom.getPlayers().get(1).getHand());
+                        SpectatorState specState = new SpectatorState(state, hostHand, guestHand);
+                        sendMessage(new Message(MessageType.SPECTATOR_STATE_BROADCAST, specState));
                     } else {
-                        sendMessage(new Message(MessageType.SPECTATE_ROOM_RESPONSE, null, false, "Phòng chưa bắt đầu hoặc không tồn tại!"));
+                        sendMessage(new Message(MessageType.SPECTATE_ROOM_RESPONSE, null, false,
+                                "Không thể xem trận: Trận đấu đã kết thúc hoặc phòng không còn tồn tại!"));
+                        sendMessage(new Message(MessageType.ROOM_LIST_RESPONSE,
+                                serverControl.getRoomManager().getAllRooms()));
                     }
                     break;
                 }
@@ -178,6 +192,7 @@ public class ClientHandler extends Thread {
                         gm.startGame();
                         serverControl.getView().showMessage("Phòng #" + currentRoomId + " đã bắt đầu ván bài UNO!");
                         serverControl.updateRoomUsersStatus(currentRoomId, "Đang chơi");
+                        serverControl.broadcastRoomList();
                     } else {
                         sendMessage(new Message(MessageType.ERROR_NOTIFICATION, "Cần tối thiểu 2 người chơi để bắt đầu!"));
                     }
@@ -259,8 +274,15 @@ public class ClientHandler extends Thread {
                     }
 
                     if (room == null || room.isFull()) {
+                        String baseName = "Phòng của " + currentUser.getUsername();
+                        String autoName = baseName;
+                        int suffix = 2;
+                        while (serverControl.getRoomManager().isRoomNameExists(autoName)) {
+                            autoName = baseName + " (" + suffix + ")";
+                            suffix++;
+                        }
                         room = serverControl.getRoomManager().createRoom(
-                                "Phòng của " + currentUser.getUsername(),
+                                autoName,
                                 currentUser.getId(),
                                 currentUser.getUsername(),
                                 2
@@ -296,7 +318,7 @@ public class ClientHandler extends Thread {
                 case REMATCH_REQUEST: {
                     Room r = serverControl.getRoomManager().getRoom(currentRoomId);
                     if (r == null || currentUser == null) {
-                        sendMessage(new Message(MessageType.ERROR_NOTIFICATION, "Phòng không tồn tại!"));
+                        sendMessage(new Message(MessageType.ERROR_NOTIFICATION, "Đối thủ đã rời phòng hoặc phòng không còn tồn tại!"));
                         break;
                     }
 
@@ -323,6 +345,7 @@ public class ClientHandler extends Thread {
                                 gm.startGame();
                                 serverControl.getView().showMessage("Phòng #" + currentRoomId + " bắt đầu ván đấu lại!");
                                 serverControl.updateRoomUsersStatus(currentRoomId, "Đang chơi");
+                                serverControl.broadcastRoomList();
                             }
                         }, 3500, java.util.concurrent.TimeUnit.MILLISECONDS);
                     } else {
@@ -354,6 +377,8 @@ public class ClientHandler extends Thread {
                     ClientHandler opponentClient = (opponent != null) ? serverControl.getClientById(opponent.getUserId()) : null;
 
                     if (!accepted) {
+                        serverControl.getRoomManager().removeRoom(currentRoomId);
+                        serverControl.broadcastRoomList();
                         if (opponentClient != null) {
                             opponentClient.sendMessage(new Message(MessageType.ERROR_NOTIFICATION, currentUser.getUsername() + " đã từ chối đấu lại!"));
                         }
@@ -367,6 +392,7 @@ public class ClientHandler extends Thread {
                                 gm.startGame();
                                 serverControl.getView().showMessage("Phòng #" + currentRoomId + " bắt đầu ván đấu lại!");
                                 serverControl.updateRoomUsersStatus(currentRoomId, "Đang chơi");
+                                serverControl.broadcastRoomList();
                             }
                         }, 3500, java.util.concurrent.TimeUnit.MILLISECONDS);
                     }

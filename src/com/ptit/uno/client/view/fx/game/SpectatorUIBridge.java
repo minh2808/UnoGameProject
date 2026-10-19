@@ -80,50 +80,80 @@ public class SpectatorUIBridge implements Initializable {
 
     public void updateGameState(GameState state, List<Card> hostHand, List<Card> guestHand) {
         Platform.runLater(() -> {
-            // Update center pile
-            if (state.getTopCard() != null) {
-                renderCardFront(discardPileImageView, state.getTopCard());
-            }
-
-            // Update hands
-            renderHand(hostHandBox, hostHand);
-            renderHand(guestHandBox, guestHand);
-
-            // Turn info
-            if (state.getCurrentTurnSeat() == 0) {
-                lblHostStatus.setText("Tới lượt");
-                lblHostStatus.setStyle("-fx-text-fill: #f1c40f;");
-                lblGuestStatus.setText("Đang chờ");
-                lblGuestStatus.setStyle("-fx-text-fill: #7f8c8d;");
-                lblTurnInfo.setText("Lượt: " + lblHostName.getText());
-                turnIndicatorDot.setFill(Color.web("#e67e22"));
-            } else {
-                lblGuestStatus.setText("Tới lượt");
-                lblGuestStatus.setStyle("-fx-text-fill: #f1c40f;");
-                lblHostStatus.setText("Đang chờ");
-                lblHostStatus.setStyle("-fx-text-fill: #7f8c8d;");
-                lblTurnInfo.setText("Lượt: " + lblGuestName.getText());
-                turnIndicatorDot.setFill(Color.web("#2980b9"));
-            }
-
-            // Game log
-            if (state.getLastActionLog() != null && !state.getLastActionLog().isEmpty() && !state.getLastActionLog().equals(lastActionLog)) {
-                lastActionLog = state.getLastActionLog();
-                appendGameLog(lastActionLog, state.getCurrentTurnSeat() == 0);
-            }
-
-            if (state.isGameOver()) {
-                if (countdownTimeline != null) countdownTimeline.stop();
-                appendGameLog("HỆ THỐNG: Trận đấu kết thúc! Thắng: " + state.getWinnerUsername(), true);
-                javafx.scene.control.Alert winAlert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
-                winAlert.setTitle("Kết quả trận đấu");
-                winAlert.setHeaderText(null);
-                winAlert.setContentText("Trận đấu đã kết thúc!\nNgười chiến thắng: " + state.getWinnerUsername());
-                if (lblTurnInfo != null && lblTurnInfo.getScene() != null && lblTurnInfo.getScene().getWindow() != null) {
-                    winAlert.initOwner(lblTurnInfo.getScene().getWindow());
+            try {
+                if (state == null) {
+                    if (countdownTimeline != null) countdownTimeline.stop();
+                    javafx.stage.Window owner = (lblTurnInfo != null && lblTurnInfo.getScene() != null)
+                            ? lblTurnInfo.getScene().getWindow()
+                            : null;
+                    com.ptit.uno.client.view.fx.util.UnoNotification.showError(
+                            owner,
+                            "Lỗi xem trận đấu",
+                            "Không thể tải dữ liệu bàn đấu! Trận đấu chưa khởi tạo xong hoặc đã kết thúc."
+                    );
+                    if (onLeaveAction != null) {
+                        onLeaveAction.run();
+                    }
+                    return;
                 }
-                winAlert.showAndWait();
-                
+
+                // Update center pile
+                if (state.getTopCard() != null) {
+                    renderCardFront(discardPileImageView, state.getTopCard());
+                }
+
+                // Update hands
+                renderHand(hostHandBox, hostHand);
+                renderHand(guestHandBox, guestHand);
+
+                // Turn info
+                if (state.getCurrentTurnSeat() == 0) {
+                    lblHostStatus.setText("Tới lượt");
+                    lblHostStatus.setStyle("-fx-text-fill: #f1c40f;");
+                    lblGuestStatus.setText("Đang chờ");
+                    lblGuestStatus.setStyle("-fx-text-fill: #7f8c8d;");
+                    lblTurnInfo.setText("Lượt: " + lblHostName.getText());
+                    turnIndicatorDot.setFill(Color.web("#e67e22"));
+                } else {
+                    lblGuestStatus.setText("Tới lượt");
+                    lblGuestStatus.setStyle("-fx-text-fill: #f1c40f;");
+                    lblHostStatus.setText("Đang chờ");
+                    lblHostStatus.setStyle("-fx-text-fill: #7f8c8d;");
+                    lblTurnInfo.setText("Lượt: " + lblGuestName.getText());
+                    turnIndicatorDot.setFill(Color.web("#2980b9"));
+                }
+
+                // Game log
+                if (state.getLastActionLog() != null && !state.getLastActionLog().isEmpty() && !state.getLastActionLog().equals(lastActionLog)) {
+                    lastActionLog = state.getLastActionLog();
+                    appendGameLog(lastActionLog, state.getCurrentTurnSeat() == 0);
+                }
+
+                if (state.isGameOver()) {
+                    if (countdownTimeline != null) countdownTimeline.stop();
+                    appendGameLog("HỆ THỐNG: Trận đấu kết thúc! Thắng: " + state.getWinnerUsername(), true);
+                    javafx.scene.control.Alert winAlert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+                    winAlert.setTitle("Kết quả trận đấu");
+                    winAlert.setHeaderText(null);
+                    winAlert.setContentText("Trận đấu đã kết thúc!\nNgười chiến thắng: " + state.getWinnerUsername());
+                    if (lblTurnInfo != null && lblTurnInfo.getScene() != null && lblTurnInfo.getScene().getWindow() != null) {
+                        winAlert.initOwner(lblTurnInfo.getScene().getWindow());
+                    }
+                    winAlert.showAndWait();
+
+                    if (onLeaveAction != null) {
+                        onLeaveAction.run();
+                    }
+                }
+            } catch (Exception ex) {
+                javafx.stage.Window owner = (lblTurnInfo != null && lblTurnInfo.getScene() != null)
+                        ? lblTurnInfo.getScene().getWindow()
+                        : null;
+                com.ptit.uno.client.view.fx.util.UnoNotification.showError(
+                        owner,
+                        "Lỗi hiển thị trận đấu",
+                        "Đã xảy ra lỗi khi cập nhật trạng thái trận đấu: " + ex.getMessage()
+                );
                 if (onLeaveAction != null) {
                     onLeaveAction.run();
                 }
@@ -133,6 +163,9 @@ public class SpectatorUIBridge implements Initializable {
 
     public void setPlayersInfo(String hostName, String guestName) {
         Platform.runLater(() -> {
+            gameLogMessages.clear();
+            chatMessages.clear();
+            lastActionLog = "";
             lblHostName.setText(hostName);
             lblGuestName.setText(guestName);
         });

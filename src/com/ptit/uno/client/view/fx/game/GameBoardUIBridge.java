@@ -138,6 +138,8 @@ public class GameBoardUIBridge implements Initializable {
 
     // Callback kết nối với ClientControl
     private GameActionListener actionListener;
+    private TutorialActionGuard tutorialGuard;
+    private boolean tutorialMode = false;
 
     public interface GameActionListener {
         void onPlayCard(Card card, CardColor chosenColor);
@@ -157,8 +159,34 @@ public class GameBoardUIBridge implements Initializable {
         default void onRematchResponse(boolean accept) {}
     }
 
+    public interface TutorialActionGuard {
+        boolean canSelectCard(Card card);
+
+        boolean canPlayCard(Card card);
+
+        boolean canDrawCard();
+
+        boolean canCallUno();
+
+        boolean canChooseColor(CardColor color);
+
+        default void onColorPickerOpened(HBox colorButtons, StackPane overlay) {}
+    }
+
     public void setActionListener(GameActionListener listener) {
         this.actionListener = listener;
+    }
+
+    public void setTutorialGuard(TutorialActionGuard guard) {
+        this.tutorialGuard = guard;
+    }
+
+    public void setTutorialMode(boolean tutorialMode) {
+        this.tutorialMode = tutorialMode;
+    }
+
+    public boolean isTutorialMode() {
+        return tutorialMode;
     }
 
     @Override
@@ -292,11 +320,22 @@ public class GameBoardUIBridge implements Initializable {
                 lastTurnSeat = state.getCurrentTurnSeat();
                 addGameLog("HỆ THỐNG: ", isMyTurn ? "Đến lượt BẠN đánh!" : "Đến lượt " + turnPlayerName,
                         Color.web("#f1c40f"), Color.web("#a0c4ab"));
-                startCountdown(state.getRemainingSeconds() > 0 ? state.getRemainingSeconds() : 15);
+                if (!tutorialMode) {
+                    startCountdown(state.getRemainingSeconds() > 0 ? state.getRemainingSeconds() : 15);
+                }
             }
 
             // 3. Đếm ngược
-            startCountdown(state.getRemainingSeconds());
+            if (tutorialMode) {
+                if (countdownTimeline != null) {
+                    countdownTimeline.stop();
+                }
+                if (lblTurnTimer != null) {
+                    lblTurnTimer.setText("HƯỚNG DẪN");
+                }
+            } else {
+                startCountdown(state.getRemainingSeconds());
+            }
 
             // 4. Cập nhật danh sách người chơi & đối thủ
             List<GameState.PlayerSummary> summaries = state.getPlayerSummaries();
@@ -334,7 +373,9 @@ public class GameBoardUIBridge implements Initializable {
                 if (countdownTimeline != null)
                     countdownTimeline.stop();
                 FXSoundHelper.playGameOver();
-                showGameOverModal(state, currentUserId);
+                if (!tutorialMode) {
+                    showGameOverModal(state, currentUserId);
+                }
             }
         });
     }
@@ -560,6 +601,7 @@ public class GameBoardUIBridge implements Initializable {
     private StackPane createCardView(Card card) {
         StackPane container = new StackPane();
         container.getStyleClass().add("hand-card-view");
+        container.setUserData(card);
 
         ImageView iv = new ImageView(FXCardHelper.getCardImage(card));
         iv.setFitWidth(72);
@@ -569,6 +611,9 @@ public class GameBoardUIBridge implements Initializable {
         container.getChildren().add(iv);
 
         container.setOnMouseClicked((MouseEvent e) -> {
+            if (tutorialGuard != null && !tutorialGuard.canSelectCard(card)) {
+                return;
+            }
             FXSoundHelper.playButtonClick();
             selectCard(card, container);
             if (e.getClickCount() == 2) {
@@ -973,6 +1018,10 @@ public class GameBoardUIBridge implements Initializable {
         if (selectedCard == null)
             return;
 
+        if (tutorialGuard != null && !tutorialGuard.canPlayCard(selectedCard)) {
+            return;
+        }
+
         if (!isMyTurn) {
             showSwingWarning("Chưa đến lượt của bạn!");
             return;
@@ -993,6 +1042,9 @@ public class GameBoardUIBridge implements Initializable {
 
     @FXML
     private void handleDrawCard(MouseEvent event) {
+        if (tutorialGuard != null && !tutorialGuard.canDrawCard()) {
+            return;
+        }
         FXSoundHelper.playButtonClick();
         if (!isMyTurn) {
             showSwingWarning("Chưa đến lượt của bạn!");
@@ -1009,6 +1061,9 @@ public class GameBoardUIBridge implements Initializable {
 
     @FXML
     private void handleCallUno(ActionEvent event) {
+        if (tutorialGuard != null && !tutorialGuard.canCallUno()) {
+            return;
+        }
         if (currentHand == null || currentHand.size() != 1) {
             showSwingWarning("Bạn chỉ được hô UNO khi trên tay còn đúng 1 lá bài!");
             return;
@@ -1053,6 +1108,15 @@ public class GameBoardUIBridge implements Initializable {
     @FXML
     public void handleLeave(ActionEvent event) {
         FXSoundHelper.playButtonClick();
+        if (tutorialMode) {
+            if (countdownTimeline != null) {
+                countdownTimeline.stop();
+            }
+            if (actionListener != null) {
+                actionListener.onLeaveGame();
+            }
+            return;
+        }
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Xác nhận");
         alert.setHeaderText(null);
@@ -1135,7 +1199,8 @@ public class GameBoardUIBridge implements Initializable {
         colorButtons.setTranslateY(30); 
 
         Image colorsImg = loadSpriteImage("colors.png");
-        CardColor[] cols = {CardColor.RED, CardColor.YELLOW, CardColor.GREEN, CardColor.BLUE};
+        // Thứ tự 4 hình thoi trong colors.png từ trái sang phải: ĐỎ, XANH LÁ, XANH DƯƠNG, VÀNG
+        CardColor[] cols = {CardColor.RED, CardColor.GREEN, CardColor.BLUE, CardColor.YELLOW};
         // Dựa trên kích thước colors.png (412x102) => mỗi màu rộng khoảng 103px
         int bw = 103;
         int bh = 102;
@@ -1147,6 +1212,7 @@ public class GameBoardUIBridge implements Initializable {
             btn.setFitHeight(75);
             btn.setCursor(javafx.scene.Cursor.HAND);
             final CardColor chosenColor = cols[i];
+            btn.setUserData(chosenColor);
             
             // Hiệu ứng Hover
             btn.setOnMouseEntered(e -> {
@@ -1159,6 +1225,9 @@ public class GameBoardUIBridge implements Initializable {
             });
             
             btn.setOnMouseClicked(e -> {
+                if (tutorialGuard != null && !tutorialGuard.canChooseColor(chosenColor)) {
+                    return;
+                }
                 // Tắt ngay âm thanh đổi màu khi người dùng chọn xong màu
                 FXSoundHelper.stopChangeColor();
                 FXSoundHelper.playButtonClick();
@@ -1179,6 +1248,11 @@ public class GameBoardUIBridge implements Initializable {
         st.setToX(1.0); 
         st.setToY(1.0);
         st.setInterpolator(Interpolator.SPLINE(0.25, 0.1, 0.25, 1.0)); // Fixed spline control point
+        st.setOnFinished(e -> {
+            if (tutorialGuard != null) {
+                tutorialGuard.onColorPickerOpened(colorButtons, overlay);
+            }
+        });
         st.play();
     }
 
@@ -1439,4 +1513,72 @@ public class GameBoardUIBridge implements Initializable {
             tl.play();
         });
     }
+
+    // ==========================================
+    // GETTERS & HELPERS PHỤC VỤ TUTORIAL SPOTLIGHT
+    // ==========================================
+
+    public void resetBoardForTutorial() {
+        previousTopCard = null;
+        previousOpponentCardCount = -1;
+        previousOpponentUnoState = false;
+        isLocallyPlayingCard = false;
+        lastTurnSeat = -999;
+        currentHand.clear();
+        clearSelection();
+    }
+
+    public BorderPane getMainBoardPane() {
+        return mainBoardPane;
+    }
+
+    public Pane getAnimationLayer() {
+        return animationLayer;
+    }
+
+    public StackPane getDrawPileContainer() {
+        return drawPileContainer;
+    }
+
+    public StackPane getDiscardPileContainer() {
+        return discardPileContainer;
+    }
+
+    public Button getBtnCallUno() {
+        return btnCallUno;
+    }
+
+    public Button getBtnPlayCard() {
+        return btnPlayCard;
+    }
+
+    public HBox getHandCardsBox() {
+        return handCardsBox;
+    }
+
+    public ScrollPane getHandScrollPane() {
+        return handScrollPane;
+    }
+
+    public HBox getOpponentHandBox() {
+        return opponentHandBox;
+    }
+
+    public ImageView getCurrentColorIndicator() {
+        return currentColorIndicator;
+    }
+
+    public Node findCardNodeInHand(Card target) {
+        if (handCardsBox == null || target == null) return null;
+        for (Node n : handCardsBox.getChildren()) {
+            if (n.getUserData() instanceof Card) {
+                Card c = (Card) n.getUserData();
+                if (c.getColor() == target.getColor() && c.getValue() == target.getValue()) {
+                    return n;
+                }
+            }
+        }
+        return null;
+    }
 }
+

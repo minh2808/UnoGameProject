@@ -20,10 +20,29 @@ public class RoomManager {
         this.roomIdCounter = 1;
     }
 
+    public synchronized boolean isRoomNameExists(String roomName) {
+        if (roomName == null) {
+            return false;
+        }
+        String normalized = roomName.trim();
+        for (Room r : rooms.values()) {
+            if (!Room.STATUS_FINISHED.equals(r.getStatus())
+                    && r.getName() != null
+                    && r.getName().trim().equalsIgnoreCase(normalized)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public synchronized Room createRoom(String roomName, int hostId, String hostName, int maxPlayers) {
+        if (roomName == null || roomName.trim().isEmpty() || isRoomNameExists(roomName)) {
+            return null;
+        }
+        String normalizedName = roomName.trim();
         int id = roomIdCounter++;
         int actualMax = (maxPlayers > 0) ? Math.min(maxPlayers, 2) : 2;
-        Room r = new Room(id, roomName, hostId, hostName, actualMax);
+        Room r = new Room(id, normalizedName, hostId, hostName, actualMax);
         Player hostPlayer = new Player(hostId, hostName, 0);
         hostPlayer.setReady(true);
         r.addPlayer(hostPlayer);
@@ -47,11 +66,16 @@ public class RoomManager {
             if (gm != null && Room.STATUS_PLAYING.equals(r.getStatus())) {
                 // Đang trong trận: người chơi rời bàn / mất kết nối -> người còn lại thắng luôn
                 gm.handlePlayerDisconnect(userId);
-                if (r.getCurrentPlayerCount() == 0) {
+                rooms.remove(roomId);
+                gameManagers.remove(roomId);
+            } else if (Room.STATUS_FINISHED.equals(r.getStatus())) {
+                // Trận đấu đã kết thúc: khi 1 trong 2 người rời đi thì giải tán phòng luôn
+                r.removePlayer(userId);
+                if (gm != null) {
                     gm.stopGame();
-                    rooms.remove(roomId);
-                    gameManagers.remove(roomId);
                 }
+                rooms.remove(roomId);
+                gameManagers.remove(roomId);
             } else {
                 r.removePlayer(userId);
                 if (r.getCurrentPlayerCount() == 0) {
@@ -72,11 +96,17 @@ public class RoomManager {
     }
 
     public List<Room> getAllRooms() {
-        return new ArrayList<Room>(rooms.values());
+        List<Room> activeRooms = new ArrayList<Room>();
+        for (Room r : rooms.values()) {
+            if (!Room.STATUS_FINISHED.equals(r.getStatus())) {
+                activeRooms.add(r);
+            }
+        }
+        return activeRooms;
     }
 
     public int getRoomCount() {
-        return rooms.size();
+        return getAllRooms().size();
     }
 
     public void setGameManager(int roomId, GameManager gm) {
@@ -85,5 +115,17 @@ public class RoomManager {
 
     public GameManager getGameManager(int roomId) {
         return gameManagers.get(roomId);
+    }
+
+    public void removeGameManager(int roomId) {
+        GameManager gm = gameManagers.remove(roomId);
+        if (gm != null) {
+            gm.stopGame();
+        }
+    }
+
+    public void removeRoom(int roomId) {
+        removeGameManager(roomId);
+        rooms.remove(roomId);
     }
 }

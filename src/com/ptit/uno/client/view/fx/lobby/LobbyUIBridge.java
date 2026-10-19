@@ -37,6 +37,8 @@ public class LobbyUIBridge implements Initializable {
     @FXML
     private Label lblWinRate;
     @FXML
+    private Button btnTutorial;
+    @FXML
     private Button btnLeaderboard;
     @FXML
     private Button btnHistory;
@@ -207,6 +209,9 @@ public class LobbyUIBridge implements Initializable {
                     onCreateRoomAction.run();
             });
         }
+        if (btnTutorial != null) {
+            btnTutorial.setOnAction(e -> handleOpenTutorial());
+        }
         btnLeaderboard.setOnAction(e -> {
             if (onLeaderboardAction != null)
                 onLeaderboardAction.run();
@@ -222,6 +227,19 @@ public class LobbyUIBridge implements Initializable {
     }
 
     /**
+     * Mở bảng Hướng dẫn tân thủ 7 bước (giống CPanelTutorial của Uno Online).
+     * Khi người dùng ấn nút ">>", chuyển thẳng vào Bàn chơi Hướng dẫn Tân thủ tương tác.
+     */
+    private void handleOpenTutorial() {
+        javafx.stage.Window owner = getWindow();
+        TutorialFXDialog dialog = new TutorialFXDialog(owner, () -> {
+            TutorialPracticeFXStage practiceStage = new TutorialPracticeFXStage(owner, currentUsername);
+            practiceStage.show();
+        });
+        dialog.show();
+    }
+
+    /**
      * Xử lý nút "Ghép ngẫu nhiên":
      * Tự động tìm phòng chờ khả dụng đầu tiên và vào ngay. Nếu không có phòng, hỏi
      * người chơi có muốn tạo phòng mới không.
@@ -229,8 +247,7 @@ public class LobbyUIBridge implements Initializable {
     private void handleQuickMatch() {
         Room targetRoom = null;
         for (Room r : allRooms) {
-            boolean isPlaying = "PLAYING".equalsIgnoreCase(r.getStatus()) || r.isFull();
-            if (!isPlaying) {
+            if (Room.STATUS_WAITING.equalsIgnoreCase(r.getStatus()) && !r.isFull()) {
                 targetRoom = r;
                 break;
             }
@@ -335,7 +352,11 @@ public class LobbyUIBridge implements Initializable {
         Platform.runLater(() -> {
             allRooms.clear();
             if (rooms != null) {
-                allRooms.addAll(rooms);
+                for (Room r : rooms) {
+                    if (r != null && !Room.STATUS_FINISHED.equalsIgnoreCase(r.getStatus())) {
+                        allRooms.add(r);
+                    }
+                }
             }
             applyRoomFilter();
         });
@@ -358,7 +379,10 @@ public class LobbyUIBridge implements Initializable {
 
         List<Room> filtered = new ArrayList<>();
         for (Room r : allRooms) {
-            boolean isPlaying = "PLAYING".equalsIgnoreCase(r.getStatus()) || r.isFull();
+            if (Room.STATUS_FINISHED.equalsIgnoreCase(r.getStatus())) {
+                continue;
+            }
+            boolean isPlaying = Room.STATUS_PLAYING.equalsIgnoreCase(r.getStatus());
 
             // 1. Lọc theo trạng thái phòng
             if ("WAITING".equals(statusFilter) && isPlaying) {
@@ -445,9 +469,10 @@ public class LobbyUIBridge implements Initializable {
         javafx.scene.layout.Region spacer1 = new javafx.scene.layout.Region();
         javafx.scene.layout.HBox.setHgrow(spacer1, javafx.scene.layout.Priority.ALWAYS);
 
-        boolean isPlaying = "PLAYING".equalsIgnoreCase(r.getStatus()) || r.isFull();
-        String statusText = isPlaying ? "Đang chơi" : "Đang chờ";
-        String statusColor = isPlaying ? "#8c95a6" : "#4ff0a0";
+        boolean isPlaying = Room.STATUS_PLAYING.equalsIgnoreCase(r.getStatus());
+        boolean isFullWaiting = !isPlaying && r.isFull();
+        String statusText = isPlaying ? "Đang chơi" : (isFullWaiting ? "Đủ người" : "Đang chờ");
+        String statusColor = isPlaying ? "#8c95a6" : (isFullWaiting ? "#f39c12" : "#4ff0a0");
 
         Label lblStatus = new Label("• " + statusText);
         lblStatus.setStyle("-fx-text-fill: " + statusColor + "; -fx-background-color: transparent; -fx-border-color: "
@@ -480,8 +505,9 @@ public class LobbyUIBridge implements Initializable {
         javafx.scene.layout.Region spacer2 = new javafx.scene.layout.Region();
         javafx.scene.layout.HBox.setHgrow(spacer2, javafx.scene.layout.Priority.ALWAYS);
 
-        Button btnAction = new Button(isPlaying ? "Xem trận" : "Vào phòng");
+        Button btnAction;
         if (isPlaying) {
+            btnAction = new Button("Xem trận");
             btnAction.setStyle(
                     "-fx-background-color: #2a303c; -fx-text-fill: white; -fx-padding: 6 12; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 4; -fx-cursor: hand;");
             btnAction.setOnAction(e -> {
@@ -489,7 +515,13 @@ public class LobbyUIBridge implements Initializable {
                 if (onSpectateAction != null)
                     onSpectateAction.run();
             });
+        } else if (isFullWaiting) {
+            btnAction = new Button("Đã đầy");
+            btnAction.setDisable(true);
+            btnAction.setStyle(
+                    "-fx-background-color: #2a303c; -fx-text-fill: #8c95a6; -fx-padding: 6 12; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 4;");
         } else {
+            btnAction = new Button("Vào phòng");
             btnAction.setStyle(
                     "-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-padding: 6 12; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 4; -fx-cursor: hand;");
             btnAction.setOnAction(e -> {
@@ -545,7 +577,15 @@ public class LobbyUIBridge implements Initializable {
 
         Optional<String> result = dialog.showAndWait();
         if (result.isPresent() && !result.get().trim().isEmpty()) {
-            lastCreatedRoomName = result.get().trim();
+            String candidate = result.get().trim();
+            for (Room r : allRooms) {
+                if (r.getName() != null && r.getName().trim().equalsIgnoreCase(candidate)) {
+                    UnoNotification.showWarning(getWindow(), "Trùng tên phòng",
+                            "Tên phòng \"" + candidate + "\" đã tồn tại! Vui lòng đặt tên khác.");
+                    return null;
+                }
+            }
+            lastCreatedRoomName = candidate;
             return lastCreatedRoomName;
         }
         return null;

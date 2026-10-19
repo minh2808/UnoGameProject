@@ -12,6 +12,7 @@ public class Room implements Serializable {
 
     public static final String STATUS_WAITING = "WAITING";
     public static final String STATUS_PLAYING = "PLAYING";
+    public static final String STATUS_FINISHED = "FINISHED";
 
     private int id;
     private String name;

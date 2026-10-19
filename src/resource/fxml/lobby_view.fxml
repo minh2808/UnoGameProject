@@ -47,6 +47,11 @@
                 <Region HBox.hgrow="ALWAYS"/>
                 
                 <HBox spacing="10" alignment="CENTER_RIGHT">
+                    <Button fx:id="btnTutorial" text="Hướng dẫn tân thủ" styleClass="btn-ghost" style="-fx-text-fill: #b3bccf;">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-graduation-cap" iconColor="#4ff0a0" iconSize="14"/>
+                        </graphic>
+                    </Button>
                     <Button fx:id="btnLeaderboard" text="Bảng xếp hạng" styleClass="btn-ghost" style="-fx-text-fill: #b3bccf;">
                         <graphic>
                             <FontIcon iconLiteral="fas-crown" iconColor="#ff9f1c" iconSize="14"/>

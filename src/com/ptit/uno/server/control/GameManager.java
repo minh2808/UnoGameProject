@@ -42,7 +42,6 @@ public class GameManager {
      * Bắt đầu ván chơi: Tạo bộ bài 108 lá, xào, chia 7 lá cho mỗi người.
      */
     public synchronized void startGame() {
-        room.setStatus(Room.STATUS_PLAYING);
         totalTurnsCount = 0;
         initDeck();
 
@@ -61,9 +60,9 @@ public class GameManager {
         do {
             firstCard = drawCardFromDeck();
             CardValue val = firstCard.getValue();
-            // Nếu không phải lá số (Nghĩa là ordinal > NINE), thì nhét lại xuống cuối nọc và bốc lá khác
+            // Nếu không phải lá số (Nghĩa là ordinal > NINE), thì nhét lại xuống đáy nọc (vị trí 0) và bốc lá khác
             if (val.ordinal() > CardValue.NINE.ordinal()) {
-                drawPile.add(firstCard); 
+                drawPile.add(0, firstCard);
             } else {
                 break;
             }
@@ -72,14 +71,17 @@ public class GameManager {
         discardPile = new ArrayList<Card>();
         discardPile.add(firstCard);
 
-        gameState = new GameState();
-        gameState.setRoomId(room.getId());
-        gameState.setTopCard(firstCard);
-        gameState.setActiveColor(firstCard.getColor());
-        gameState.setCurrentTurnSeat(0); // Ghế 0 đi trước
-        gameState.setDirection(1);
-        gameState.setDrawPileCount(drawPile.size());
-        gameState.setLastActionLog("Trận đấu bắt đầu! Lá bài khởi đầu: " + firstCard);
+        GameState initialState = new GameState();
+        initialState.setRoomId(room.getId());
+        initialState.setTopCard(firstCard);
+        initialState.setActiveColor(firstCard.getColor());
+        initialState.setCurrentTurnSeat(0); // Ghế 0 đi trước
+        initialState.setDirection(1);
+        initialState.setDrawPileCount(drawPile.size());
+        initialState.setLastActionLog("Trận đấu bắt đầu! Lá bài khởi đầu: " + firstCard);
+        this.gameState = initialState;
+
+        room.setStatus(Room.STATUS_PLAYING);
 
         startTurnTimer();
         broadcastGameState();
@@ -423,7 +425,8 @@ public class GameManager {
         // Phát sóng trạng thái bàn cờ (Game Over) đến người chơi trước khi cập nhật phòng
         broadcastGameState();
 
-        room.setStatus(Room.STATUS_WAITING);
+        room.setStatus(Room.STATUS_FINISHED);
+        serverControl.getRoomManager().removeGameManager(room.getId());
         // Xóa bot nếu có
         room.getPlayers().removeIf(Player::isBot);
         if (room.getCurrentPlayerCount() > 0 && room.getPlayer(room.getHostId()) == null) {
@@ -432,6 +435,7 @@ public class GameManager {
             room.setHostName(newHost.getUsername());
         }
         serverControl.updateRoomUsersStatus(room.getId(), "Đang trong phòng");
+        serverControl.broadcastRoomList();
     }
 
     /**
