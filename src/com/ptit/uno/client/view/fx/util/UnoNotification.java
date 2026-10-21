@@ -42,6 +42,7 @@ public class UnoNotification {
             StackPane iconPane = createGlowingBadge("fas-gamepad", "#38bdf8", "#1e40af");
 
             Action acceptAction = new Action("Vào phòng ngay", ae -> {
+                com.ptit.uno.client.view.fx.game.FXSoundHelper.playButtonClick();
                 dismiss(ae);
                 if (onAccept != null) {
                     onAccept.run();
@@ -61,6 +62,7 @@ public class UnoNotification {
             );
 
             Action declineAction = new Action("Từ chối", ae -> {
+                com.ptit.uno.client.view.fx.game.FXSoundHelper.playButtonClick();
                 dismiss(ae);
                 if (onDecline != null) {
                     onDecline.run();

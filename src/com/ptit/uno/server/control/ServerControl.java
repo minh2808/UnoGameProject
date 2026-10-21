@@ -67,9 +67,21 @@ public class ServerControl {
         }
     }
 
-    public synchronized void addOnlineUser(ClientHandler handler) {
-        activeClients.add(handler);
+    public synchronized boolean addOnlineUser(ClientHandler handler) {
+        if (handler.getCurrentUser() != null) {
+            String username = handler.getCurrentUser().getUsername();
+            for (ClientHandler ch : activeClients) {
+                if (ch != handler && ch.getCurrentUser() != null
+                        && ch.getCurrentUser().getUsername().equalsIgnoreCase(username)) {
+                    return false;
+                }
+            }
+        }
+        if (!activeClients.contains(handler)) {
+            activeClients.add(handler);
+        }
         view.updateClientCount(activeClients.size());
+        return true;
     }
 
     public synchronized void removeOnlineUser(ClientHandler handler) {

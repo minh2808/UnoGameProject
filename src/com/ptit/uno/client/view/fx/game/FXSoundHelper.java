@@ -107,8 +107,43 @@ public class FXSoundHelper {
         playSound("game_over.mp3");
     }
 
+    private static long lastButtonClickTime = 0;
+
     public static void playButtonClick() {
+        long now = System.currentTimeMillis();
+        if (now - lastButtonClickTime < 60) {
+            return;
+        }
+        lastButtonClickTime = now;
         playSound("press_button.mp3");
+    }
+
+    /**
+     * Tự động gắn âm thanh click (giống nút '>' ở bảng hướng dẫn tân thủ)
+     * cho tất cả các Button, ToggleButton và nút đóng cửa sổ trên một Scene.
+     */
+    public static void attachButtonSound(javafx.scene.Scene scene) {
+        if (scene == null) return;
+        scene.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_PRESSED, e -> {
+            if (e.getTarget() instanceof javafx.scene.Node) {
+                javafx.scene.Node node = (javafx.scene.Node) e.getTarget();
+                while (node != null) {
+                    if (node instanceof javafx.scene.control.ButtonBase) {
+                        if (!node.isDisabled()) {
+                            playButtonClick();
+                        }
+                        break;
+                    }
+                    if (node.getStyleClass() != null &&
+                            (node.getStyleClass().contains("window-control-btn")
+                             || node.getStyleClass().contains("close-button"))) {
+                        playButtonClick();
+                        break;
+                    }
+                    node = node.getParent();
+                }
+            }
+        });
     }
 
     public static void playChangeColor() {

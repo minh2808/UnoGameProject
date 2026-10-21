@@ -38,7 +38,9 @@ public class SpectatorFXView extends JFrame {
 
             stage = new Stage();
             stage.setTitle("UNO - Spectator Mode");
-            stage.setScene(new Scene(root, 1100, 700));
+            Scene scene = new Scene(root, 1100, 700);
+            FXSoundHelper.attachButtonSound(scene);
+            stage.setScene(scene);
             stage.setResizable(false);
             
             // Override close behavior to trigger leave instead

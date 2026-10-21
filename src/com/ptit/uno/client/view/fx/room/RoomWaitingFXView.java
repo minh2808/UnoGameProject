@@ -71,6 +71,7 @@ public class RoomWaitingFXView extends RoomWaitingFrm {
             stage.setTitle("UNO Multiplayer - Phòng chờ (Đấu trường 1-1)");
             Scene scene = new Scene(root, 1100, 680);
             scene.setFill(Color.TRANSPARENT);
+            com.ptit.uno.client.view.fx.game.FXSoundHelper.attachButtonSound(scene);
             stage.setScene(scene);
             stage.setMinWidth(1000);
             stage.setMinHeight(620);

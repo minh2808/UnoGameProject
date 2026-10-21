@@ -1272,27 +1272,29 @@ public class GameBoardUIBridge implements Initializable {
         gameOverOverlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.78);");
         gameOverOverlay.setPrefSize(mainBoardPane.getWidth(), mainBoardPane.getHeight());
 
-        VBox cardBox = new VBox(15);
+        VBox cardBox = new VBox(18);
         cardBox.setAlignment(Pos.CENTER);
-        cardBox.setMaxWidth(440);
+        cardBox.setPrefWidth(450);
+        cardBox.setMaxWidth(450);
+        cardBox.setMaxHeight(Region.USE_PREF_SIZE);
         cardBox.setStyle(
-            "-fx-background-color: linear-gradient(to bottom, #112217, #09130d);" +
+            "-fx-background-color: linear-gradient(to bottom, #132a1c, #0a160f);" +
             "-fx-background-radius: 18px;" +
             "-fx-border-color: #f1c40f;" +
             "-fx-border-width: 2px;" +
             "-fx-border-radius: 18px;" +
-            "-fx-padding: 25px 30px;" +
-            "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 25, 0, 0, 6);"
+            "-fx-padding: 28px 32px;" +
+            "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.85), 28, 0.2, 0, 8);"
         );
 
         FontIcon trophyIcon = new FontIcon("fas-trophy");
-        trophyIcon.setIconSize(22);
+        trophyIcon.setIconSize(26);
         trophyIcon.setIconColor(Color.web("#f1c40f"));
 
         Label lblTitle = new Label("KẾT QUẢ TRẬN ĐẤU");
-        lblTitle.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #f1c40f; -fx-effect: dropshadow(gaussian, rgba(241, 196, 15, 0.6), 10, 0, 0, 0);");
+        lblTitle.setStyle("-fx-font-size: 24px; -fx-font-weight: 900; -fx-text-fill: #f1c40f; -fx-effect: dropshadow(gaussian, rgba(241, 196, 15, 0.55), 10, 0, 0, 0);");
 
-        HBox titleBox = new HBox(8, trophyIcon, lblTitle);
+        HBox titleBox = new HBox(10, trophyIcon, lblTitle);
         titleBox.setAlignment(Pos.CENTER);
 
         String winner = state.getWinnerUsername() != null ? state.getWinnerUsername() : "Không rõ";
@@ -1311,46 +1313,96 @@ public class GameBoardUIBridge implements Initializable {
         }
 
         FontIcon myStatusIcon = new FontIcon(iAmWinner ? "fas-check-circle" : "fas-times-circle");
-        myStatusIcon.setIconSize(16);
-        myStatusIcon.setIconColor(Color.web(iAmWinner ? "#2ecc71" : "#e74c3c"));
+        myStatusIcon.setIconSize(18);
+        myStatusIcon.setIconColor(Color.web(iAmWinner ? "#2ecc71" : "#ff5b62"));
 
         Label lblMyStatus = new Label(iAmWinner ? "BẠN ĐÃ CHIẾN THẮNG!" : "BẠN ĐÃ THUA CUỘC!");
         lblMyStatus.setStyle(iAmWinner 
-            ? "-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2ecc71;" 
-            : "-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;");
+            ? "-fx-font-size: 16px; -fx-font-weight: 800; -fx-text-fill: #2ecc71;" 
+            : "-fx-font-size: 16px; -fx-font-weight: 800; -fx-text-fill: #ff5b62;");
 
         HBox myStatusBox = new HBox(8, myStatusIcon, lblMyStatus);
         myStatusBox.setAlignment(Pos.CENTER);
+        myStatusBox.setStyle(
+            "-fx-background-color: " + (iAmWinner ? "rgba(46, 204, 113, 0.12);" : "rgba(231, 76, 60, 0.12);") +
+            "-fx-background-radius: 999px;" +
+            "-fx-border-color: " + (iAmWinner ? "rgba(46, 204, 113, 0.4);" : "rgba(231, 76, 60, 0.4);") +
+            "-fx-border-radius: 999px;" +
+            "-fx-padding: 6px 18px;"
+        );
 
-        // Bảng kết quả điểm: Người thắng +20 điểm, người thua -20 điểm dùng Ikonli FontIcon
+        // Bảng kết quả điểm: Căn thẳng hàng Icon + Tên bên trái, Điểm cộng/trừ bên phải
         VBox scoreListBox = new VBox(10);
         scoreListBox.setAlignment(Pos.CENTER);
-        scoreListBox.setStyle("-fx-background-color: rgba(255, 255, 255, 0.05); -fx-background-radius: 10px; -fx-padding: 12px 20px;");
+        scoreListBox.setFillWidth(true);
+        scoreListBox.setStyle(
+            "-fx-background-color: rgba(255, 255, 255, 0.05);" +
+            "-fx-background-radius: 12px;" +
+            "-fx-border-color: rgba(255, 255, 255, 0.1);" +
+            "-fx-border-radius: 12px;" +
+            "-fx-padding: 14px 18px;"
+        );
 
+        // Dòng người thắng
         FontIcon winnerIcon = new FontIcon("fas-trophy");
         winnerIcon.setIconSize(16);
         winnerIcon.setIconColor(Color.web("#f1c40f"));
+        StackPane winnerIconWrap = new StackPane(winnerIcon);
+        winnerIconWrap.setPrefWidth(24);
+        winnerIconWrap.setMinWidth(24);
 
-        Label lblWinnerScore = new Label(winner + " (Thắng) : +20 điểm");
-        lblWinnerScore.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #2ecc71;");
-        HBox winnerRow = new HBox(8, winnerIcon, lblWinnerScore);
-        winnerRow.setAlignment(Pos.CENTER);
+        Label lblWinnerName = new Label(winner + " (Thắng)");
+        lblWinnerName.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #2ecc71;");
 
+        Region winnerSpacer = new Region();
+        HBox.setHgrow(winnerSpacer, Priority.ALWAYS);
+
+        Label lblWinnerPts = new Label("+20 điểm");
+        lblWinnerPts.setStyle(
+            "-fx-font-size: 14px; -fx-font-weight: 800; -fx-text-fill: #2ecc71;" +
+            "-fx-background-color: rgba(46, 204, 113, 0.16); -fx-background-radius: 6px; -fx-padding: 3px 10px;"
+        );
+
+        HBox winnerRow = new HBox(10, winnerIconWrap, lblWinnerName, winnerSpacer, lblWinnerPts);
+        winnerRow.setAlignment(Pos.CENTER_LEFT);
+        winnerRow.setStyle("-fx-padding: 4px 6px;");
+
+        // Đường kẻ phân cách mờ giữa 2 người chơi
+        Separator rowSep = new Separator();
+        rowSep.setStyle("-fx-opacity: 0.15;");
+
+        // Dòng người thua
         FontIcon loserIcon = new FontIcon("fas-times-circle");
         loserIcon.setIconSize(16);
-        loserIcon.setIconColor(Color.web("#e74c3c"));
+        loserIcon.setIconColor(Color.web("#ff5b62"));
+        StackPane loserIconWrap = new StackPane(loserIcon);
+        loserIconWrap.setPrefWidth(24);
+        loserIconWrap.setMinWidth(24);
 
-        Label lblLoserScore = new Label(loser + " (Thua) : -20 điểm");
-        lblLoserScore.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;");
-        HBox loserRow = new HBox(8, loserIcon, lblLoserScore);
-        loserRow.setAlignment(Pos.CENTER);
+        Label lblLoserName = new Label(loser + " (Thua)");
+        lblLoserName.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #ff5b62;");
 
-        scoreListBox.getChildren().addAll(winnerRow, loserRow);
+        Region loserSpacer = new Region();
+        HBox.setHgrow(loserSpacer, Priority.ALWAYS);
+
+        Label lblLoserPts = new Label("-20 điểm");
+        lblLoserPts.setStyle(
+            "-fx-font-size: 14px; -fx-font-weight: 800; -fx-text-fill: #ff5b62;" +
+            "-fx-background-color: rgba(231, 76, 60, 0.16); -fx-background-radius: 6px; -fx-padding: 3px 10px;"
+        );
+
+        HBox loserRow = new HBox(10, loserIconWrap, lblLoserName, loserSpacer, lblLoserPts);
+        loserRow.setAlignment(Pos.CENTER_LEFT);
+        loserRow.setStyle("-fx-padding: 4px 6px;");
+
+        scoreListBox.getChildren().addAll(winnerRow, rowSep, loserRow);
 
         Label lblRematchStatus = new Label("");
         lblRematchStatus.setStyle("-fx-font-size: 13px; -fx-text-fill: #f39c12; -fx-font-style: italic;");
+        lblRematchStatus.setVisible(false);
+        lblRematchStatus.setManaged(false);
 
-        HBox buttonBox = new HBox(15);
+        HBox buttonBox = new HBox(16);
         buttonBox.setAlignment(Pos.CENTER);
 
         Button btnRematch = new Button("ĐẤU LẠI");
@@ -1358,14 +1410,17 @@ public class GameBoardUIBridge implements Initializable {
         rematchIcon.setIconSize(14);
         rematchIcon.setIconColor(Color.WHITE);
         btnRematch.setGraphic(rematchIcon);
+        btnRematch.setGraphicTextGap(8);
+        btnRematch.setPrefWidth(175);
+        btnRematch.setPrefHeight(42);
         btnRematch.setStyle(
             "-fx-background-color: linear-gradient(to bottom, #2ecc71, #27ae60);" +
             "-fx-text-fill: white;" +
             "-fx-font-size: 14px;" +
             "-fx-font-weight: bold;" +
             "-fx-background-radius: 8px;" +
-            "-fx-padding: 9px 22px;" +
-            "-fx-cursor: hand;"
+            "-fx-cursor: hand;" +
+            "-fx-effect: dropshadow(three-pass-box, rgba(46, 204, 113, 0.35), 10, 0.2, 0, 2);"
         );
 
         Button btnLobby = new Button("SẢNH CHÍNH");
@@ -1373,25 +1428,30 @@ public class GameBoardUIBridge implements Initializable {
         homeIcon.setIconSize(14);
         homeIcon.setIconColor(Color.WHITE);
         btnLobby.setGraphic(homeIcon);
+        btnLobby.setGraphicTextGap(8);
+        btnLobby.setPrefWidth(175);
+        btnLobby.setPrefHeight(42);
         btnLobby.setStyle(
             "-fx-background-color: linear-gradient(to bottom, #e74c3c, #c0392b);" +
             "-fx-text-fill: white;" +
             "-fx-font-size: 14px;" +
             "-fx-font-weight: bold;" +
             "-fx-background-radius: 8px;" +
-            "-fx-padding: 9px 22px;" +
-            "-fx-cursor: hand;"
+            "-fx-cursor: hand;" +
+            "-fx-effect: dropshadow(three-pass-box, rgba(231, 76, 60, 0.35), 10, 0.2, 0, 2);"
         );
 
         btnRematch.setOnAction(e -> {
             FXSoundHelper.playButtonClick();
             btnRematch.setDisable(true);
-            btnRematch.setText("Đang đợi...");
+            btnRematch.setText("ĐANG ĐỢI...");
             FontIcon waitIcon = new FontIcon("fas-clock");
             waitIcon.setIconSize(14);
             waitIcon.setIconColor(Color.WHITE);
             btnRematch.setGraphic(waitIcon);
             lblRematchStatus.setText("Đang đợi đối thủ xác nhận sẵn sàng...");
+            lblRematchStatus.setVisible(true);
+            lblRematchStatus.setManaged(true);
             if (actionListener != null) {
                 actionListener.onRematchRequest();
             }

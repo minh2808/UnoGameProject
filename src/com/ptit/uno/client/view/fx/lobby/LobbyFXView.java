@@ -77,6 +77,7 @@ public class LobbyFXView extends LobbyFrm {
             stage.setTitle("UNO Multiplayer - Sảnh chính (Lobby)");
             Scene scene = new Scene(root, 1140, 700);
             scene.setFill(Color.TRANSPARENT);
+            com.ptit.uno.client.view.fx.game.FXSoundHelper.attachButtonSound(scene);
             stage.setScene(scene);
             stage.setMinWidth(1060);
             stage.setMinHeight(640);

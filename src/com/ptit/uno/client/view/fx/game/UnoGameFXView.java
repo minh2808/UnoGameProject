@@ -58,7 +58,9 @@ public class UnoGameFXView {
 
             stage = new Stage();
             stage.setTitle("UNO Multiplayer Online - PTIT LTM");
-            stage.setScene(new Scene(root, 1150, 680));
+            Scene scene = new Scene(root, 1150, 680);
+            FXSoundHelper.attachButtonSound(scene);
+            stage.setScene(scene);
             stage.setMinWidth(1000);
             stage.setMinHeight(620);
             stage.centerOnScreen();

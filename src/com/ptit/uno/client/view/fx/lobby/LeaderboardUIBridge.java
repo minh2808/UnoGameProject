@@ -24,6 +24,13 @@ public class LeaderboardUIBridge {
     @FXML private TableColumn<LeaderboardRow, Integer> colWins;
     @FXML private TableColumn<LeaderboardRow, Integer> colTotal;
     
+    @FXML private Label lblTop1Name;
+    @FXML private Label lblTop1Stats;
+    @FXML private Label lblTop2Name;
+    @FXML private Label lblTop2Stats;
+    @FXML private Label lblTop3Name;
+    @FXML private Label lblTop3Stats;
+
     @FXML private Button btnClose;
     @FXML private Label lblCloseIcon;
 
@@ -52,7 +59,23 @@ public class LeaderboardUIBridge {
 
     public void renderLeaderboard(List<User> list) {
         listData.clear();
+
+        // Reset mặc định cho bục nhận giải
+        updatePodiumSlot(lblTop1Name, lblTop1Stats, null);
+        updatePodiumSlot(lblTop2Name, lblTop2Stats, null);
+        updatePodiumSlot(lblTop3Name, lblTop3Stats, null);
+
         if (list != null) {
+            if (list.size() >= 1) {
+                updatePodiumSlot(lblTop1Name, lblTop1Stats, list.get(0));
+            }
+            if (list.size() >= 2) {
+                updatePodiumSlot(lblTop2Name, lblTop2Stats, list.get(1));
+            }
+            if (list.size() >= 3) {
+                updatePodiumSlot(lblTop3Name, lblTop3Stats, list.get(2));
+            }
+
             int rank = 1;
             for (User u : list) {
                 listData.add(new LeaderboardRow(
@@ -63,6 +86,17 @@ public class LeaderboardUIBridge {
                         u.getTotalMatches()
                 ));
             }
+        }
+    }
+
+    private void updatePodiumSlot(Label lblName, Label lblStats, User u) {
+        if (lblName == null || lblStats == null) return;
+        if (u != null) {
+            lblName.setText(u.getUsername());
+            lblStats.setText(u.getScore() + " Elo • " + u.getWinMatches() + " Thắng");
+        } else {
+            lblName.setText("Chưa có");
+            lblStats.setText("--- Elo • 0 Thắng");
         }
     }
 

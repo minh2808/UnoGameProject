@@ -51,6 +51,7 @@ public class LeaderboardFXView extends LeaderboardFrm {
             stage.setTitle("BẢNG XẾP HẠNG CAO THỦ UNO");
             Scene scene = new Scene(root);
             scene.setFill(Color.TRANSPARENT);
+            com.ptit.uno.client.view.fx.game.FXSoundHelper.attachButtonSound(scene);
             stage.setScene(scene);
             
             // To make it behave like a dialog

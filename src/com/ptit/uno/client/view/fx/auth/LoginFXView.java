@@ -64,6 +64,7 @@ public class LoginFXView extends LoginFrm {
             stage.setTitle("UNO Multiplayer - Đăng nhập (PTIT LTM)");
             Scene scene = new Scene(root, 960, 580);
             scene.setFill(Color.TRANSPARENT);
+            com.ptit.uno.client.view.fx.game.FXSoundHelper.attachButtonSound(scene);
             stage.setScene(scene);
             stage.setMinWidth(900);
             stage.setMinHeight(550);

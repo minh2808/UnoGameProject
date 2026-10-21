@@ -66,10 +66,22 @@ public class ClientHandler extends Thread {
             switch (req.getType()) {
                 case LOGIN_REQUEST: {
                     User u = (User) req.getPayload();
-                    User loggedIn = userDAO.checkLogin(u.getUsername(), u.getPassword());
+                    if (u == null || u.getUsername() == null) {
+                        sendMessage(new Message(MessageType.LOGIN_RESPONSE, null, false, "Thông tin đăng nhập không hợp lệ!"));
+                        break;
+                    }
+                    if (serverControl.getClientByUsername(u.getUsername().trim()) != null) {
+                        sendMessage(new Message(MessageType.LOGIN_RESPONSE, null, false, "Tài khoản này đang được đăng nhập ở nơi khác!"));
+                        break;
+                    }
+                    User loggedIn = userDAO.checkLogin(u.getUsername().trim(), u.getPassword());
                     if (loggedIn != null) {
                         this.currentUser = loggedIn;
-                        serverControl.addOnlineUser(this);
+                        if (!serverControl.addOnlineUser(this)) {
+                            this.currentUser = null;
+                            sendMessage(new Message(MessageType.LOGIN_RESPONSE, null, false, "Tài khoản này đang được đăng nhập ở nơi khác!"));
+                            break;
+                        }
                         sendMessage(new Message(MessageType.LOGIN_RESPONSE, loggedIn, true, "Đăng nhập thành công!"));
                         serverControl.getView().showMessage("User đăng nhập: " + loggedIn.getUsername());
                         serverControl.broadcastOnlineUsers();

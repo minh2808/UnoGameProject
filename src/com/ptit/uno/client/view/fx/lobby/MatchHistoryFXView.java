@@ -52,6 +52,7 @@ public class MatchHistoryFXView extends MatchHistoryFrm {
             stage.setTitle("LỊCH SỬ CÁC VÁN ĐẤU");
             Scene scene = new Scene(root);
             scene.setFill(Color.TRANSPARENT);
+            com.ptit.uno.client.view.fx.game.FXSoundHelper.attachButtonSound(scene);
             stage.setScene(scene);
             
             // To make it behave like a dialog
