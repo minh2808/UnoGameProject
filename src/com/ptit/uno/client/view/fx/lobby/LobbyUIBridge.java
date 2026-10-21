@@ -1,5 +1,6 @@
 package com.ptit.uno.client.view.fx.lobby;
 
+import com.ptit.uno.client.view.fx.game.FXSoundHelper;
 import com.ptit.uno.client.view.fx.util.UnoNotification;
 import com.ptit.uno.model.Room;
 import com.ptit.uno.model.User;
@@ -15,7 +16,10 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.stage.Popup;
 import javafx.util.Duration;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -43,7 +47,13 @@ public class LobbyUIBridge implements Initializable {
     @FXML
     private Button btnHistory;
     @FXML
+    private Button btnAudio;
+    @FXML
+    private FontIcon iconAudio;
+    @FXML
     private Button btnLogout;
+
+    private Popup audioPopup;
 
     @FXML
     private Label lblRoomCount;
@@ -220,10 +230,169 @@ public class LobbyUIBridge implements Initializable {
             if (onHistoryAction != null)
                 onHistoryAction.run();
         });
+        if (btnAudio != null) {
+            btnAudio.setOnAction(e -> handleToggleAudioPopup());
+            updateAudioIcon();
+        }
         btnLogout.setOnAction(e -> {
             if (onLogoutAction != null)
                 onLogoutAction.run();
         });
+    }
+
+    private void updateAudioIcon() {
+        if (iconAudio == null) return;
+        boolean isMuted = FXSoundHelper.isLobbyMusicMuted();
+        double vol = FXSoundHelper.getLobbyMusicVolume();
+        if (isMuted || vol <= 0.001) {
+            iconAudio.setIconLiteral("fas-volume-mute");
+            iconAudio.setIconColor(Color.web("#ff5b62"));
+        } else if (vol <= 0.5) {
+            iconAudio.setIconLiteral("fas-volume-down");
+            iconAudio.setIconColor(Color.web("#00d2d3"));
+        } else {
+            iconAudio.setIconLiteral("fas-volume-up");
+            iconAudio.setIconColor(Color.web("#00d2d3"));
+        }
+    }
+
+    private void handleToggleAudioPopup() {
+        if (btnAudio == null || btnAudio.getScene() == null || btnAudio.getScene().getWindow() == null) return;
+        if (audioPopup == null) {
+            initAudioPopup();
+        }
+
+        if (audioPopup.isShowing()) {
+            audioPopup.hide();
+        } else {
+            javafx.geometry.Bounds bounds = btnAudio.localToScreen(btnAudio.getBoundsInLocal());
+            double x = bounds.getMinX() - 100;
+            double y = bounds.getMaxY() + 8;
+            audioPopup.show(btnAudio.getScene().getWindow(), x, y);
+        }
+    }
+
+    private void initAudioPopup() {
+        audioPopup = new Popup();
+        audioPopup.setAutoHide(true);
+
+        VBox card = new VBox(10);
+        card.setPrefWidth(240);
+        card.setStyle(
+            "-fx-background-color: #0b1a3d;" +
+            "-fx-border-color: #2f7bff;" +
+            "-fx-border-width: 1.5px;" +
+            "-fx-border-radius: 10px;" +
+            "-fx-background-radius: 10px;" +
+            "-fx-padding: 12px 14px;" +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.75), 18, 0.25, 0, 4);"
+        );
+
+        // Header: Icon + Title + Percent Label
+        HBox header = new HBox(8);
+        header.setAlignment(Pos.CENTER_LEFT);
+
+        FontIcon musicIcon = new FontIcon("fas-music");
+        musicIcon.setIconSize(13);
+        musicIcon.setIconColor(Color.web("#00d2d3"));
+
+        Label lblTitle = new Label("Nhạc nền Sảnh");
+        lblTitle.setStyle("-fx-text-fill: #eaf1ff; -fx-font-weight: bold; -fx-font-size: 13px;");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        Label lblPercent = new Label();
+        lblPercent.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;");
+
+        header.getChildren().addAll(musicIcon, lblTitle, spacer, lblPercent);
+
+        // Volume Slider (0% to 100%)
+        Slider volumeSlider = new Slider(0.0, 1.0, FXSoundHelper.getLobbyMusicVolume());
+        volumeSlider.setPrefWidth(210);
+        volumeSlider.setCursor(javafx.scene.Cursor.HAND);
+        volumeSlider.setStyle(
+            "-fx-control-inner-background: #081739;" +
+            "-fx-accent: #00d2d3;"
+        );
+
+        // Quick Mute / Unmute Button
+        Button btnMuteToggle = new Button();
+        btnMuteToggle.setMaxWidth(Double.MAX_VALUE);
+        btnMuteToggle.setCursor(javafx.scene.Cursor.HAND);
+
+        Runnable refreshUI = () -> {
+            boolean isMuted = FXSoundHelper.isLobbyMusicMuted();
+            double vol = FXSoundHelper.getLobbyMusicVolume();
+
+            if (isMuted || vol <= 0.001) {
+                lblPercent.setText("Tắt tiếng");
+                lblPercent.setTextFill(Color.web("#ff5b62"));
+
+                btnMuteToggle.setText("Bật âm thanh");
+                FontIcon mi = new FontIcon("fas-volume-up");
+                mi.setIconSize(12);
+                mi.setIconColor(Color.web("#00d2d3"));
+                btnMuteToggle.setGraphic(mi);
+                btnMuteToggle.setStyle(
+                    "-fx-background-color: rgba(0, 210, 211, 0.12);" +
+                    "-fx-text-fill: #00d2d3;" +
+                    "-fx-border-color: #00d2d3;" +
+                    "-fx-border-radius: 6px;" +
+                    "-fx-background-radius: 6px;" +
+                    "-fx-font-size: 12px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-padding: 5 10;"
+                );
+            } else {
+                int pct = (int) Math.round(vol * 100);
+                lblPercent.setText(pct + "%");
+                lblPercent.setTextFill(Color.web("#00d2d3"));
+
+                btnMuteToggle.setText("Tắt tiếng");
+                FontIcon mi = new FontIcon("fas-volume-mute");
+                mi.setIconSize(12);
+                mi.setIconColor(Color.web("#ff5b62"));
+                btnMuteToggle.setGraphic(mi);
+                btnMuteToggle.setStyle(
+                    "-fx-background-color: rgba(229, 56, 59, 0.15);" +
+                    "-fx-text-fill: #ff5b62;" +
+                    "-fx-border-color: #ff5b62;" +
+                    "-fx-border-radius: 6px;" +
+                    "-fx-background-radius: 6px;" +
+                    "-fx-font-size: 12px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-padding: 5 10;"
+                );
+            }
+            updateAudioIcon();
+        };
+
+        volumeSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            double v = newVal.doubleValue();
+            FXSoundHelper.setLobbyMusicVolume(v);
+            refreshUI.run();
+        });
+
+        btnMuteToggle.setOnAction(e -> {
+            boolean wasMuted = FXSoundHelper.isLobbyMusicMuted();
+            if (wasMuted) {
+                FXSoundHelper.setLobbyMusicMuted(false);
+                if (FXSoundHelper.getLobbyMusicVolume() <= 0.05) {
+                    volumeSlider.setValue(0.5);
+                } else {
+                    volumeSlider.setValue(FXSoundHelper.getLobbyMusicVolume());
+                }
+            } else {
+                FXSoundHelper.setLobbyMusicMuted(true);
+            }
+            refreshUI.run();
+        });
+
+        refreshUI.run();
+
+        card.getChildren().addAll(header, volumeSlider, btnMuteToggle);
+        audioPopup.getContent().add(card);
     }
 
     /**

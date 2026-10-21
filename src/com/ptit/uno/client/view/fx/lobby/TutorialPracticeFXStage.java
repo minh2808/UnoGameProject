@@ -153,6 +153,7 @@ public class TutorialPracticeFXStage {
 
             stage.setOnCloseRequest(e -> {
                 stopAllAnimations();
+                FXSoundHelper.playLobbyMusic();
             });
 
         } catch (Exception e) {
@@ -163,6 +164,7 @@ public class TutorialPracticeFXStage {
 
     public void show() {
         if (stage != null) {
+            FXSoundHelper.stopLobbyMusic();
             stage.show();
             stage.toFront();
             startScriptedTutorialMatch();
@@ -1269,6 +1271,7 @@ public class TutorialPracticeFXStage {
         if (stage != null) {
             stage.close();
         }
+        FXSoundHelper.playLobbyMusic();
     }
 
     private Image loadSprite(String fileName) {

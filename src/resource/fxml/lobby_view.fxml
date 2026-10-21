@@ -62,6 +62,14 @@
                             <FontIcon iconLiteral="fas-history" iconColor="#4c8bf5" iconSize="14"/>
                         </graphic>
                     </Button>
+                    <Button fx:id="btnAudio" styleClass="btn-ghost" style="-fx-padding: 8px 12px;">
+                        <graphic>
+                            <FontIcon fx:id="iconAudio" iconLiteral="fas-volume-up" iconColor="#00d2d3" iconSize="14"/>
+                        </graphic>
+                        <tooltip>
+                            <Tooltip text="Điều chỉnh âm lượng nhạc nền" />
+                        </tooltip>
+                    </Button>
                     <Button fx:id="btnLogout" text="Đăng xuất" styleClass="btn-danger">
                         <graphic>
                             <FontIcon iconLiteral="fas-sign-out-alt" iconColor="white" iconSize="14"/>

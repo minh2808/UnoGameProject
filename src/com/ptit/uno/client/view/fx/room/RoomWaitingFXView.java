@@ -1,6 +1,7 @@
 package com.ptit.uno.client.view.fx.room;
 
 import com.ptit.uno.client.view.RoomWaitingFrm;
+import com.ptit.uno.client.view.fx.game.FXSoundHelper;
 import com.ptit.uno.client.view.fx.util.UnoNotification;
 import com.ptit.uno.model.ChatMessage;
 import com.ptit.uno.model.Room;
@@ -164,6 +165,7 @@ public class RoomWaitingFXView extends RoomWaitingFrm {
                     stage.hide();
                 }
             }
+            FXSoundHelper.setRoomWaitingActive(visible);
         });
     }
 

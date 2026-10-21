@@ -99,6 +99,7 @@ public class LobbyFXView extends LobbyFrm {
             }
 
             stage.setOnCloseRequest(e -> {
+                com.ptit.uno.client.view.fx.game.FXSoundHelper.stopLobbyMusic();
                 System.exit(0);
             });
 
@@ -240,6 +241,7 @@ public class LobbyFXView extends LobbyFrm {
                     stage.hide();
                 }
             }
+            com.ptit.uno.client.view.fx.game.FXSoundHelper.setLobbyActive(visible);
         });
     }
 
