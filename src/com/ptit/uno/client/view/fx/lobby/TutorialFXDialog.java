@@ -10,10 +10,12 @@ import javafx.animation.Timeline;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -60,6 +62,7 @@ public class TutorialFXDialog {
     private ImageView btnBackView;
     private ImageView btnNextView;
     private ImageView btnSkipView;
+    private HBox endButtonsBox;
 
     private Runnable onSkipOrStartPractice;
 
@@ -156,6 +159,51 @@ public class TutorialFXDialog {
         positionCentered(btnSkipView, BOX_WIDTH - 53, BOX_HEIGHT - 53);
         tutorialBox.getChildren().add(btnSkipView);
 
+        // 7. Các nút lựa chọn ở trang cuối: Hướng dẫn từng bước & Đấu tập với Bot
+        endButtonsBox = new HBox(14);
+        endButtonsBox.setAlignment(Pos.CENTER);
+
+        Button btnStepByStep = new Button("HƯỚNG DẪN TỪNG BƯỚC");
+        btnStepByStep.setCursor(Cursor.HAND);
+        btnStepByStep.setStyle(
+            "-fx-background-color: linear-gradient(to right, #10b981, #059669);" +
+            "-fx-text-fill: #ffffff;" +
+            "-fx-font-weight: 800;" +
+            "-fx-font-size: 13.5px;" +
+            "-fx-background-radius: 20px;" +
+            "-fx-padding: 9px 20px;" +
+            "-fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.45), 12, 0, 0, 2);"
+        );
+        btnStepByStep.setOnAction(e -> {
+            FXSoundHelper.playButtonClick();
+            onButSkip();
+        });
+
+        Button btnFreePlayBot = new Button("ĐẤU TẬP VỚI BOT");
+        btnFreePlayBot.setCursor(Cursor.HAND);
+        btnFreePlayBot.setStyle(
+            "-fx-background-color: linear-gradient(to right, #3b82f6, #1d4ed8);" +
+            "-fx-text-fill: #ffffff;" +
+            "-fx-font-weight: 800;" +
+            "-fx-font-size: 13.5px;" +
+            "-fx-background-radius: 20px;" +
+            "-fx-padding: 9px 20px;" +
+            "-fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.45), 12, 0, 0, 2);"
+        );
+        btnFreePlayBot.setOnAction(e -> {
+            FXSoundHelper.playButtonClick();
+            Window winOwner = (dialogStage != null) ? dialogStage.getOwner() : null;
+            closeDialog();
+            BotPracticeGameFXStage botStage = new BotPracticeGameFXStage(winOwner, "Tân Thủ");
+            botStage.show();
+        });
+
+        endButtonsBox.getChildren().addAll(btnStepByStep, btnFreePlayBot);
+        endButtonsBox.setLayoutX(CENTER_X - 190);
+        endButtonsBox.setLayoutY(BOX_HEIGHT - 65);
+        endButtonsBox.setVisible(false);
+        tutorialBox.getChildren().add(endButtonsBox);
+
         overlayRoot.getChildren().add(tutorialBox);
 
         Scene scene = new Scene(overlayRoot);
@@ -228,6 +276,9 @@ public class TutorialFXDialog {
 
         btnBackView.setVisible(pageIndex > 0);
         btnNextView.setVisible(pageIndex < TUTORIAL_TEXTS.length - 1);
+        if (endButtonsBox != null) {
+            endButtonsBox.setVisible(pageIndex == TUTORIAL_TEXTS.length - 1);
+        }
 
         lblContent.setText(TUTORIAL_TEXTS[pageIndex]);
 
@@ -347,12 +398,12 @@ public class TutorialFXDialog {
     }
 
     private void onButSkip() {
-        Window owner = (dialogStage != null) ? dialogStage.getOwner() : null;
+        Window winOwner = (dialogStage != null) ? dialogStage.getOwner() : null;
         closeDialog();
         if (onSkipOrStartPractice != null) {
             onSkipOrStartPractice.run();
         } else {
-            TutorialPracticeFXStage practiceStage = new TutorialPracticeFXStage(owner, "Tân Thủ");
+            TutorialPracticeFXStage practiceStage = new TutorialPracticeFXStage(winOwner, "Tân Thủ");
             practiceStage.show();
         }
     }

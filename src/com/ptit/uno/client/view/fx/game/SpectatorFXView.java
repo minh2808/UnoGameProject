@@ -37,11 +37,13 @@ public class SpectatorFXView extends JFrame {
             controller = loader.getController();
 
             stage = new Stage();
-            stage.setTitle("UNO - Spectator Mode");
-            Scene scene = new Scene(root, 1100, 700);
+            stage.setTitle("UNO Multiplayer - Chế độ Xem trận (Khán giả)");
+            Scene scene = new Scene(root, 1150, 680);
             FXSoundHelper.attachButtonSound(scene);
             stage.setScene(scene);
-            stage.setResizable(false);
+            stage.setMinWidth(1000);
+            stage.setMinHeight(620);
+            stage.centerOnScreen();
             
             // Override close behavior to trigger leave instead
             stage.setOnCloseRequest(e -> {
@@ -51,13 +53,15 @@ public class SpectatorFXView extends JFrame {
 
             if (controller != null) {
                 controller.setOnLeaveAction(() -> fireEvent(leaveRoomListeners, "LEAVE_SPECTATE"));
-                controller.setOnSendChatAction(msg -> {
-                    chatMessageToSend = msg;
-                    fireEvent(sendChatListeners, "SEND_CHAT");
-                });
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public void resetBoard() {
+        if (controller != null) {
+            controller.resetBoard();
         }
     }
 

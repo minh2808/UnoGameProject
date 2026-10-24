@@ -34,7 +34,7 @@ public class ServerControl {
         this.activeClients = new CopyOnWriteArrayList<ClientHandler>();
         this.roomManager = new RoomManager();
 
-        // Khởi tạo kết nối CSDL (Slide b03)
+        // Khởi tạo kết nối CSDL
         DAO.getConnection();
 
         // Mở ServerSocket và lắng nghe (Slide b05)
@@ -87,6 +87,10 @@ public class ServerControl {
     public synchronized void removeOnlineUser(ClientHandler handler) {
         activeClients.remove(handler);
         view.updateClientCount(activeClients.size());
+    }
+
+    public List<ClientHandler> getActiveClients() {
+        return activeClients;
     }
 
     public List<User> getOnlineUsers() {

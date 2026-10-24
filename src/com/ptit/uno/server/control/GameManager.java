@@ -206,17 +206,22 @@ public class GameManager {
 
     private void scheduleUnoPenalty(int userId) {
         timerExecutor.schedule(() -> {
-            Player p = room.getPlayer(userId);
-            // Nếu 5 giây trôi qua mà vẫn có 1 lá và CHƯA hô UNO thì phạt!
-            if (p != null && p.getCardCount() == 1 && !p.isUno()) {
-                Card c1 = drawCardFromDeck();
-                Card c2 = drawCardFromDeck();
-                if (c1 != null) p.addCard(c1);
-                if (c2 != null) p.addCard(c2);
-                
-                gameState.setLastActionLog("HỆ THỐNG: " + p.getUsername() + " quên hô UNO! Bị phạt rút 2 lá.");
-                serverControl.sendHandUpdate(userId, p.getHand());
-                broadcastGameState();
+            synchronized (GameManager.this) {
+                if (gameState == null || gameState.isGameOver()) {
+                    return;
+                }
+                Player p = room.getPlayer(userId);
+                // Nếu 5 giây trôi qua mà vẫn có 1 lá và CHƯA hô UNO thì phạt!
+                if (p != null && p.getCardCount() == 1 && !p.isUno()) {
+                    Card c1 = drawCardFromDeck();
+                    Card c2 = drawCardFromDeck();
+                    if (c1 != null) p.addCard(c1);
+                    if (c2 != null) p.addCard(c2);
+
+                    gameState.setLastActionLog("HỆ THỐNG: " + p.getUsername() + " quên hô UNO trong 5 giây! Bị phạt bốc 2 lá bài.");
+                    serverControl.sendHandUpdate(userId, p.getHand());
+                    broadcastGameState();
+                }
             }
         }, 5, TimeUnit.SECONDS);
     }
@@ -374,7 +379,6 @@ public class GameManager {
                 room.setHostName(remainingWinner.getUsername());
             }
             serverControl.broadcastRoomList();
-            serverControl.broadcastToRoom(room.getId(), new Message(MessageType.ROOM_UPDATE_BROADCAST, room));
         } else {
             stopGame();
         }
@@ -411,11 +415,24 @@ public class GameManager {
         Map<Integer, Integer> scoreChanges = new HashMap<Integer, Integer>();
         scoreChanges.put(winner.getUserId(), 20);
         userDAO.updateStats(winner.getUserId(), 20, true);
+        ClientHandler winnerHandler = serverControl.getClientById(winner.getUserId());
+        if (winnerHandler != null && winnerHandler.getCurrentUser() != null) {
+            User wu = winnerHandler.getCurrentUser();
+            wu.setScore(wu.getScore() + 20);
+            wu.setWinMatches(wu.getWinMatches() + 1);
+            wu.setTotalMatches(wu.getTotalMatches() + 1);
+        }
 
         for (Player p : room.getPlayers()) {
             if (p.getUserId() != winner.getUserId()) {
                 scoreChanges.put(p.getUserId(), -20);
                 userDAO.updateStats(p.getUserId(), -20, false);
+                ClientHandler loserHandler = serverControl.getClientById(p.getUserId());
+                if (loserHandler != null && loserHandler.getCurrentUser() != null) {
+                    User lu = loserHandler.getCurrentUser();
+                    lu.setScore(Math.max(0, lu.getScore() - 20));
+                    lu.setTotalMatches(lu.getTotalMatches() + 1);
+                }
             }
         }
 
@@ -436,6 +453,7 @@ public class GameManager {
         }
         serverControl.updateRoomUsersStatus(room.getId(), "Đang trong phòng");
         serverControl.broadcastRoomList();
+        serverControl.broadcastOnlineUsers();
     }
 
     /**

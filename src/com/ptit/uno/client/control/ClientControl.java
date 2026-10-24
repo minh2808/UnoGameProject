@@ -24,10 +24,6 @@ import java.util.Map;
 
 /**
  * ClientControl: Trung tâm điều khiển toàn bộ logic và mạng phía Client.
- * Áp dụng triệt để Mô hình MVC Cải tiến (Slide b02-2 & b05):
- * - Giành quyền điều khiển toàn bộ các View.
- * - Khởi tạo các View, đăng ký bộ lắng nghe sự kiện (Inner Classes
- * ActionListener).
  * - Quản lý kết nối Socket TCP, ObjectStream và luồng ngầm
  * ClientReceiverThread.
  */
@@ -147,7 +143,14 @@ public class ClientControl {
             public void onLeaveGame() {
                 sendData(new Message(MessageType.LEAVE_ROOM_REQUEST));
                 currentRoom = null;
-                gameView.setVisible(false);
+                if (gameView != null) {
+                    gameView.resetBoard();
+                    gameView.setVisible(false);
+                }
+                if (spectatorView != null) {
+                    spectatorView.resetBoard();
+                    spectatorView.setVisible(false);
+                }
                 lobbyFrm.setVisible(true);
                 sendData(new Message(MessageType.GET_ROOMS_REQUEST));
                 sendData(new Message(MessageType.GET_ONLINE_USERS_REQUEST));
@@ -272,8 +275,14 @@ public class ClientControl {
             sendData(new Message(MessageType.LEAVE_ROOM_REQUEST));
             currentRoom = null;
             roomWaitingFrm.setVisible(false);
-            if (spectatorView != null)
+            if (gameView != null) {
+                gameView.resetBoard();
+                gameView.setVisible(false);
+            }
+            if (spectatorView != null) {
+                spectatorView.resetBoard();
                 spectatorView.setVisible(false);
+            }
             lobbyFrm.setVisible(true);
             sendData(new Message(MessageType.GET_ROOMS_REQUEST));
             sendData(new Message(MessageType.GET_ONLINE_USERS_REQUEST));
@@ -353,6 +362,17 @@ public class ClientControl {
 
                     case ONLINE_USERS_RESPONSE:
                         List<User> users = (List<User>) msg.getPayload();
+                        if (users != null && currentUser != null) {
+                            for (User u : users) {
+                                if (u.getId() == currentUser.getId()) {
+                                    currentUser.setScore(u.getScore());
+                                    currentUser.setWinMatches(u.getWinMatches());
+                                    currentUser.setTotalMatches(u.getTotalMatches());
+                                    lobbyFrm.setUserInfo(currentUser);
+                                    break;
+                                }
+                            }
+                        }
                         lobbyFrm.renderOnlineUsers(users);
                         break;
 
@@ -360,6 +380,14 @@ public class ClientControl {
                     case JOIN_ROOM_RESPONSE:
                         if (msg.isSuccess()) {
                             this.currentRoom = (Room) msg.getPayload();
+                            if (gameView != null) {
+                                gameView.resetBoard();
+                                gameView.setVisible(false);
+                            }
+                            if (spectatorView != null) {
+                                spectatorView.resetBoard();
+                                spectatorView.setVisible(false);
+                            }
                             lobbyFrm.setVisible(false);
                             roomWaitingFrm.renderRoom(currentRoom, currentUser.getId());
                             roomWaitingFrm.setVisible(true);
@@ -369,6 +397,25 @@ public class ClientControl {
                         break;
 
                     case ROOM_UPDATE_BROADCAST:
+                        if (msg.getPayload() == null || !msg.isSuccess()) {
+                            this.currentRoom = null;
+                            if (gameView != null) {
+                                gameView.resetBoard();
+                                gameView.setVisible(false);
+                            }
+                            if (spectatorView != null) {
+                                spectatorView.resetBoard();
+                                spectatorView.setVisible(false);
+                            }
+                            roomWaitingFrm.setVisible(false);
+                            lobbyFrm.setVisible(true);
+                            if (msg.getMessage() != null && !msg.getMessage().isEmpty()) {
+                                UnoNotification.showFeedback(getActiveWindow(), false, "Thông báo phòng", msg.getMessage());
+                            }
+                            sendData(new Message(MessageType.GET_ROOMS_REQUEST));
+                            sendData(new Message(MessageType.GET_ONLINE_USERS_REQUEST));
+                            break;
+                        }
                         if (currentRoom == null) {
                             break;
                         }

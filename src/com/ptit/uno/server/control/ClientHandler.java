@@ -117,6 +117,9 @@ public class ClientHandler extends Thread {
                         sendMessage(new Message(MessageType.CREATE_ROOM_RESPONSE, null, false, "Tên phòng không được để trống!"));
                         break;
                     }
+                    if (this.currentRoomId != -1) {
+                        serverControl.getRoomManager().leaveRoom(this.currentRoomId, currentUser.getId());
+                    }
                     int maxP = (r.getMaxPlayers() > 0) ? Math.min(r.getMaxPlayers(), 2) : 2;
                     Room created = serverControl.getRoomManager().createRoom(
                             roomName, currentUser.getId(), currentUser.getUsername(), maxP
@@ -135,6 +138,9 @@ public class ClientHandler extends Thread {
                 }
                 case JOIN_ROOM_REQUEST: {
                     int roomId = (Integer) req.getPayload();
+                    if (this.currentRoomId != -1 && this.currentRoomId != roomId) {
+                        serverControl.getRoomManager().leaveRoom(this.currentRoomId, currentUser.getId());
+                    }
                     boolean joined = serverControl.getRoomManager().joinRoom(roomId, currentUser.getId(), currentUser.getUsername());
                     if (joined) {
                         this.currentRoomId = roomId;
@@ -181,6 +187,10 @@ public class ClientHandler extends Thread {
                     if (currentRoomId != -1) {
                         int leavingRoomId = currentRoomId;
                         boolean wasSpectator = isSpectator;
+                        Room leavingRoom = serverControl.getRoomManager().getRoom(leavingRoomId);
+                        boolean wasPlayingOrFinished = leavingRoom != null
+                                && (Room.STATUS_PLAYING.equals(leavingRoom.getStatus())
+                                || Room.STATUS_FINISHED.equals(leavingRoom.getStatus()));
                         currentRoomId = -1;
                         isSpectator = false;
                         if (!wasSpectator) {
@@ -188,6 +198,23 @@ public class ClientHandler extends Thread {
                             Room current = serverControl.getRoomManager().getRoom(leavingRoomId);
                             if (current != null) {
                                 serverControl.broadcastToRoom(leavingRoomId, new Message(MessageType.ROOM_UPDATE_BROADCAST, current));
+                            } else {
+                                for (ClientHandler ch : serverControl.getActiveClients()) {
+                                    if (ch != this && ch.getCurrentRoomId() == leavingRoomId) {
+                                        ch.setCurrentRoomId(-1);
+                                        ch.setSpectator(false);
+                                        if (ch.getCurrentUser() != null) {
+                                            ch.getCurrentUser().setStatus("Rảnh");
+                                        }
+                                        // Chỉ đẩy người còn lại về sảnh nếu đang ở phòng chờ (WAITING).
+                                        // Nếu đang trong trận (PLAYING) hoặc vừa kết thúc (FINISHED), giữ nguyên màn hình bàn đấu
+                                        // để người chơi còn lại xem bảng Kết Quả Chiến Thắng (+20 điểm).
+                                        if (!wasPlayingOrFinished) {
+                                            ch.sendMessage(new Message(MessageType.ROOM_UPDATE_BROADCAST, null, false,
+                                                    "Phòng đấu đã giải tán vì người chơi đã rời đi."));
+                                        }
+                                    }
+                                }
                             }
                         }
                         currentUser.setStatus("Rảnh");
@@ -238,6 +265,9 @@ public class ClientHandler extends Thread {
                     break;
                 }
                 case CHAT_MESSAGE: {
+                    if (isSpectator) {
+                        break; // Khán giả (góc nhìn thứ 3) không có quyền gửi bình luận / tin nhắn
+                    }
                     ChatMessage chat = (ChatMessage) req.getPayload();
                     chat.setSender(currentUser != null ? currentUser.getUsername() : "Ẩn danh");
                     if (currentRoomId != -1) {
@@ -330,7 +360,8 @@ public class ClientHandler extends Thread {
                 case REMATCH_REQUEST: {
                     Room r = serverControl.getRoomManager().getRoom(currentRoomId);
                     if (r == null || currentUser == null) {
-                        sendMessage(new Message(MessageType.ERROR_NOTIFICATION, "Đối thủ đã rời phòng hoặc phòng không còn tồn tại!"));
+                        sendMessage(new Message(MessageType.ROOM_UPDATE_BROADCAST, null, false,
+                                "Đối thủ đã rời phòng hoặc phòng không còn tồn tại!"));
                         break;
                     }
 
@@ -343,7 +374,8 @@ public class ClientHandler extends Thread {
                     }
 
                     if (opponent == null) {
-                        sendMessage(new Message(MessageType.ERROR_NOTIFICATION, "Đối thủ đã rời phòng!"));
+                        sendMessage(new Message(MessageType.ROOM_UPDATE_BROADCAST, null, false,
+                                "Đối thủ đã rời phòng!"));
                         break;
                     }
 
@@ -376,7 +408,11 @@ public class ClientHandler extends Thread {
                         accepted = (Boolean) req.getPayload();
                     }
                     Room r = serverControl.getRoomManager().getRoom(currentRoomId);
-                    if (r == null || currentUser == null) break;
+                    if (r == null || currentUser == null) {
+                        sendMessage(new Message(MessageType.ROOM_UPDATE_BROADCAST, null, false,
+                                "Đối thủ đã rời phòng hoặc phòng không còn tồn tại!"));
+                        break;
+                    }
 
                     Player opponent = null;
                     for (Player p : r.getPlayers()) {
@@ -435,10 +471,32 @@ public class ClientHandler extends Thread {
         if (currentRoomId != -1 && currentUser != null) {
             int leavingRoomId = currentRoomId;
             boolean wasSpectator = isSpectator;
+            Room leavingRoom = serverControl.getRoomManager().getRoom(leavingRoomId);
+            boolean wasPlayingOrFinished = leavingRoom != null
+                    && (Room.STATUS_PLAYING.equals(leavingRoom.getStatus())
+                    || Room.STATUS_FINISHED.equals(leavingRoom.getStatus()));
             currentRoomId = -1;
             isSpectator = false;
             if (!wasSpectator) {
                 serverControl.getRoomManager().leaveRoom(leavingRoomId, currentUser.getId());
+                Room current = serverControl.getRoomManager().getRoom(leavingRoomId);
+                if (current != null) {
+                    serverControl.broadcastToRoom(leavingRoomId, new Message(MessageType.ROOM_UPDATE_BROADCAST, current));
+                } else {
+                    for (ClientHandler ch : serverControl.getActiveClients()) {
+                        if (ch != this && ch.getCurrentRoomId() == leavingRoomId) {
+                            ch.setCurrentRoomId(-1);
+                            ch.setSpectator(false);
+                            if (ch.getCurrentUser() != null) {
+                                ch.getCurrentUser().setStatus("Rảnh");
+                            }
+                            if (!wasPlayingOrFinished) {
+                                ch.sendMessage(new Message(MessageType.ROOM_UPDATE_BROADCAST, null, false,
+                                        "Phòng đấu đã giải tán do đối thủ ngắt kết nối."));
+                            }
+                        }
+                    }
+                }
             }
             serverControl.broadcastRoomList();
         }
@@ -455,6 +513,10 @@ public class ClientHandler extends Thread {
 
     public int getCurrentRoomId() {
         return currentRoomId;
+    }
+
+    public void setCurrentRoomId(int currentRoomId) {
+        this.currentRoomId = currentRoomId;
     }
 
     public boolean isSpectator() {

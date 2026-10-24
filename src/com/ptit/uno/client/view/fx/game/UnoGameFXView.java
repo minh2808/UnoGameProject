@@ -89,6 +89,14 @@ public class UnoGameFXView {
         });
     }
 
+    public void resetBoard() {
+        Platform.runLater(() -> {
+            if (controller != null) {
+                controller.resetBoard();
+            }
+        });
+    }
+
     public void setPlayerUsername(String username) {
         Platform.runLater(() -> {
             if (controller != null) {

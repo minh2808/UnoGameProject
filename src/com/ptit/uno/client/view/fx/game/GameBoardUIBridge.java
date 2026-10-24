@@ -253,6 +253,16 @@ public class GameBoardUIBridge implements Initializable {
         if (state == null)
             return;
         Platform.runLater(() -> {
+            // 0. Gỡ bỏ modal kết thúc ván cũ nếu một ván chơi mới đang bắt đầu
+            if (!state.isGameOver()) {
+                if (gameOverOverlay != null) {
+                    if (animationLayer != null) {
+                        animationLayer.getChildren().remove(gameOverOverlay);
+                    }
+                    gameOverOverlay = null;
+                }
+            }
+
             // 1. Kiểm tra biến động lá bài trên bàn để kích hoạt Animation bài bay
             Card top = state.getTopCard();
             if (top != null) {
@@ -296,6 +306,11 @@ public class GameBoardUIBridge implements Initializable {
                 if (!action.equals(lastActionLog)) {
                     lastActionLog = action;
                     addGameLog("MỚI NHẤT: ", action, Color.web("#f1c40f"), Color.web("#ffffff"));
+                    if (action.contains("quên hô UNO")) {
+                        String myName = lblPlayerName != null ? lblPlayerName.getText() : "";
+                        boolean isSelfPenalty = myName != null && !myName.isEmpty() && action.contains(myName);
+                        showUnoPenaltyNotification(action, isSelfPenalty);
+                    }
                 }
             }
 
@@ -946,6 +961,96 @@ public class GameBoardUIBridge implements Initializable {
         pt.play();
     }
 
+    /**
+     * Hiển thị thông báo nổi bật giữa bàn chơi khi người chơi quên bấm UNO trong 5 giây và bị phạt bốc 2 lá bài.
+     */
+    public void showUnoPenaltyNotification(String actionLog, boolean isSelfPenalty) {
+        if (animationLayer == null) return;
+
+        FXSoundHelper.playSpecialCard();
+
+        // Hiệu ứng bay 2 lá bài phạt từ nọc về tay người bị phạt
+        if (isSelfPenalty) {
+            animateDrawCardToPlayer();
+            PauseTransition secondCardDelay = new PauseTransition(Duration.millis(220));
+            secondCardDelay.setOnFinished(ev -> animateDrawCardToPlayer());
+            secondCardDelay.play();
+        } else {
+            animateDrawCardToOpponent();
+            PauseTransition secondCardDelay = new PauseTransition(Duration.millis(220));
+            secondCardDelay.setOnFinished(ev -> animateDrawCardToOpponent());
+            secondCardDelay.play();
+        }
+
+        VBox penaltyBanner = new VBox(6);
+        penaltyBanner.setAlignment(Pos.CENTER);
+        penaltyBanner.setMouseTransparent(true);
+        penaltyBanner.setMaxWidth(440);
+        penaltyBanner.setPrefWidth(440);
+        penaltyBanner.setStyle(
+            "-fx-background-color: linear-gradient(to bottom, rgba(127, 29, 29, 0.96), rgba(69, 10, 10, 0.96));" +
+            "-fx-background-radius: 16px;" +
+            "-fx-border-color: #f59e0b;" +
+            "-fx-border-width: 2px;" +
+            "-fx-border-radius: 16px;" +
+            "-fx-padding: 14px 22px;" +
+            "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.85), 24, 0.25, 0, 6);"
+        );
+
+        FontIcon warnIcon = new FontIcon("fas-exclamation-triangle");
+        warnIcon.setIconSize(22);
+        warnIcon.setIconColor(Color.web("#fbbf24"));
+
+        Label lblTitle = new Label(isSelfPenalty ? "QUÊN HÔ UNO! PHẠT BỐC 2 LÁ" : "ĐỐI THỦ QUÊN HÔ UNO! (+2 LÁ)");
+        lblTitle.setStyle(
+            "-fx-font-size: 17px;" +
+            "-fx-font-weight: 900;" +
+            "-fx-text-fill: #fef08a;" +
+            "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 6, 0, 0, 1);"
+        );
+
+        HBox headerRow = new HBox(10, warnIcon, lblTitle);
+        headerRow.setAlignment(Pos.CENTER);
+
+        String detailText = isSelfPenalty
+            ? "Bạn còn 1 lá bài nhưng quên bấm UNO trong 5 giây nên phải bốc thêm 2 lá!"
+            : actionLog.replace("HỆ THỐNG: ", "");
+        Label lblDetail = new Label(detailText);
+        lblDetail.setWrapText(true);
+        lblDetail.setAlignment(Pos.CENTER);
+        lblDetail.setStyle(
+            "-fx-font-size: 13.5px;" +
+            "-fx-font-weight: bold;" +
+            "-fx-text-fill: #ffffff;" +
+            "-fx-text-alignment: center;"
+        );
+
+        penaltyBanner.getChildren().addAll(headerRow, lblDetail);
+
+        double boardW = mainBoardPane.getWidth() > 0 ? mainBoardPane.getWidth() : 1100;
+        double boardH = mainBoardPane.getHeight() > 0 ? mainBoardPane.getHeight() : 650;
+        penaltyBanner.setLayoutX((boardW - 440) / 2.0);
+        penaltyBanner.setLayoutY(boardH / 2.0 - 145);
+
+        animationLayer.getChildren().add(penaltyBanner);
+
+        ScaleTransition st = new ScaleTransition(Duration.millis(280), penaltyBanner);
+        st.setFromX(0.5);
+        st.setFromY(0.5);
+        st.setToX(1.0);
+        st.setToY(1.0);
+        st.setInterpolator(Interpolator.SPLINE(0.25, 0.1, 0.25, 1.0));
+
+        FadeTransition ft = new FadeTransition(Duration.millis(450), penaltyBanner);
+        ft.setFromValue(1.0);
+        ft.setToValue(0.0);
+        ft.setDelay(Duration.millis(3000));
+        ft.setOnFinished(e -> animationLayer.getChildren().remove(penaltyBanner));
+
+        st.setOnFinished(e -> ft.play());
+        st.play();
+    }
+
     private Image loadSpriteImage(String fileName) {
         try {
             String[] paths = {
@@ -1331,6 +1436,17 @@ public class GameBoardUIBridge implements Initializable {
             "-fx-padding: 6px 18px;"
         );
 
+        String endActionLog = state.getLastActionLog() != null ? state.getLastActionLog() : "";
+        boolean opponentLeft = endActionLog.contains("thoát trận") || endActionLog.contains("ngắt kết nối");
+        Label lblReason = new Label(opponentLeft
+            ? "Đối thủ đã rời trận đấu — Bạn được xử thắng trực tiếp!"
+            : endActionLog);
+        lblReason.setWrapText(true);
+        lblReason.setAlignment(Pos.CENTER);
+        lblReason.setStyle("-fx-font-size: 13.5px; -fx-font-weight: bold; -fx-text-fill: #f1c40f; -fx-text-alignment: center;");
+        lblReason.setVisible(opponentLeft);
+        lblReason.setManaged(opponentLeft);
+
         // Bảng kết quả điểm: Căn thẳng hàng Icon + Tên bên trái, Điểm cộng/trừ bên phải
         VBox scoreListBox = new VBox(10);
         scoreListBox.setAlignment(Pos.CENTER);
@@ -1468,8 +1584,12 @@ public class GameBoardUIBridge implements Initializable {
             }
         });
 
-        buttonBox.getChildren().addAll(btnRematch, btnLobby);
-        cardBox.getChildren().addAll(titleBox, myStatusBox, scoreListBox, lblRematchStatus, buttonBox);
+        if (opponentLeft) {
+            buttonBox.getChildren().add(btnLobby);
+        } else {
+            buttonBox.getChildren().addAll(btnRematch, btnLobby);
+        }
+        cardBox.getChildren().addAll(titleBox, myStatusBox, lblReason, scoreListBox, lblRematchStatus, buttonBox);
 
         gameOverOverlay.getChildren().add(cardBox);
         animationLayer.getChildren().add(gameOverOverlay);
@@ -1577,6 +1697,66 @@ public class GameBoardUIBridge implements Initializable {
     // ==========================================
     // GETTERS & HELPERS PHỤC VỤ TUTORIAL SPOTLIGHT
     // ==========================================
+
+    /**
+     * Dọn dẹp và reset toàn bộ trạng thái bàn cờ về ban đầu cho ván đấu mới
+     */
+    public void resetBoard() {
+        Platform.runLater(() -> {
+            if (countdownTimeline != null) {
+                countdownTimeline.stop();
+            }
+            if (gameOverOverlay != null) {
+                if (animationLayer != null) {
+                    animationLayer.getChildren().remove(gameOverOverlay);
+                }
+                gameOverOverlay = null;
+            }
+            if (animationLayer != null) {
+                animationLayer.getChildren().clear();
+            }
+            previousTopCard = null;
+            previousOpponentCardCount = -1;
+            previousOpponentUnoState = false;
+            isLocallyPlayingCard = false;
+            lastTurnSeat = -999;
+            lastActionLog = null;
+            currentTopCard = null;
+            currentActiveColor = null;
+            isMyTurn = false;
+            selectedCard = null;
+            selectedCardView = null;
+            currentHand.clear();
+            chatMessages.clear();
+
+            if (handCardsBox != null) handCardsBox.getChildren().clear();
+            if (opponentHandBox != null) opponentHandBox.getChildren().clear();
+            if (lblOpponentName != null) lblOpponentName.setText("Đối thủ");
+            if (lblOpponentCards != null) lblOpponentCards.setText("0 lá");
+            if (lblOpponentStatus != null) lblOpponentStatus.setText("Đang chờ");
+            if (lblPlayerStatus != null) lblPlayerStatus.setText("ĐANG CHỜ");
+            if (lblTurnTimer != null) lblTurnTimer.setText("15s");
+            if (lblTurnInfo != null) lblTurnInfo.setText("Lượt: Đang kết nối...");
+            if (turnIndicatorDot != null) turnIndicatorDot.setFill(Color.web("#2ecc71"));
+            if (turnIndicatorBox != null) {
+                turnIndicatorBox.getStyleClass().removeAll("turn-timer-pill-my-turn", "turn-timer-pill-opponent-turn");
+            }
+            if (discardPileContainer != null) {
+                discardPileContainer.setStyle("");
+            }
+            if (discardPileImageView != null) {
+                discardPileImageView.setImage(null);
+            }
+            if (currentColorIndicator != null) {
+                Image defImg = loadSpriteImage("colors.png");
+                if (defImg != null) currentColorIndicator.setImage(defImg);
+            }
+            if (btnCallUno != null) {
+                btnCallUno.setDisable(true);
+                btnCallUno.setStyle("-fx-opacity: 0.35; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 8, 0, 0, 3);");
+            }
+        });
+    }
 
     public void resetBoardForTutorial() {
         previousTopCard = null;

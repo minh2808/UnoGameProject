@@ -1195,7 +1195,7 @@ public class TutorialPracticeFXStage {
             btnRow.setAlignment(Pos.CENTER);
             VBox.setMargin(btnRow, new Insets(6, 0, 0, 0));
 
-            Button btnReplay = new Button("THỰC HÀNH LẠI");
+            Button btnReplay = new Button("HƯỚNG DẪN LẠI");
             FontIcon replayIcon = new FontIcon("fas-redo");
             replayIcon.setIconSize(14);
             replayIcon.setIconColor(Color.web("#334155"));
@@ -1207,9 +1207,9 @@ public class TutorialPracticeFXStage {
                 "-fx-border-radius: 10px;" +
                 "-fx-text-fill: #1e293b;" +
                 "-fx-font-weight: 700;" +
-                "-fx-font-size: 14px;" +
+                "-fx-font-size: 13.5px;" +
                 "-fx-background-radius: 10px;" +
-                "-fx-padding: 10px 20px;"
+                "-fx-padding: 10px 16px;"
             );
             btnReplay.setOnAction(e -> {
                 FXSoundHelper.playButtonClick();
@@ -1217,7 +1217,30 @@ public class TutorialPracticeFXStage {
                 startScriptedTutorialMatch();
             });
 
-            Button btnBackLobby = new Button("VÀO SẢNH CHIẾN NGAY!");
+            Button btnPlayWithBot = new Button("ĐẤU TẬP VỚI BOT");
+            FontIcon botIcon = new FontIcon("fas-robot");
+            botIcon.setIconSize(14);
+            botIcon.setIconColor(Color.WHITE);
+            btnPlayWithBot.setGraphic(botIcon);
+            btnPlayWithBot.setCursor(Cursor.HAND);
+            btnPlayWithBot.setStyle(
+                "-fx-background-color: linear-gradient(to right, #3b82f6, #1d4ed8);" +
+                "-fx-text-fill: #ffffff;" +
+                "-fx-font-weight: 800;" +
+                "-fx-font-size: 13.5px;" +
+                "-fx-background-radius: 10px;" +
+                "-fx-padding: 10px 18px;" +
+                "-fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.4), 12, 0, 0, 2);"
+            );
+            btnPlayWithBot.setOnAction(e -> {
+                FXSoundHelper.playButtonClick();
+                javafx.stage.Window owner = (stage != null) ? stage.getOwner() : null;
+                closeStage();
+                BotPracticeGameFXStage botStage = new BotPracticeGameFXStage(owner, playerUsername);
+                botStage.show();
+            });
+
+            Button btnBackLobby = new Button("VÀO SẢNH CHIẾN");
             FontIcon checkIcon = new FontIcon("fas-play");
             checkIcon.setIconSize(14);
             checkIcon.setIconColor(Color.WHITE);
@@ -1227,9 +1250,9 @@ public class TutorialPracticeFXStage {
                 "-fx-background-color: linear-gradient(to right, #10b981, #059669);" +
                 "-fx-text-fill: #ffffff;" +
                 "-fx-font-weight: 800;" +
-                "-fx-font-size: 14px;" +
+                "-fx-font-size: 13.5px;" +
                 "-fx-background-radius: 10px;" +
-                "-fx-padding: 10px 22px;" +
+                "-fx-padding: 10px 18px;" +
                 "-fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.4), 12, 0, 0, 2);"
             );
             btnBackLobby.setOnAction(e -> {
@@ -1237,7 +1260,7 @@ public class TutorialPracticeFXStage {
                 closeStage();
             });
 
-            btnRow.getChildren().addAll(btnReplay, btnBackLobby);
+            btnRow.getChildren().addAll(btnReplay, btnPlayWithBot, btnBackLobby);
             card.getChildren().addAll(crownIcon, lblTitle, checklistBox, btnRow);
             modalOverlay.getChildren().add(card);
             tutorialOverlayPane.getChildren().add(modalOverlay);
