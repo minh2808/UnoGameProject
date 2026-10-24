@@ -9,14 +9,6 @@ import javax.swing.UIManager;
 
 /**
  * Lớp khởi động phía Client (ClientRun).
- * Bám sát Slide b05 (TS. Nguyễn Mạnh Hùng):
- * public class ClientRun {
- *     public static void main(String[] args) {
- *         ClientView view = new ClientView();
- *         ClientControl control = new ClientControl(view);
- *         view.setVisible(true);
- *     }
- * }
  */
 public class ClientRun {
     public static void main(String[] args) {

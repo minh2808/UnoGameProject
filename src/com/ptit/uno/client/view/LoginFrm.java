@@ -97,6 +97,7 @@ public class LoginFrm extends JFrame {
     }
 
     // --- CÁC HÀM ĐĂNG KÝ LISTENER ĐỂ CONTROLLER CẮM VÀO (Chuẩn MVC Cải tiến) ---
+
     public void addLoginListener(ActionListener log) {
         btnLogin.addActionListener(log);
     }

@@ -11,7 +11,6 @@ import java.util.List;
 
 /**
  * Lớp UserDAO xử lý các thao tác CSDL liên quan đến tài khoản người dùng.
- * Bám sát Slide b03 & b05 (sử dụng PreparedStatement chống SQL Injection).
  */
 public class UserDAO extends DAO {
 
@@ -19,9 +18,7 @@ public class UserDAO extends DAO {
         super();
     }
 
-    /**
-     * Xác thực đăng nhập người dùng.
-     */
+
     public User checkLogin(String username, String password) {
         Connection connection = getConnection();
         if (connection == null) {

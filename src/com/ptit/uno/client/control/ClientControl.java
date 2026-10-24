@@ -4,6 +4,7 @@ import com.ptit.uno.client.view.*;
 import com.ptit.uno.client.view.fx.auth.LoginFXView;
 import com.ptit.uno.client.view.fx.auth.RegisterFXView;
 import com.ptit.uno.client.view.fx.game.GameBoardUIBridge;
+import com.ptit.uno.client.view.fx.game.SpectatorFXView;
 import com.ptit.uno.client.view.fx.game.UnoGameFXView;
 import com.ptit.uno.client.view.fx.lobby.LobbyFXView;
 import com.ptit.uno.client.view.fx.room.RoomWaitingFXView;
@@ -42,7 +43,7 @@ public class ClientControl {
     private final LobbyFrm lobbyFrm;
     private final RoomWaitingFrm roomWaitingFrm;
     private final UnoGameFXView gameView;
-    private final com.ptit.uno.client.view.fx.game.SpectatorFXView spectatorView;
+    private final SpectatorFXView spectatorView;
     private final LeaderboardFrm leaderboardFrm;
     private final MatchHistoryFrm matchHistoryFrm;
 
@@ -60,7 +61,7 @@ public class ClientControl {
                 ? new com.ptit.uno.client.view.fx.lobby.MatchHistoryFXView()
                 : new MatchHistoryFrm();
 
-        // Đăng ký toàn bộ các Listener từ Control vào View (Chuẩn Slide b02-2)
+        // Đăng ký toàn bộ các Listener từ Control vào View
         initListeners();
     }
 
@@ -179,7 +180,7 @@ public class ClientControl {
     }
 
     // =========================================================================
-    // CÁC INNER CLASSES XỬ LÝ SỰ KIỆN TỪ VIEW ĐẨY VỀ (ĐÚNG SLIDE 46 MÔN LTM)
+    // CÁC INNER CLASSES XỬ LÝ SỰ KIỆN TỪ VIEW ĐẨY VỀ
     // =========================================================================
 
     class LoginListener implements ActionListener {
