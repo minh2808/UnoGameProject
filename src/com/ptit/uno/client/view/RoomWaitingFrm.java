@@ -132,6 +132,15 @@ public class RoomWaitingFrm extends JFrame {
         txtChat.setCaretPosition(txtChat.getDocument().getLength());
     }
 
+    public void clearChat() {
+        if (txtChat != null) {
+            txtChat.setText("");
+        }
+        if (txtInputChat != null) {
+            txtInputChat.setText("");
+        }
+    }
+
     public String getChatMessage() {
         String t = txtInputChat.getText().trim();
         txtInputChat.setText("");

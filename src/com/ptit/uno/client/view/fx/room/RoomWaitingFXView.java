@@ -117,6 +117,14 @@ public class RoomWaitingFXView extends RoomWaitingFrm {
     }
 
     @Override
+    public void clearChat() {
+        super.clearChat();
+        if (controller != null) {
+            controller.clearChat();
+        }
+    }
+
+    @Override
     public String getChatMessage() {
         return controller != null ? controller.getChatMessage() : "";
     }

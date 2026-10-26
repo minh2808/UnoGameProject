@@ -276,6 +276,7 @@ public class ClientControl {
         public void actionPerformed(ActionEvent e) {
             sendData(new Message(MessageType.LEAVE_ROOM_REQUEST));
             currentRoom = null;
+            roomWaitingFrm.clearChat();
             roomWaitingFrm.setVisible(false);
             if (gameView != null) {
                 gameView.resetBoard();
@@ -393,6 +394,7 @@ public class ClientControl {
                                 spectatorView.setVisible(false);
                             }
                             lobbyFrm.setVisible(false);
+                            roomWaitingFrm.clearChat();
                             roomWaitingFrm.renderRoom(currentRoom, currentUser.getId());
                             roomWaitingFrm.setVisible(true);
                         } else {
@@ -411,6 +413,7 @@ public class ClientControl {
                                 spectatorView.resetBoard();
                                 spectatorView.setVisible(false);
                             }
+                            roomWaitingFrm.clearChat();
                             roomWaitingFrm.setVisible(false);
                             lobbyFrm.setVisible(true);
                             if (msg.getMessage() != null && !msg.getMessage().isEmpty()) {
@@ -649,6 +652,7 @@ public class ClientControl {
                 alert.setContentText(reason);
                 alert.showAndWait();
                 gameView.setVisible(false);
+                roomWaitingFrm.clearChat();
                 roomWaitingFrm.setVisible(false);
                 lobbyFrm.setVisible(false);
                 loginFrm.setVisible(true);
@@ -657,6 +661,7 @@ public class ClientControl {
             SwingUtilities.invokeLater(() -> {
                 JOptionPane.showMessageDialog(null, reason, "Mất kết nối", JOptionPane.ERROR_MESSAGE);
                 gameView.setVisible(false);
+                roomWaitingFrm.clearChat();
                 roomWaitingFrm.setVisible(false);
                 lobbyFrm.setVisible(false);
                 loginFrm.setVisible(true);

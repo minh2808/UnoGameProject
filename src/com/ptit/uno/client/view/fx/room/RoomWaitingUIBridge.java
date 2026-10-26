@@ -162,6 +162,17 @@ public class RoomWaitingUIBridge implements Initializable {
         });
     }
 
+    public void clearChat() {
+        Platform.runLater(() -> {
+            if (txtChatLog != null) {
+                txtChatLog.clear();
+            }
+            if (txtChatInput != null) {
+                txtChatInput.clear();
+            }
+        });
+    }
+
     public String getChatMessage() {
         if (txtChatInput == null) return "";
         String msg = txtChatInput.getText().trim();

@@ -49,7 +49,7 @@ public class TutorialFXDialog {
         "LÁ CẤM LƯỢT (SKIP) SẼ CHẶN LƯỢT CỦA NGƯỜI CHƠI TIẾP THEO",
         "LÁ ĐẢO CHIỀU (REVERSE) SẼ ĐỔI CHIỀU VÒNG ĐÁNH HIỆN TẠI",
         "LÁ ĐỔI MÀU (WILD) CÓ THỂ ĐÁNH LÊN BẤT KỲ LÁ BÀI NÀO VÀ CHO PHÉP BẠN CHỌN MÀU TIẾP THEO",
-        "LÁ ĐỔI MÀU +4 (WILD DRAW 4) CHO PHÉP BẠN CHỌN MÀU MỚI VÀ BUỘC NGƯỜI TIẾP THEO BỐC 4 LÁ BÀI.\nĐỂ DÙNG LÁ NÀY, BẠN PHẢI KHÔNG CÒN LÁ BÀI NÀO KHÁC ĐÁNH ĐƯỢC",
+        "LÁ ĐỔI MÀU +4 (WILD DRAW 4) CÓ THỂ ĐÁNH LÊN BẤT KỲ LÁ BÀI NÀO!\nCHO PHÉP BẠN ĐỔI MÀU MỚI, BUỘC NGƯỜI KẾ TIẾP BỐC 4 LÁ BÀI VÀ MẤT LƯỢT.",
         "ĐỪNG QUÊN BẤM NÚT 1 (UNO) KHI BẠN CHỈ CÒN 1 LÁ BÀI TRÊN TAY, NẾU KHÔNG BẠN SẼ BỊ PHẠT BỐC 2 LÁ BÀI!"
     };
 
