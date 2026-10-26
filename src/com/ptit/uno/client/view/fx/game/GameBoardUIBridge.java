@@ -741,6 +741,7 @@ public class GameBoardUIBridge implements Initializable {
         if (selectedCardView != null) {
             selectedCardView.setVisible(false);
         }
+        updateUnoButtonVisual();
 
         double randomAngle = -6.0 + random.nextDouble() * 12.0;
         animateFloatingCard(start, target, FXCardHelper.getCardImage(card), randomAngle, () -> {
@@ -1169,7 +1170,8 @@ public class GameBoardUIBridge implements Initializable {
         if (tutorialGuard != null && !tutorialGuard.canCallUno()) {
             return;
         }
-        if (currentHand == null || currentHand.size() != 1) {
+        int cardCount = getActualCardCount();
+        if (cardCount != 1) {
             showSwingWarning("Bạn chỉ được hô UNO khi trên tay còn đúng 1 lá bài!");
             return;
         }
@@ -1180,12 +1182,41 @@ public class GameBoardUIBridge implements Initializable {
         }
     }
 
+    /**
+     * Lấy số lượng lá bài thực tế đang có trên tay (tính cả trường hợp lá bài vừa đánh ra đang bay)
+     */
+    private int getActualCardCount() {
+        if (handCardsBox != null && !handCardsBox.getChildren().isEmpty()) {
+            int visibleCount = 0;
+            for (Node node : handCardsBox.getChildren()) {
+                if (node.isVisible()) {
+                    visibleCount++;
+                }
+            }
+            return visibleCount;
+        }
+        return (currentHand != null) ? currentHand.size() : 0;
+    }
+
     private void updateUnoButtonVisual() {
         if (btnCallUno == null) return;
-        if (currentHand != null && currentHand.size() == 1) {
-            btnCallUno.setStyle("-fx-effect: dropshadow(gaussian, #f39c12, 18, 0.7, 0, 0);");
+
+        int cardCount = getActualCardCount();
+        if (cardCount == 0) {
+            btnCallUno.setDisable(true);
+            btnCallUno.setStyle("-fx-opacity: 0.35; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 8, 0, 0, 3);");
+            return;
+        }
+
+        // Đang trong ván đấu và có bài trên tay -> Luôn mở khóa để người chơi có thể bấm
+        btnCallUno.setDisable(false);
+
+        if (cardCount == 1) {
+            // Khi còn đúng 1 lá bài: nút sáng rực màu vàng để báo hiệu có thể hô UNO
+            btnCallUno.setStyle("-fx-opacity: 1.0; -fx-effect: dropshadow(gaussian, #f39c12, 20, 0.8, 0, 0);");
         } else {
-            btnCallUno.setStyle("-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 8, 0, 0, 3);");
+            // Khi còn nhiều hơn 1 lá: hiển thị bình thường, không phát sáng
+            btnCallUno.setStyle("-fx-opacity: 0.85; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 8, 0, 0, 3);");
         }
     }
 

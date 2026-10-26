@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -363,18 +364,20 @@ public class ClientControl {
 
                     case ONLINE_USERS_RESPONSE:
                         List<User> users = (List<User>) msg.getPayload();
-                        if (users != null && currentUser != null) {
+                        List<User> displayOnlineUsers = new ArrayList<>();
+                        if (users != null) {
                             for (User u : users) {
-                                if (u.getId() == currentUser.getId()) {
+                                if (currentUser != null && u.getId() == currentUser.getId()) {
                                     currentUser.setScore(u.getScore());
                                     currentUser.setWinMatches(u.getWinMatches());
                                     currentUser.setTotalMatches(u.getTotalMatches());
                                     lobbyFrm.setUserInfo(currentUser);
-                                    break;
+                                } else {
+                                    displayOnlineUsers.add(u);
                                 }
                             }
                         }
-                        lobbyFrm.renderOnlineUsers(users);
+                        lobbyFrm.renderOnlineUsers(displayOnlineUsers);
                         break;
 
                     case CREATE_ROOM_RESPONSE:

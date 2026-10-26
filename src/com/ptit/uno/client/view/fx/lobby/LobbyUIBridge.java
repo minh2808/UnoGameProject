@@ -719,6 +719,11 @@ public class LobbyUIBridge implements Initializable {
             if (users != null) {
                 int idx = 1;
                 for (User u : users) {
+                    // Loại bỏ chính bản thân người chơi đang đăng nhập
+                    if (currentUsername != null && !currentUsername.isEmpty()
+                            && currentUsername.equalsIgnoreCase(u.getUsername())) {
+                        continue;
+                    }
                     String status = "Rảnh";
                     if (u.getStatus() != null && !u.getStatus().equalsIgnoreCase("ONLINE")
                             && !u.getStatus().equalsIgnoreCase("Rảnh")) {

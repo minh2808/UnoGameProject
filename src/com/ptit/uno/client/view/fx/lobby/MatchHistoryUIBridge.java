@@ -97,6 +97,10 @@ public class MatchHistoryUIBridge {
                     }
                 }
 
+                if (opponent == null || "null".equalsIgnoreCase(opponent) || opponent.trim().isEmpty()) {
+                    opponent = "Không rõ";
+                }
+
                 String endTime = String.valueOf(map.get("endTime"));
 
                 listData.add(new HistoryRow(matchId, roomName, opponent, result, scoreChange, endTime));

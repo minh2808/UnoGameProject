@@ -89,14 +89,21 @@ public class MatchDAO extends DAO {
             mock.put("matchId", 1);
             mock.put("roomName", "Phòng UNO VIP");
             mock.put("winnerName", "player1");
+            mock.put("opponentName", "player2");
             mock.put("scoreChange", "+50");
+            mock.put("isWin", true);
+            mock.put("result", "THẮNG");
             mock.put("endTime", "2026-09-21 10:00:00");
             list.add(mock);
             return list;
         }
 
-        String sql = "SELECT m.id AS match_id, m.room_name, u.username AS winner_name, " +
-                "mp.score_change, m.end_time " +
+        String sql = "SELECT m.id AS match_id, m.room_name, m.winner_id, u.username AS winner_name, " +
+                "mp.score_change, mp.is_winner, m.end_time, " +
+                "(SELECT GROUP_CONCAT(u2.username SEPARATOR ', ') " +
+                " FROM `match_player` mp2 " +
+                " JOIN `user` u2 ON mp2.user_id = u2.id " +
+                " WHERE mp2.match_id = m.id AND mp2.user_id != mp.user_id) AS opponent_names " +
                 "FROM `match` m " +
                 "JOIN `match_player` mp ON m.id = mp.match_id " +
                 "LEFT JOIN `user` u ON m.winner_id = u.id " +
@@ -110,9 +117,26 @@ public class MatchDAO extends DAO {
                     Map<String, Object> map = new HashMap<String, Object>();
                     map.put("matchId", rs.getInt("match_id"));
                     map.put("roomName", rs.getString("room_name"));
-                    map.put("winnerName", rs.getString("winner_name") != null ? rs.getString("winner_name") : "Không rõ");
+                    String winnerName = rs.getString("winner_name");
+                    map.put("winnerName", winnerName != null ? winnerName : "Không rõ");
                     map.put("scoreChange", (rs.getInt("score_change") >= 0 ? "+" : "") + rs.getInt("score_change"));
                     map.put("endTime", rs.getString("end_time"));
+
+                    int winnerId = rs.getInt("winner_id");
+                    boolean isWin = (rs.getInt("is_winner") == 1) || (winnerId == userId);
+                    String opp = rs.getString("opponent_names");
+                    if (opp == null || opp.trim().isEmpty()) {
+                        if (!isWin && winnerName != null && !winnerName.isEmpty()) {
+                            opp = winnerName;
+                        } else {
+                            opp = "Không rõ";
+                        }
+                    }
+
+                    map.put("opponentName", opp);
+                    map.put("isWin", isWin);
+                    map.put("result", isWin ? "THẮNG" : "THUA");
+
                     list.add(map);
                 }
             }
